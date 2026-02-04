@@ -1,0 +1,15 @@
+target-version = "py312"
+line-length = 120
+extend-exclude = [
+    "__pycache__",
+    ".venv",
+    "build",
+    "dist",
+]
+
+[lint]
+select = ["F", "I001", "RUF022"]
+ignore = ["E501"]
+
+[format]
+quote-style = "double"

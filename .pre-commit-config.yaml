@@ -1,0 +1,51 @@
+# all commands by default will run on every commit
+default_install_hook_types: [commit-msg, pre-commit, post-commit]
+default_stages: [pre-commit]
+
+repos:
+  # commitizen - conventional commits
+  - repo: https://github.com/commitizen-tools/commitizen
+    rev: v4.9.1
+    hooks:
+      - id: commitizen
+      - id: commitizen-branch
+        stages:
+          - post-commit
+          - pre-push
+  # general checks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: check-json
+      - id: check-toml
+      - id: check-yaml
+        args: [--allow-multiple-documents]
+        additional_dependencies: [pyyaml]
+      - id: end-of-file-fixer
+        exclude: .gitlab/Default.md
+      - id: trailing-whitespace
+  # ruff - linting + formatting
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.13.0
+    hooks:
+      - id: ruff
+        name: ruff
+        args: [--config, .ruff.toml, --fix]
+      - id: ruff-format
+        name: ruff-format
+        args: [--config, .ruff.toml]
+  # docformatter - docstring formatting
+  - repo: https://github.com/pycqa/docformatter
+    rev: v1.7.7
+    hooks:
+      - id: docformatter
+        name: docformatter
+        args:
+          - -r
+          - -i
+          - --pre-summary-newline
+          # - --make-summary-multi-line
+          - --force-wrap
+          - --wrap-summaries=120
+          - --wrap-descriptions=120
+          - .

@@ -1,0 +1,10 @@
+# ======================================================
+# Kafka Clusters Configuration
+# Define all Kafka cluster-specific settings and related integrations.
+# ======================================================
+kafka:
+  clusters:
+    - name: local
+      bootstrap-servers: kafka_b:9094
+      schemaRegistry: http://schema-registry:8081
+      schemaRegistryShowNullValues: true
