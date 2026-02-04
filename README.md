@@ -12,7 +12,10 @@ An end-to-end MLOps platform for analyzing job market trends, predicting salarie
 
 ## Architecture Diagram
 
-![Dataflow Diagram](./docs/images/dataflow-diagram.excalidraw.png)
+
+- Dataflow Diagram:
+
+![Dataflow Diagram](./docs/images/dfd.excalidraw.png)
 
 ## Monorepo Structure
 
