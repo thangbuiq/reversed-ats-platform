@@ -1,5 +1,5 @@
 UV_PROJECT_ENVIRONMENT := "../.venv"
-UV_PROJECT_PATH := env_var("PWD") + "/jitp-kafka-producer"
+UV_PROJECT_PATH := env_var("PWD") + "/rats-kafka-producer"
 UV := "UV_PROJECT_ENVIRONMENT=" + UV_PROJECT_ENVIRONMENT + " uv --project " + UV_PROJECT_PATH
 
 install:
@@ -19,7 +19,7 @@ produce:
 	@{{ UV }} run python -m producer scrape
 
 kafka-up:
-	@cd jitp-kafka-setup && docker-compose up -d
+	@cd rats-kafka-setup && docker-compose up -d
 
 kafka-down:
-	@cd jitp-kafka-setup && docker-compose down --remove-orphans
+	@cd rats-kafka-setup && docker-compose down --remove-orphans
