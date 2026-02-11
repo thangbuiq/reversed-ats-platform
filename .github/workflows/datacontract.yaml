@@ -1,0 +1,54 @@
+name: 🔎 Validate datacontract
+
+on:
+  push:
+    paths:
+      - "rats-kafka-producer/datacontract/**"
+  pull_request:
+    paths:
+      - "rats-kafka-producer/datacontract/**"
+
+jobs:
+  validate-datacontract:
+    runs-on: ubuntu-latest
+    env:
+      DATACONTRACT_KAFKA_BOOTSTRAP_SERVERS: ${{ secrets.DATACONTRACT_KAFKA_BOOTSTRAP_SERVERS }}
+      DATACONTRACT_KAFKA_SASL_USERNAME: ${{ secrets.DATACONTRACT_KAFKA_SASL_USERNAME }}
+      DATACONTRACT_KAFKA_SASL_PASSWORD: ${{ secrets.DATACONTRACT_KAFKA_SASL_PASSWORD }}
+      DATACONTRACT_KAFKA_SASL_MECHANISM: ${{ secrets.DATACONTRACT_KAFKA_SASL_MECHANISM }}
+      CONFLUENT_SCHEMA_REGISTRY_URL: ${{ secrets.CONFLUENT_SCHEMA_REGISTRY_URL }}
+      CONFLUENT_SCHEMA_REGISTRY_API_KEY: ${{ secrets.CONFLUENT_SCHEMA_REGISTRY_API_KEY }}
+      CONFLUENT_SCHEMA_REGISTRY_API_SECRET: ${{ secrets.CONFLUENT_SCHEMA_REGISTRY_API_SECRET }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Install OpenJDK 17 headless
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y openjdk-17-jdk-headless
+          echo "JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64" >> $GITHUB_ENV
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+
+      - name: Install project dependencies
+        run: |
+          uv tool install --python python3.12 --upgrade 'datacontract-cli[all]'
+
+      - name: Lint the datacontract
+        run: |
+          uv run datacontract lint rats-kafka-producer/datacontract/contract/com/rats/jobs/rats.job-listings.v1.yaml
+
+      - name: Append the servers section to contract for testing
+        uses: mikefarah/yq@v4.9.8
+        with:
+          cmd: |
+            yq eval \
+            '.servers[0].server = "production" | .servers[0].type = "kafka" | .servers[0].host = strenv(DATACONTRACT_KAFKA_BOOTSTRAP_SERVERS) | .servers[0].topic = "rats.job-listings.v1" | .servers[0].format = "avro"' \
+            -i rats-kafka-producer/datacontract/contract/com/rats/jobs/rats.job-listings.v1.yaml
+
+      - name: Validate the datacontract
+        run: |
+          cd rats-kafka-producer
+          uv run datacontract/validate.py

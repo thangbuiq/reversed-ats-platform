@@ -1,0 +1,23 @@
+{
+  "name": "DatabricksDeltaLakeSink",
+  "config": {
+    "topics": "pageviews",
+    "connector.class": "io.confluent.connect.databricks.deltalake.DatabricksDeltaLakeSinkConnector",
+    "name": "DatabricksDeltaLakeSink",
+    "s3.region": "<region>",
+    "key.converter": "org.apache.kafka.connect.storage.StringConverter",
+    "value.converter": "io.confluent.connect.avro.AvroConverter",
+    "value.converter.schema.registry.url": "http://localhost:8081",
+    "confluent.topic.bootstrap.servers": "localhost:9092",
+    "delta.lake.host.name": "<delta-lake-host-name e.g. dbc-e12345cd-e12345ed.cloud.databricks.com>",
+    "delta.lake.http.path": "<delta-lake-host-name e.g. sql/protocolv1/o/1234567891811460/0000-01234-str6jlpz>",
+    "delta.lake.token": "************************************",
+    "delta.lake.topic2table.map": "pageviews:pageviews",
+    "delta.lake.table.auto.create": "true",
+    "staging.s3.access.key.id": "********************",
+    "staging.s3.secret.access.key": "****************************************",
+    "staging.bucket.name": "databricks",
+    "flush.interval.ms": "300000",
+    "tasks.max": "1"
+  }
+}

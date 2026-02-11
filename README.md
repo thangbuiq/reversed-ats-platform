@@ -1,5 +1,5 @@
 <div align="center">
-<img src="docs/images/logo.png" alt="logo" width="100px"/>
+<img src="assets/docs/images/logo.png" alt="logo" width="100px"/>
 <h3>RATS - Reversed ATS Platform </h3>
 
 Reversed ATS platform, a platform for analyzing job market trends, predicting salaries, and matching candidate to jobs market using real-time data from LinkedIn and Glassdoor.
@@ -15,7 +15,6 @@ Reversed ATS platform, a platform for analyzing job market trends, predicting sa
   <img src="https://repobeats.axiom.co/api/embed/ee98e46bc2a349af73f7be4965defbc12093b7b0.svg" alt="stats"/>
 </p>
 
-
 ## Platform Features
 
 - Real-time Job Data Crawling: Automated daily scraping from LinkedIn.
@@ -28,7 +27,10 @@ Reversed ATS platform, a platform for analyzing job market trends, predicting sa
 - [Platform Features](#platform-features)
 - [Table of Contents](#table-of-contents)
 - [Monorepo Structure](#monorepo-structure)
-- [Architecture Diagram](#architecture-diagram)
+- [How It Works](#how-it-works)
+- [Quick Start](#quick-start)
+- [Prerequisites](#prerequisites)
+- [Development](#development)
 
 ## Monorepo Structure
 
@@ -39,14 +41,54 @@ The monorepo is organized into the following key components:
 - [rats-dashboard-app](./rats-dashboard-app): Next.js application for visualizing job market insights
 - [rats-dbt-transformer](./rats-dbt-transformer): dbt models for transforming raw data into analysis-ready datasets
 - [rats-kafka-consumer](./rats-kafka-consumer): Spark Streaming application for consuming and preprocessing data from Kafka
-- [rats-kafka-producer](./rats-kafka-producer): Data crawling scripts to fetch job postings and salary data, producing to Kafka topics
-- [rats-kafka-setup](./rats-kafka-setup): Docker Compose setup for Kafka and Schema Registry
+- [rats-kafka-producer](./rats-kafka-producer): Data contract definitions and producer application for sending crawled data to Kafka
 - [rats-model-serving](./rats-model-serving): FastAPI application for serving trained ML models
 - [rats-model-training](./rats-model-training): Scripts and notebooks for training ML models
-- [rats-services-setup](./rats-services-setup): Docker Compose setup for MLOps components like MLflow, Airflow,...
 
-## Architecture Diagram
+## How It Works
 
-- Dataflow Diagram:
+![Dataflow Diagram](./assets/docs/images/dfd.excalidraw.png)
 
-  ![Dataflow Diagram](./docs/images/dfd.excalidraw.png)
+## Quick Start
+
+To quickly get started with the RATS platform, follow these steps after you met the [Prerequisites](#prerequisites):
+
+1. Clone the repository:
+
+```bash
+git clone https://github.com/thangbuiq/reversed-ats-platform
+cd reversed-ats-platform
+```
+
+2. Start the platform using Docker Compose:
+
+```bash
+docker compose up -d
+```
+
+Or using the `just` command if you have Just installed:
+
+```bash
+just up
+```
+
+## Prerequisites
+
+Before running the RATS platform, ensure you have the following prerequisites installed:
+
+- `docker`: [Install Docker](https://docs.docker.com/get-docker/)
+- `uv`: [Install uv](https://docs.astral.sh/uv/)
+- `just` (optional): [Install Just](https://github.com/casey/just)
+
+## Development
+
+In each subdirectory, you will find a `README.md` file with specific instructions for development, testing, and deployment of that component. Please refer to those files for detailed guidance on working with each part of the RATS platform.
+
+But for most components, you can use `uv` to manage your development environment. For example, to set up the environment for the Dagster app:
+
+```bash
+cd <component-directory>
+uv sync --all-groups --all-extras
+```
+
+And develop the component as needed.

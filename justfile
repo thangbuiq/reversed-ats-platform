@@ -2,13 +2,14 @@ UV_PROJECT_ENVIRONMENT := "../.venv"
 UV_PROJECT_PATH := env_var("PWD") + "/rats-kafka-producer"
 UV := "UV_PROJECT_ENVIRONMENT=" + UV_PROJECT_ENVIRONMENT + " uv --project " + UV_PROJECT_PATH
 
-install:
-	@echo "Installing development environment..."
-	@{{ UV }} sync --all-extras --all-groups --all-packages
-	@echo "Installing prek pre-commit hooks..."
-	@source .venv/bin/activate
-	@{{ UV }} run prek install --install-hooks
-	@echo "Development environment setup complete."
+up:
+	@docker-compose up -d
+
+upbuild:
+	@docker-compose up -d --build
+
+down:
+	@docker-compose down --remove-orphans
 
 format:
 	@echo "Formatting code with plugins via prek..."
@@ -16,10 +17,4 @@ format:
 	@prek run --all-files
 
 produce:
-	@{{ UV }} run python -m producer scrape
-
-kafka-up:
-	@cd rats-kafka-setup && docker-compose up -d
-
-kafka-down:
-	@cd rats-kafka-setup && docker-compose down --remove-orphans
+	@cd rats-kafka-producer && uv run python3 src/rats_kafka_producer/pipeline.py

@@ -1,0 +1,205 @@
+version: 1.0.0
+kind: DataContract
+apiVersion: v3.1.0
+id: com.rats.jobs/rats.job-listings.v1
+name: RATS Job Listings
+status: draft
+team:
+  name: Owner
+description:
+  purpose: Schema for job listing data, used for ingesting job listings from various job boards into the RATS platform.
+  usage: This schema is used to standardize job listing data ingested from multiple job boards, facilitating downstream processing, analysis, and storage within the RATS platform.
+  limitations: This schema may not capture all possible job listing attributes from every job board. Additional fields may be required for specific use cases or integrations.
+schema:
+  - name: JobListing
+    physicalType: record
+    description: Schema for job listing data
+    customProperties:
+      - property: namespace
+        value: com.rats.jobs
+    logicalType: object
+    physicalName: JobListing
+    properties:
+      - name: job_id
+        physicalType: string
+        description: Unique job identifier
+        logicalType: string
+        required: true
+      - name: site
+        physicalType: string
+        description: Job board site name
+        logicalType: string
+        required: false
+      - name: search_term
+        physicalType: string
+        description: Search term used to find this job
+        logicalType: string
+        required: true
+      - name: ingestion_timestamp
+        physicalType: long
+        description: Ingestion timestamp
+        logicalType: date
+        required: true
+      - name: ingestion_date
+        physicalType: string
+        description: Date partition key (YYYY-MM-DD)
+        logicalType: string
+        required: true
+      - name: job
+        physicalType: record
+        description: Primary job listing details
+        logicalType: object
+        required: true
+        properties:
+          - name: job_url
+            physicalType: string
+            description: URL to job posting
+            logicalType: string
+            required: false
+          - name: job_url_direct
+            physicalType: string
+            description: Direct application URL
+            logicalType: string
+            required: false
+          - name: title
+            physicalType: string
+            description: Job title
+            logicalType: string
+            required: false
+          - name: company
+            physicalType: string
+            description: Company name
+            logicalType: string
+            required: false
+          - name: location
+            physicalType: string
+            description: Job location
+            logicalType: string
+            required: false
+          - name: job_type
+            physicalType: string
+            description: Employment type
+            logicalType: string
+            required: false
+          - name: date_posted
+            physicalType: string
+            description: Date job was posted
+            logicalType: string
+            required: false
+          - name: is_remote
+            physicalType: boolean
+            description: Remote work flag
+            logicalType: boolean
+            required: false
+          - name: job_level
+            physicalType: string
+            description: Seniority level
+            logicalType: string
+            required: false
+          - name: job_function
+            physicalType: string
+            description: Job function category
+            logicalType: string
+            required: false
+          - name: listing_type
+            physicalType: string
+            description: Type of listing
+            logicalType: string
+            required: false
+          - name: emails
+            physicalType: string
+            description: Contact emails
+            logicalType: string
+            required: false
+          - name: description
+            physicalType: string
+            description: Job description
+            logicalType: string
+            required: false
+      - name: compensation
+        physicalType: record
+        description: Compensation details
+        logicalType: object
+        required: true
+        properties:
+          - name: interval
+            physicalType: string
+            description: Salary interval
+            logicalType: string
+            required: false
+          - name: min_amount
+            physicalType: double
+            description: Minimum salary
+            logicalType: number
+            required: false
+          - name: max_amount
+            physicalType: double
+            description: Maximum salary
+            logicalType: number
+            required: false
+          - name: currency
+            physicalType: string
+            description: Salary currency
+            logicalType: string
+            required: false
+      - name: company_details
+        physicalType: record
+        description: Company details
+        logicalType: object
+        required: true
+        properties:
+          - name: company_industry
+            physicalType: string
+            description: Company industry
+            logicalType: string
+            required: false
+          - name: company_url
+            physicalType: string
+            description: Company website
+            logicalType: string
+            required: false
+          - name: company_url_direct
+            physicalType: string
+            description: Direct company URL
+            logicalType: string
+            required: false
+          - name: company_addresses
+            physicalType: string
+            description: Company addresses
+            logicalType: string
+            required: false
+          - name: company_num_employees
+            physicalType: int
+            description: Number of employees
+            logicalType: integer
+            required: false
+          - name: company_revenue
+            physicalType: string
+            description: Company revenue
+            logicalType: string
+            required: false
+          - name: company_description
+            physicalType: string
+            description: Company description
+            logicalType: string
+            required: false
+          - name: logo_photo_url
+            physicalType: string
+            description: Company logo URL
+            logicalType: string
+            required: false
+          - name: banner_photo_url
+            physicalType: string
+            description: Company banner URL
+            logicalType: string
+            required: false
+          - name: ceo_name
+            physicalType: string
+            description: CEO name
+            logicalType: string
+            required: false
+          - name: ceo_photo_url
+            physicalType: string
+            description: CEO photo URL
+            logicalType: string
+            required: false
