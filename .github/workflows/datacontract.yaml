@@ -2,11 +2,11 @@ name: 🔎 Validate datacontract
 
 on:
   push:
-    paths:
-      - "rats-kafka-producer/datacontract/**"
+    branches: ["main"]
+    paths: ["rats-kafka-producer/**"]
   pull_request:
-    paths:
-      - "rats-kafka-producer/datacontract/**"
+    branches: ["main"]
+    paths: ["rats-kafka-producer/**"]
 
 jobs:
   validate-datacontract:
