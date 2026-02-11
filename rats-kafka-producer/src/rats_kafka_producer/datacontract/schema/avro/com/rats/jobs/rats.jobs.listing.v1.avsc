@@ -1,0 +1,61 @@
+{
+  "type": "record",
+  "name": "JobListing",
+  "doc": "Schema for job listing data",
+  "fields": [
+    {
+      "name": "job_id",
+      "doc": "Unique job identifier",
+      "type": ["null", "string"]
+    },
+    {
+      "name": "site",
+      "doc": "Job board site name",
+      "type": ["null", "string"]
+    },
+    {
+      "name": "search_term",
+      "doc": "Search term used to find this job",
+      "type": ["null", "string"]
+    },
+    {
+      "name": "job",
+      "doc": "Primary job listing details",
+      "type": [
+        "null",
+        {
+          "type": "record",
+          "name": "job",
+          "doc": "Primary job listing details",
+          "fields": []
+        }
+      ]
+    },
+    {
+      "name": "compensation",
+      "doc": "Compensation details",
+      "type": [
+        "null",
+        {
+          "type": "record",
+          "name": "compensation",
+          "doc": "Compensation details",
+          "fields": []
+        }
+      ]
+    },
+    {
+      "name": "company_details",
+      "doc": "Company details",
+      "type": [
+        "null",
+        {
+          "type": "record",
+          "name": "company_details",
+          "doc": "Company details",
+          "fields": []
+        }
+      ]
+    }
+  ]
+}

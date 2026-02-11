@@ -1,0 +1,59 @@
+name: 🔎 Datacontract
+
+on:
+  push:
+    branches: ["main"]
+    paths: ["rats-kafka-producer/**"]
+  pull_request:
+    branches: ["main"]
+    paths: ["rats-kafka-producer/**"]
+
+env:
+  DATACONTRACT_YAML_PATH: src/rats_kafka_producer/datacontract/contract/com/rats/jobs/rats.jobs.listing.v1.yaml
+  DATACONTRACT_AVRO_PATH: src/rats_kafka_producer/datacontract/schema/avro/com/rats/jobs/rats.jobs.listing.v1.avsc
+  DATACONTRACT_KAFKA_TOPIC: rats.jobs.listing.v1
+
+jobs:
+  validate-datacontract:
+    name: Run Validate
+    runs-on: ubuntu-latest
+    env:
+      DATACONTRACT_KAFKA_BOOTSTRAP_SERVERS: ${{ secrets.DATACONTRACT_KAFKA_BOOTSTRAP_SERVERS }}
+      DATACONTRACT_KAFKA_SASL_USERNAME: ${{ secrets.DATACONTRACT_KAFKA_SASL_USERNAME }}
+      DATACONTRACT_KAFKA_SASL_PASSWORD: ${{ secrets.DATACONTRACT_KAFKA_SASL_PASSWORD }}
+      DATACONTRACT_KAFKA_SASL_MECHANISM: ${{ secrets.DATACONTRACT_KAFKA_SASL_MECHANISM }}
+      CONFLUENT_SCHEMA_REGISTRY_URL: ${{ secrets.CONFLUENT_SCHEMA_REGISTRY_URL }}
+      CONFLUENT_SCHEMA_REGISTRY_API_KEY: ${{ secrets.CONFLUENT_SCHEMA_REGISTRY_API_KEY }}
+      CONFLUENT_SCHEMA_REGISTRY_API_SECRET: ${{ secrets.CONFLUENT_SCHEMA_REGISTRY_API_SECRET }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Install OpenJDK 17 headless
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wget openjdk-17-jdk-headless
+          echo "JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64" >> $GITHUB_ENV
+          wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/local/bin/yq
+          chmod +x /usr/local/bin/yq
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+
+      - name: Install project dependencies
+        run: |
+          uv tool install --python python3.12 --upgrade 'datacontract-cli[all]'
+          cd rats-kafka-producer
+          uv sync --all-groups --all-extras
+
+      - name: Lint the datacontract
+        run: |
+          cd rats-kafka-producer
+          uv run datacontract lint ${{ env.DATACONTRACT_YAML_PATH }}
+
+      - name: Validate the datacontract
+        run: |
+          cd rats-kafka-producer
+          uv run src/rats_kafka_producer/datacontract/validate.py

@@ -1,0 +1,43 @@
+name: 🦞 Scrape
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  scrape-smoke:
+    name: Run Smoke Test
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+
+      - name: Sync dependencies
+        run: |
+          cd rats-kafka-producer
+          uv sync --frozen --all-groups --all-extras
+
+      - name: Export scraper config
+        run: |
+          echo "SITE_NAMES=linkedin" >> "$GITHUB_ENV"
+          echo "LINKEDIN_FETCH_DESCRIPTION=false" >> "$GITHUB_ENV"
+          echo "SEARCH_TERMS=[\"Data Engineer\"]" >> "$GITHUB_ENV"
+          echo "JOB_LOCATION=United States" >> "$GITHUB_ENV"
+          echo "RESULTS_WANTED=5" >> "$GITHUB_ENV"
+          echo "HOURS_OLD=24" >> "$GITHUB_ENV"
+          echo "LOG_LEVEL=INFO" >> "$GITHUB_ENV"
+
+      - name: Run scrape smoke test (no Kafka produce)
+        run: |
+          cd rats-kafka-producer
+          uv run rats-kafka-producer run --no-produce
