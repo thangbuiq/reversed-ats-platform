@@ -22,7 +22,9 @@ jobs:
           enable-cache: true
 
       - name: Sync dependencies
-        run: uv sync --frozen
+        run: |
+          cd rats-kafka-producer
+          uv sync --frozen --all-groups --all-extras
 
       - name: Export scraper config
         run: |
@@ -35,4 +37,6 @@ jobs:
           echo "LOG_LEVEL=INFO" >> "$GITHUB_ENV"
 
       - name: Run scrape smoke test (no Kafka produce)
-        run: uv run rats-kafka-producer run --no-produce
+        run: |
+          cd rats-kafka-producer
+          uv run rats-kafka-producer run --no-produce
