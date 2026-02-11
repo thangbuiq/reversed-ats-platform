@@ -90,7 +90,7 @@ def setup_jars() -> List[str]:
     urls = [
         # Spark Kafka
         f"https://repo1.maven.org/maven2/org/apache/spark/spark-sql-kafka-0-10_{SCALA_VERSION}/{SPARK_VERSION}/spark-sql-kafka-0-10_{SCALA_VERSION}-{SPARK_VERSION}.jar",
-        "https://repo1.maven.org/maven2/org/apache/kafka/kafka-clients/3.6.1/kafka-clients-3.6.1.jar"
+        "https://repo1.maven.org/maven2/org/apache/kafka/kafka-clients/3.6.1/kafka-clients-3.6.1.jar",
         # Spark Avro
         f"https://repo1.maven.org/maven2/org/apache/spark/spark-avro_{SCALA_VERSION}/{SPARK_VERSION}/spark-avro_{SCALA_VERSION}-{SPARK_VERSION}.jar",
         "https://repo1.maven.org/maven2/org/apache/avro/avro/1.11.3/avro-1.11.3.jar",
