@@ -18,5 +18,5 @@ def load_schema_from_file(schema_path: Path) -> dict[str, Any]:
 
 ROOT_DIR = Path(__file__).resolve().parents[2]
 JOB_LISTING_SCHEMA = load_schema_from_file(
-    ROOT_DIR / "datacontract" / "schema" / "avro" / "com" / "rat" / "jobs" / "rats.job-listings.v1.avsc",
+    ROOT_DIR / "datacontract" / "schema" / "avro" / "com" / "rats" / "jobs" / "rats.job-listings.v1.avsc",
 )

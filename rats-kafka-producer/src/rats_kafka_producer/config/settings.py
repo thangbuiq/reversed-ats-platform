@@ -13,13 +13,13 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class KafkaConfig(BaseModel):
     """Kafka producer configuration for Confluent Cloud and local brokers."""
 
-    bootstrap_servers: str
-    schema_registry_url: str
-    api_key: str
-    api_secret: str
-    schema_registry_api_key: str
-    schema_registry_api_secret: str
-    client_id: str
+    bootstrap_servers: str = "localhost:9092"
+    schema_registry_url: str = "http://localhost:8081"
+    api_key: str = ""
+    api_secret: str = ""
+    schema_registry_api_key: str = ""
+    schema_registry_api_secret: str = ""
+    client_id: str = ""
     topic: str = "rats.job-listings.v1"
 
 
@@ -35,8 +35,6 @@ class ScraperConfig(BaseSettings):
     """Main configuration for the scraper."""
 
     model_config = SettingsConfigDict(
-        env_prefix="SCRAPER_",
-        env_nested_delimiter="__",
         extra="ignore",
     )
 
@@ -95,7 +93,7 @@ class ScraperConfig(BaseSettings):
             kafka=KafkaConfig(
                 bootstrap_servers=os.getenv("DATACONTRACT_KAFKA_BOOTSTRAP_SERVERS", "localhost:9092"),
                 schema_registry_url=os.getenv("CONFLUENT_SCHEMA_REGISTRY_URL", "http://localhost:8081"),
-                topic=os.getenv("LINKEDIN_KAFKA_TOPIC", "rats.job-listings"),
+                topic=os.getenv("LINKEDIN_KAFKA_TOPIC", "rats.job-listings.v1"),
                 api_key=os.getenv("DATACONTRACT_KAFKA_SASL_USERNAME", ""),
                 api_secret=os.getenv("DATACONTRACT_KAFKA_SASL_PASSWORD", ""),
                 schema_registry_api_key=os.getenv("CONFLUENT_SCHEMA_REGISTRY_API_KEY", ""),

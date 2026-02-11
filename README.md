@@ -60,17 +60,16 @@ git clone https://github.com/thangbuiq/reversed-ats-platform
 cd reversed-ats-platform
 ```
 
-2. Start the platform using Docker Compose:
+2. Explore and run individual components:
 
-```bash
-docker compose up -d
-```
+   Each component of the platform (e.g., `rats-dashboard-app`, `rats-kafka-consumer`, `rats-model-serving`, etc.) has its own `README.md` with detailed instructions for running and deploying that service.
 
-Or using the `just` command if you have Just installed:
+   After cloning the repository, navigate to the component you're interested in and follow its README. For example:
 
-```bash
-just up
-```
+   ```bash
+   cd rats-dashboard-app
+   # follow the instructions in rats-dashboard-app/README.md
+   ```
 
 ## Prerequisites
 

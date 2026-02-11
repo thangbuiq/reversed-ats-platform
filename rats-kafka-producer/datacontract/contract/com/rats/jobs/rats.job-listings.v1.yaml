@@ -38,7 +38,7 @@ schema:
       - name: ingestion_timestamp
         physicalType: long
         description: Ingestion timestamp
-        logicalType: date
+        logicalType: timestamp-millis
         required: true
       - name: ingestion_date
         physicalType: string
