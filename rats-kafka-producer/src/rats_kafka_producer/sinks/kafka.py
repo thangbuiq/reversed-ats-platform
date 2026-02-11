@@ -18,7 +18,7 @@ from tenacity import (
 
 from rats_kafka_producer.config.models import JobListing
 from rats_kafka_producer.config.settings import ScraperConfig
-from rats_kafka_producer.schema import JOB_LISTING_SCHEMA
+from rats_kafka_producer.schema import get_job_listing_schema
 
 
 class KafkaJobProducer:
@@ -49,7 +49,7 @@ class KafkaJobProducer:
         # Create Avro serializer
         self._avro_serializer = AvroSerializer(
             schema_registry_client=schema_registry_client,
-            schema_str=json.dumps(JOB_LISTING_SCHEMA),
+            schema_str=json.dumps(get_job_listing_schema()),
         )
 
         # Configure Kafka producer

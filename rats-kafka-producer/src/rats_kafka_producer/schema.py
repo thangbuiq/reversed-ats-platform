@@ -3,20 +3,38 @@
 from __future__ import annotations
 
 import json
-from pathlib import Path
+from importlib.resources import files
 from typing import Any
 
 
-def load_schema_from_file(schema_path: Path) -> dict[str, Any]:
-    """Load an Avro schema from a filesystem path."""
-    if not schema_path.exists():
-        raise FileNotFoundError(f"Avro schema not found at {schema_path}")
+def load_job_listing_schema() -> dict[str, Any]:
+    """Load the job listing Avro schema from package data.
+    
+    This function loads the schema lazily to avoid import-time failures
+    when the package structure changes (e.g., during installation).
+    """
+    schema_file = files("rats_kafka_producer.data").joinpath("job_listing.avsc")
+    schema_text = schema_file.read_text(encoding="utf-8")
+    return json.loads(schema_text)
 
-    with schema_path.open("r", encoding="utf-8") as handle:
-        return json.load(handle)
+
+# Cache the schema after first load
+_SCHEMA_CACHE: dict[str, Any] | None = None
 
 
-ROOT_DIR = Path(__file__).resolve().parents[2]
-JOB_LISTING_SCHEMA = load_schema_from_file(
-    ROOT_DIR / "datacontract" / "schema" / "avro" / "com" / "rats" / "jobs" / "rats.job-listings.v1.avsc",
-)
+def get_job_listing_schema() -> dict[str, Any]:
+    """Get the job listing schema, loading and caching it on first access."""
+    global _SCHEMA_CACHE
+    if _SCHEMA_CACHE is None:
+        _SCHEMA_CACHE = load_job_listing_schema()
+    return _SCHEMA_CACHE
+
+
+# For backward compatibility, provide JOB_LISTING_SCHEMA that calls the getter
+# Note: This will still load on import, but will work in installed packages
+try:
+    JOB_LISTING_SCHEMA = load_job_listing_schema()
+except Exception:
+    # If loading fails during import (e.g., during build), use None
+    # and let users call get_job_listing_schema() directly
+    JOB_LISTING_SCHEMA = None
