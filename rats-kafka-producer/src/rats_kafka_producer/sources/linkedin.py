@@ -13,6 +13,8 @@ from tenacity import (
 from rats_kafka_producer.config.models import JobListing
 from rats_kafka_producer.config.settings import ScraperConfig
 
+UNSET = object()
+
 
 class JobSpyScraper:
     """Job scraping class using jobspy package with retry logic."""
@@ -39,26 +41,35 @@ class JobSpyScraper:
         site_names: list[str] | None = None,
         location: str | None = None,
         results_wanted: int | None = None,
+        hours_old: int | None | object = UNSET,
     ) -> list[JobListing]:
         """Scrape jobs for a specific search term."""
         site_names = site_names or self.config.site_names
         location = location or self.config.location
         results_wanted = results_wanted or self.config.results_wanted
+        if hours_old is UNSET:
+            hours_old = self.config.hours_old
 
         logger.info(
             f"Scraping jobs for term: '{search_term}', "
             f"sites: {site_names}, location: '{location}', "
-            f"results wanted: {results_wanted}"
+            f"results wanted: {results_wanted}, "
+            f"hours_old: {hours_old if hours_old is not None else 'all'}"
         )
 
         @self._create_retry_decorator()
         def _scrape():
+            scrape_kwargs = {
+                "site_name": site_names,
+                "search_term": search_term,
+                "location": location,
+                "linkedin_fetch_description": self.config.linkedin_fetch_description,
+                "results_wanted": results_wanted,
+            }
+            if hours_old is not None:
+                scrape_kwargs["hours_old"] = hours_old
             return scrape_jobs(
-                site_name=site_names,
-                search_term=search_term,
-                location=location,
-                linkedin_fetch_description=self.config.linkedin_fetch_description,
-                results_wanted=results_wanted,
+                **scrape_kwargs,
             )
 
         try:

@@ -13,9 +13,10 @@ Reversed ATS platform is a platform for analyzing job market trends, predicting 
 
 ## Code Style Guidelines
 
+- Follow PEP 8 style guidelines and [Google Python Style Guide](https://google.github.io/styleguide/pyguide.html).
 - Use type hints for function signatures and naming conventions of variables, functions, classes, and modules should follow PEP 8 guidelines.
 - Don't write too much in-line comments. Instead, write code that is self-explanatory and declarative enough to not need comments.
-- Write short docstrings for classes and functions. Use [Google style](https://google.github.io/styleguide/pyguide.html#38-comments-and-docstrings).
+- Write short docstrings for classes and functions. Use [Google style](https://google.github.io/styleguide/pyguide.html#38-comments-and-docstrings) for docstrings.
 
 ## Prek hooks
 

@@ -5,7 +5,9 @@ from datetime import datetime
 from enum import Enum
 from typing import Any
 
-from pydantic import BaseModel, ConfigDict, Field, HttpUrl
+from pydantic import BaseModel, ConfigDict, Field, HttpUrl, field_validator
+from rich.console import Console
+from rich.table import Table
 
 from rats_kafka_producer.config.utils import sanitize_value
 
@@ -67,6 +69,17 @@ class JobPosting(BaseModel):
 
     raw_data: dict[str, Any] = Field(default_factory=dict)
 
+    @field_validator("id", mode="before")
+    @classmethod
+    def ensure_uuid_id(cls, value: Any) -> str:
+        """Ensure IDs are UUID formatted."""
+        if value in (None, ""):
+            return str(uuid.uuid4())
+        try:
+            return str(uuid.UUID(str(value)))
+        except (ValueError, TypeError, AttributeError):
+            return str(uuid.uuid4())
+
     def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary for serialization."""
         return self.model_dump(mode="json")
@@ -110,6 +123,17 @@ class JobListing(BaseModel):
     search_term: str = ""
     ingestion_timestamp: int = Field(default_factory=lambda: int(datetime.now().timestamp() * 1000))
     ingestion_date: str = Field(default_factory=lambda: datetime.now().strftime("%Y-%m-%d"))
+
+    @field_validator("job_id", mode="before")
+    @classmethod
+    def ensure_uuid_job_id(cls, value: Any) -> str:
+        """Ensure job_id is UUID formatted."""
+        if value in (None, ""):
+            return str(uuid.uuid4())
+        try:
+            return str(uuid.UUID(str(value)))
+        except (ValueError, TypeError, AttributeError):
+            return str(uuid.uuid4())
 
     @classmethod
     def from_raw(cls, raw_data: dict[str, Any], search_term: str) -> "JobListing":
@@ -158,8 +182,6 @@ class JobListing(BaseModel):
             "job_id": self.job_id,
             "site": self.site,
             "search_term": self.search_term,
-            "ingestion_timestamp": self.ingestion_timestamp,
-            "ingestion_date": self.ingestion_date,
             "job": {
                 "job_url": self.job_url,
                 "job_url_direct": self.job_url_direct,
@@ -195,6 +217,18 @@ class JobListing(BaseModel):
                 "ceo_photo_url": self.ceo_photo_url,
             },
         }
+
+    def to_kafka_headers(self) -> list[tuple[str, str]]:
+        """
+        Build Kafka headers.
+
+        All custom headers use the kafka_ prefix.
+        """
+        return [
+            ("kafka_job_id", self.job_id),
+            ("kafka_ingestion_timestamp", str(self.ingestion_timestamp)),
+            ("kafka_ingestion_date", self.ingestion_date),
+        ]
 
 
 class ScrapeResult(BaseModel):
@@ -268,3 +302,17 @@ class PipelineStats(BaseModel):
 
     def to_dict(self) -> dict[str, Any]:
         return self.model_dump(mode="json")
+
+    def print_pretty(self) -> None:
+        """Print a human-readable summary of the pipeline stats using rich Table."""
+        console = Console()
+        table = Table(title="Pipeline Statistics")
+        table.add_column("Metric", style="cyan", no_wrap=True)
+        table.add_column("Value", style="magenta")
+        table.add_row("Start Time", str(self.start_time))
+        table.add_row("End Time", str(self.end_time) if self.end_time else "N/A")
+        table.add_row("Duration (seconds)", f"{self.duration_seconds:.2f}")
+        table.add_row("Total Jobs Scraped", str(self.total_jobs_scraped))
+        table.add_row("Total Jobs Produced", str(self.total_jobs_produced))
+        table.add_row("Total Jobs Failed", str(self.total_jobs_failed))
+        console.print(table)

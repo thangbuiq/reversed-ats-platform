@@ -1,5 +1,3 @@
-import os
-
 from rats_kafka_producer.config.settings import ScraperConfig
 
 
@@ -11,6 +9,7 @@ def test_config_loading(monkeypatch):
     monkeypatch.setenv("LINKEDIN_FETCH_DESCRIPTION", "false")
     monkeypatch.setenv("JOB_LOCATION", "New York")
     monkeypatch.setenv("RESULTS_WANTED", "50")
+    monkeypatch.setenv("HOURS_OLD", "24")
 
     config = ScraperConfig.from_env()
 
@@ -19,3 +18,4 @@ def test_config_loading(monkeypatch):
     assert config.linkedin_fetch_description is False
     assert config.location == "New York"
     assert config.results_wanted == 50
+    assert config.hours_old == 24

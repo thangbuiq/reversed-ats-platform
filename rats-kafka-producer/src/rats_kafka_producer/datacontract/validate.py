@@ -2,7 +2,7 @@
 
 import os
 import subprocess
-from typing import List
+from pathlib import Path
 
 from datacontract.data_contract import DataContract
 from dotenv import load_dotenv
@@ -15,8 +15,11 @@ SPARK_VERSION = "4.1.1"
 SCALA_VERSION = "2.13"
 CONFLUENT_VERSION = "7.6.0"
 
-JAR_DIR = os.path.expanduser("~/spark-jars")
-os.makedirs(JAR_DIR, exist_ok=True)
+MODULE_DIR = Path(__file__).resolve().parent
+CONTRACT_FILE = MODULE_DIR / "contract" / "com" / "rats" / "jobs" / "rats.jobs.listing.v1.yaml"
+
+JAR_DIR = Path.home() / "spark-jars"
+JAR_DIR.mkdir(parents=True, exist_ok=True)
 
 
 def run_data_contract_test(spark: SparkSession) -> None:
@@ -25,7 +28,7 @@ def run_data_contract_test(spark: SparkSession) -> None:
     data_contract = DataContract(
         spark=spark,
         server="production",
-        data_contract_file="datacontract/contract/com/rats/jobs/rats.job-listings.v1.yaml",
+        data_contract_file=str(CONTRACT_FILE),
     )
 
     run = data_contract.test()
@@ -47,7 +50,41 @@ def run_data_contract_test(spark: SparkSession) -> None:
     logger.info("Data contract test completed.")
 
 
-def init_spark_session(jar_files: List[str]) -> SparkSession:
+def append_server_section_to_contract() -> None:
+    """
+    Append the servers section to contract for testing.
+
+    Reverse after test.
+    """
+    os.environ["PATH"] += os.pathsep + "/usr/local/bin"
+    subprocess.run(
+        [
+            "yq",
+            "eval",
+            '.servers[0].server = "production" | .servers[0].type = "kafka" | .servers[0].host = strenv(DATACONTRACT_KAFKA_BOOTSTRAP_SERVERS) | .servers[0].topic = strenv(DATACONTRACT_KAFKA_TOPIC) | .servers[0].format = "avro"',
+            "-i",
+            str(CONTRACT_FILE),
+        ],
+        check=True,
+    )
+
+
+def revert_contract_file() -> None:
+    """Revert the contract file to its original state."""
+    # cut the absolute path to the git repo
+    CONTRACT_FILE_PATH = str(CONTRACT_FILE).split("reversed-ats-platform/rats-kafka-producer/")[-1]
+    subprocess.run(
+        [
+            "git",
+            "checkout",
+            "--",
+            str(CONTRACT_FILE_PATH),
+        ],
+        check=True,
+    )
+
+
+def init_spark_session(jar_files: list[str]) -> SparkSession:
     """Initialize and return a Spark session."""
     if "JAVA_HOME" not in os.environ:
         if os.uname().sysname == "Darwin":  # macos, run brew --prefix openjdk@17
@@ -61,7 +98,7 @@ def init_spark_session(jar_files: List[str]) -> SparkSession:
     load_dotenv()
     spark = (
         SparkSession.builder.appName("KafkaAvroReader")
-        .config("spark.jars", ",".join([os.path.join(JAR_DIR, jar) for jar in jar_files]))
+        .config("spark.jars", ",".join(str(JAR_DIR / jar) for jar in jar_files))
         # Kafka security
         .config("spark.kafka.security.protocol", "SASL_SSL")
         .config("spark.kafka.sasl.mechanism", os.getenv("DATACONTRACT_KAFKA_SASL_MECHANISM"))
@@ -84,7 +121,7 @@ def init_spark_session(jar_files: List[str]) -> SparkSession:
     return spark
 
 
-def setup_jars() -> List[str]:
+def setup_jars() -> list[str]:
     """Setup required jars for Spark."""
     # ====== CONFIGURE YOUR SPARK VERSION HERE ======
     urls = [
@@ -102,15 +139,22 @@ def setup_jars() -> List[str]:
     ]
 
     for url in urls:
-        subprocess.run(["wget", "-nc", "-P", JAR_DIR, url], check=True)
+        subprocess.run(["wget", "-nc", "-P", str(JAR_DIR), url], check=True)
 
     # list downloaded jars and return as a list
-    jar_files = os.listdir(JAR_DIR)
+    jar_files = [path.name for path in JAR_DIR.iterdir() if path.is_file()]
     logger.info(f"Downloaded JAR files: {jar_files}")
     return jar_files
 
 
-if __name__ == "__main__":
+def run_validate_data_contract() -> None:
+    """Run data contract validation workflow."""
     jar_files = setup_jars()
     spark = init_spark_session(jar_files)
+    append_server_section_to_contract()
     run_data_contract_test(spark)
+    revert_contract_file()
+
+
+if __name__ == "__main__":
+    run_validate_data_contract()

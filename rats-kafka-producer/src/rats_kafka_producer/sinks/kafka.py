@@ -1,6 +1,7 @@
 """Kafka producer for Avro-encoded job listings."""
 
 import json
+import uuid
 
 from confluent_kafka import KafkaException, Producer
 from confluent_kafka.admin import AdminClient, NewTopic
@@ -17,8 +18,8 @@ from tenacity import (
 )
 
 from rats_kafka_producer.config.models import JobListing
+from rats_kafka_producer.config.schema import get_job_listing_schema
 from rats_kafka_producer.config.settings import ScraperConfig
-from rats_kafka_producer.schema import get_job_listing_schema
 
 
 class KafkaJobProducer:
@@ -29,6 +30,7 @@ class KafkaJobProducer:
         self._producer: Producer | None = None
         self._avro_serializer: AvroSerializer | None = None
         self._is_initialized = False
+        self.topic_created_on_initialize = False
 
     def initialize(self) -> None:
         """Initialize Kafka producer and schema registry."""
@@ -70,13 +72,13 @@ class KafkaJobProducer:
             )
 
         # Ensure topic exists
-        self._ensure_topic_exists(producer_conf)
+        self.topic_created_on_initialize = self._ensure_topic_exists(producer_conf)
 
         self._producer = Producer(producer_conf)
         self._is_initialized = True
         logger.info("Kafka producer initialized successfully")
 
-    def _ensure_topic_exists(self, conf: dict) -> None:
+    def _ensure_topic_exists(self, conf: dict) -> bool:
         """Create Kafka topic if it doesn't exist."""
         topic_name = self.config.kafka.topic
         # Create a copy of conf to avoid modifying the original if AdminClient modifies it
@@ -88,10 +90,10 @@ class KafkaJobProducer:
             cluster_metadata = admin_client.list_topics(timeout=10)
             if topic_name in cluster_metadata.topics:
                 logger.info(f"Topic '{topic_name}' already exists")
-                return
+                return False
         except Exception as e:
             logger.warning(f"Could not check if topic exists (will try to produce anyway): {e}")
-            return
+            return False
 
         logger.info(f"Topic '{topic_name}' not found. Attempting to create it...")
         new_topic = NewTopic(topic_name, num_partitions=1, replication_factor=3)
@@ -102,10 +104,12 @@ class KafkaJobProducer:
                 try:
                     future.result()  # Wait for result
                     logger.info(f"Topic '{topic}' created successfully")
+                    return True
                 except Exception as e:
                     logger.error(f"Failed to create topic '{topic}': {e}")
         except Exception as e:
             logger.error(f"Error during topic creation: {e}")
+        return False
 
     def _delivery_report(self, err, msg):
         """Callback for message delivery reports."""
@@ -144,6 +148,9 @@ class KafkaJobProducer:
                 topic=self.config.kafka.topic,
                 key=job.job_id.encode("utf-8"),
                 value=serialized_value,
+                headers=job.to_kafka_headers()
+                + [("kafka_message_id", str(uuid.uuid4()))]
+                + [("kafka_producer_client_id", self.config.kafka.client_id)],
                 callback=self._delivery_report,
             )
 

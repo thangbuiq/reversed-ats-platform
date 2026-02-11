@@ -15,7 +15,6 @@ class RATSProducerApp:
         self.config = config or ScraperConfig.from_env()
         self.scraper = JobSpyScraper(self.config)
         self.producer = KafkaJobProducer(self.config)
-        self.producer.initialize()
         logger.success("RATSProducerApp initialized")
 
     def run(
@@ -24,9 +23,14 @@ class RATSProducerApp:
         produce_to_kafka: bool = True,
     ) -> PipelineStats:
         """Run the complete pipeline: scrape jobs and produce to Kafka."""
-        logger.info("=" * 80)
         logger.info("Starting Job Scraper Pipeline")
-        logger.info("=" * 80)
+        effective_hours_old = self.config.hours_old
+
+        if produce_to_kafka:
+            self.producer.initialize()
+            if self.producer.topic_created_on_initialize:
+                effective_hours_old = None
+                logger.info("Topic was initialized on this run. Skipping hours_old filter for first bootstrap scrape.")
 
         stats = PipelineStats()
         terms_to_process = search_terms or self.config.search_terms
@@ -38,7 +42,7 @@ class RATSProducerApp:
 
             # Scrape
             try:
-                jobs = self.scraper.scrape_jobs_for_term(search_term)
+                jobs = self.scraper.scrape_jobs_for_term(search_term, hours_old=effective_hours_old)
                 result.scraped_count = len(jobs)
             except Exception as e:
                 logger.error(f"Failed to scrape jobs for '{search_term}': {str(e)}")
@@ -55,15 +59,7 @@ class RATSProducerApp:
             stats.total_jobs_failed += result.failed_count
 
         stats.complete()
-
-        logger.info("=" * 80)
-        logger.info("Pipeline Execution Summary:")
-        logger.info(f"Total jobs scraped: {stats.total_jobs_scraped}")
-        logger.info(f"Total jobs produced: {stats.total_jobs_produced}")
-        logger.info(f"Total jobs failed: {stats.total_jobs_failed}")
-        logger.info(f"Duration: {stats.duration_seconds:.2f} seconds")
-        logger.info("=" * 80)
-
+        stats.print_pretty()
         return stats
 
     def __enter__(self):
@@ -72,8 +68,3 @@ class RATSProducerApp:
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.producer.close()
         logger.info("Pipeline resources cleaned up")
-
-
-if __name__ == "__main__":
-    with RATSProducerApp() as pipeline:
-        pipeline.run()

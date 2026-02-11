@@ -1,4 +1,4 @@
-name: 🔎 Validate datacontract
+name: 🔎 Datacontract
 
 on:
   push:
@@ -8,8 +8,14 @@ on:
     branches: ["main"]
     paths: ["rats-kafka-producer/**"]
 
+env:
+  DATACONTRACT_YAML_PATH: rats-kafka-producer/src/rats_kafka_producer/datacontract/contract/com/rats/jobs/rats.job-listings.v1.yaml
+  DATACONTRACT_AVRO_PATH: rats-kafka-producer/src/rats_kafka_producer/datacontract/schema/avro/com/rats/jobs/rats.job-listings.v1.avsc
+  DATACONTRACT_KAFKA_TOPIC: rats.jobs.listing.v1
+
 jobs:
   validate-datacontract:
+    name: Run Validate
     runs-on: ubuntu-latest
     env:
       DATACONTRACT_KAFKA_BOOTSTRAP_SERVERS: ${{ secrets.DATACONTRACT_KAFKA_BOOTSTRAP_SERVERS }}
@@ -21,14 +27,14 @@ jobs:
       CONFLUENT_SCHEMA_REGISTRY_API_SECRET: ${{ secrets.CONFLUENT_SCHEMA_REGISTRY_API_SECRET }}
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Install OpenJDK 17 headless
         run: |
           sudo apt-get update
           sudo apt-get install -y wget openjdk-17-jdk-headless
           echo "JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64" >> $GITHUB_ENV
-          wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/local/bin/yq &&\
+          wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/local/bin/yq
           chmod +x /usr/local/bin/yq
 
       - name: Install uv
@@ -42,13 +48,7 @@ jobs:
 
       - name: Lint the datacontract
         run: |
-          uv run datacontract lint rats-kafka-producer/datacontract/contract/com/rats/jobs/rats.job-listings.v1.yaml
-
-      - name: Append the servers section to contract for testing
-        run: |
-          /usr/local/bin/yq eval \
-          '.servers[0].server = "production" | .servers[0].type = "kafka" | .servers[0].host = strenv(DATACONTRACT_KAFKA_BOOTSTRAP_SERVERS) | .servers[0].topic = "rats.job-listings.v1" | .servers[0].format = "avro"' \
-          -i rats-kafka-producer/datacontract/contract/com/rats/jobs/rats.job-listings.v1.yaml
+          uv run datacontract lint ${{ env.DATACONTRACT_YAML_PATH }}}
 
       - name: Validate the datacontract
         run: |

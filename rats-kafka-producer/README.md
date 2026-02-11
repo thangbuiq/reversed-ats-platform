@@ -12,7 +12,7 @@ The RATS Kafka Producer scrapes job listings and publishes them to Kafka with Av
 
 ```bash
 uv sync
-uv run rats-kafka-producer run --search-term "Data Engineer" --location "Ho Chi Minh City, Vietnam"
+uv run rats-kafka-producer run
 ```
 
 ## CLI
@@ -26,10 +26,7 @@ uv run rats-kafka-producer --help
 Run the pipeline:
 
 ```bash
-uv run rats-kafka-producer run \
-  --search-term "Data Engineer" \
-  --location "Ho Chi Minh City, Vietnam" \
-  --results 25
+uv run rats-kafka-producer run
 ```
 
 Disable Kafka publishing (scrape only):
@@ -38,25 +35,21 @@ Disable Kafka publishing (scrape only):
 uv run rats-kafka-producer run --no-produce
 ```
 
-Print the effective configuration:
+Validate scraper + data contract config:
 
 ```bash
-uv run rats-kafka-producer config
+uv run rats-kafka-producer validate
 ```
 
 ## Configuration
 
-Configuration is loaded in this order:
-
-1. CLI overrides
-2. Config file (YAML or JSON)
-3. Environment variables
-4. Defaults
+Search terms are configured via environment variables. CLI overrides for search terms are intentionally disabled.
 
 ### Environment variables
 
 - `JOB_LOCATION`
 - `RESULTS_WANTED`
+- `HOURS_OLD`
 - `SITE_NAMES`
 - `SEARCH_TERMS`
 - `LINKEDIN_FETCH_DESCRIPTION`
@@ -68,24 +61,24 @@ Configuration is loaded in this order:
 - `CONFLUENT_SCHEMA_REGISTRY_API_KEY`
 - `CONFLUENT_SCHEMA_REGISTRY_API_SECRET`
 - `CONFLUENT_KAFKA_CLIENT_ID`
-- `LINKEDIN_KAFKA_TOPIC`
+- `DATACONTRACT_KAFKA_TOPIC`
 
-### Config file example
+### Environment example
 
-```yaml
-location: Ho Chi Minh City, Vietnam
-results_wanted: 20
-search_terms:
-  - Data Engineer
-  - ML Engineer
-kafka:
-  bootstrap_servers: pkc-xxxx.us-east-1.aws.confluent.cloud:9092
-  schema_registry_url: https://psrc-xxxx.us-east-1.aws.confluent.cloud
-  api_key: ${DATACONTRACT_KAFKA_SASL_USERNAME}
-  api_secret: ${DATACONTRACT_KAFKA_SASL_PASSWORD}
-  schema_registry_api_key: ${CONFLUENT_SCHEMA_REGISTRY_API_KEY}
-  schema_registry_api_secret: ${CONFLUENT_SCHEMA_REGISTRY_API_SECRET}
-  client_id: ccloud-python-client-862dcf68-e5e6-4941-85b6-06dcb7fbff2a
+```bash
+JOB_LOCATION="Ho Chi Minh City, Vietnam"
+RESULTS_WANTED=20
+HOURS_OLD=24
+SITE_NAMES=linkedin
+SEARCH_TERMS='["Data Engineer","ML Engineer"]'
+DATACONTRACT_KAFKA_BOOTSTRAP_SERVERS=pkc-xxxx.us-east-1.aws.confluent.cloud:9092
+CONFLUENT_SCHEMA_REGISTRY_URL=https://psrc-xxxx.us-east-1.aws.confluent.cloud
+DATACONTRACT_KAFKA_SASL_USERNAME=...
+DATACONTRACT_KAFKA_SASL_PASSWORD=...
+CONFLUENT_SCHEMA_REGISTRY_API_KEY=...
+CONFLUENT_SCHEMA_REGISTRY_API_SECRET=...
+CONFLUENT_KAFKA_CLIENT_ID=ccloud-python-client-xxx
+DATACONTRACT_KAFKA_TOPIC=rats.jobs.listing.v1
 ```
 
 ## Development
@@ -99,3 +92,4 @@ prek run --all-files
 
 - Kafka publishing requires a schema registry endpoint when Avro is enabled.
 - When credentials are missing, the producer will attempt to connect without SASL authentication.
+- `hours_old` defaults to `24` for daily runs. On first Kafka topic initialization, the pipeline skips this filter.

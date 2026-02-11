@@ -1928,6 +1928,10 @@ dependencies = [
 ]
 
 [package.optional-dependencies]
+datacontract = [
+    { name = "pyspark" },
+    { name = "rich" },
+]
 dev = [
     { name = "pytest" },
 ]
@@ -1935,20 +1939,24 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "confluent-kafka", extras = ["avro", "schemaregistry"], specifier = ">=2.13.0" },
-    { name = "datacontract-cli", extras = ["all", "kafka", "s3"], specifier = ">=0.10.16" },
+    { name = "datacontract-cli", extras = ["all"], specifier = ">=0.10.16" },
+    { name = "datacontract-cli", extras = ["kafka"], specifier = ">=0.10.16" },
+    { name = "datacontract-cli", extras = ["s3"], specifier = ">=0.10.16" },
     { name = "loguru", specifier = ">=0.7.0" },
     { name = "numpy", specifier = ">=1.26.0" },
     { name = "pandas", specifier = ">=2.1.0" },
     { name = "pydantic", specifier = ">=2.5.0" },
     { name = "pydantic-settings", specifier = ">=2.12.0" },
+    { name = "pyspark", marker = "extra == 'datacontract'", specifier = ">=3.5.0" },
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=7.4.0" },
     { name = "python-dotenv", specifier = ">=1.0.0" },
     { name = "python-jobspy", specifier = ">=1.1.82" },
     { name = "pyyaml", specifier = ">=6.0.1" },
+    { name = "rich", marker = "extra == 'datacontract'", specifier = ">=13.0.0" },
     { name = "tenacity", specifier = ">=8.2.0" },
     { name = "typer", specifier = ">=0.12.3" },
 ]
-provides-extras = ["dev"]
+provides-extras = ["dev", "datacontract"]
 
 [[package]]
 name = "rdflib"

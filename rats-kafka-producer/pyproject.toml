@@ -20,11 +20,14 @@ dependencies = [
     "python-jobspy>=1.1.82",
     # Kafka
     "confluent-kafka[avro,schemaregistry]>=2.13.0",
-    "datacontract-cli[all,kafka,s3]>=0.10.16",
+    "datacontract-cli[all]>=0.10.16",
+    "datacontract-cli[kafka]>=0.10.16",
+    "datacontract-cli[s3]>=0.10.16",
 ]
 
 [project.scripts]
 rats-kafka-producer = "rats_kafka_producer.cli:app"
+rats-kafka-producer-datacontract = "rats_kafka_producer.datacontract.validate:main"
 
 [project.optional-dependencies]
 dev = [

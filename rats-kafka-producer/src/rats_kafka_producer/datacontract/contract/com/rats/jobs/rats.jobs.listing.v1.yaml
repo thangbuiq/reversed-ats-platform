@@ -1,7 +1,7 @@
 version: 1.0.0
 kind: DataContract
 apiVersion: v3.1.0
-id: com.rats.jobs/rats.job-listings.v1
+id: com.rats.jobs/rats.jobs.listing.v1
 name: RATS Job Listings
 status: draft
 team:
@@ -33,16 +33,6 @@ schema:
       - name: search_term
         physicalType: string
         description: Search term used to find this job
-        logicalType: string
-        required: true
-      - name: ingestion_timestamp
-        physicalType: long
-        description: Ingestion timestamp
-        logicalType: timestamp-millis
-        required: true
-      - name: ingestion_date
-        physicalType: string
-        description: Date partition key (YYYY-MM-DD)
         logicalType: string
         required: true
       - name: job
