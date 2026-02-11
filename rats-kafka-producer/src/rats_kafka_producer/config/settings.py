@@ -11,7 +11,12 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class KafkaConfig(BaseModel):
-    """Kafka producer configuration for Confluent Cloud and local brokers."""
+    """Kafka producer configuration for Confluent Cloud and local brokers.
+    
+    Credentials default to empty strings for local development scenarios
+    where authentication is not required. The producer checks for non-empty
+    credentials before applying authentication.
+    """
 
     bootstrap_servers: str = "localhost:9092"
     schema_registry_url: str = "http://localhost:8081"

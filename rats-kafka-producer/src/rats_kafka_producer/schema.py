@@ -34,7 +34,10 @@ def get_job_listing_schema() -> dict[str, Any]:
 # Note: This will still load on import, but will work in installed packages
 try:
     JOB_LISTING_SCHEMA = load_job_listing_schema()
-except Exception:
-    # If loading fails during import (e.g., during build), use None
-    # and let users call get_job_listing_schema() directly
+except (FileNotFoundError, ModuleNotFoundError, json.JSONDecodeError) as e:
+    # If loading fails during import (e.g., during build or when package data is missing),
+    # set to None and let users call get_job_listing_schema() directly
+    import warnings
+
+    warnings.warn(f"Failed to load schema at import time: {e}. Use get_job_listing_schema() instead.")
     JOB_LISTING_SCHEMA = None
