@@ -9,8 +9,8 @@ on:
     paths: ["rats-kafka-producer/**"]
 
 env:
-  DATACONTRACT_YAML_PATH: rats-kafka-producer/src/rats_kafka_producer/datacontract/contract/com/rats/jobs/rats.job-listings.v1.yaml
-  DATACONTRACT_AVRO_PATH: rats-kafka-producer/src/rats_kafka_producer/datacontract/schema/avro/com/rats/jobs/rats.job-listings.v1.avsc
+  DATACONTRACT_YAML_PATH: src/rats_kafka_producer/datacontract/contract/com/rats/jobs/rats.jobs.listing.v1.yaml
+  DATACONTRACT_AVRO_PATH: src/rats_kafka_producer/datacontract/schema/avro/com/rats/jobs/rats.jobs.listing.v1.avsc
   DATACONTRACT_KAFKA_TOPIC: rats.jobs.listing.v1
 
 jobs:
@@ -39,18 +39,21 @@ jobs:
 
       - name: Install uv
         uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
 
       - name: Install project dependencies
         run: |
           uv tool install --python python3.12 --upgrade 'datacontract-cli[all]'
           cd rats-kafka-producer
-          uv sync --extra datacontract
+          uv sync --all-groups --all-extras
 
       - name: Lint the datacontract
         run: |
-          uv run datacontract lint ${{ env.DATACONTRACT_YAML_PATH }}}
+          cd rats-kafka-producer
+          uv run datacontract lint ${{ env.DATACONTRACT_YAML_PATH }}
 
       - name: Validate the datacontract
         run: |
           cd rats-kafka-producer
-          uv run datacontract/validate.py
+          uv run src/rats_kafka_producer/datacontract/validate.py
