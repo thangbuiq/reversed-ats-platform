@@ -1,4 +1,4 @@
-name: 🚀 Deploy RATS Kafka Producer Bundle
+name: 🚀 Deploy
 
 on:
   workflow_dispatch:
@@ -15,6 +15,7 @@ on:
 
 permissions:
   contents: read
+  pull-requests: write
 
 concurrency:
   group: deploy-rats-kafka-producer-prod
@@ -22,7 +23,7 @@ concurrency:
 
 jobs:
   deploy-prod:
-    name: Deploy Databricks Bundle (prod)
+    name: Deploy Databricks Bundle (PROD)
     runs-on: ubuntu-latest
     env:
       DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
@@ -83,3 +84,27 @@ jobs:
           fi
           cd rats-kafka-producer
           databricks bundle deploy -t prod
+
+      - name: Create comment
+        uses: peter-evans/create-or-update-comment@v5
+        if: ${{ github.event_name == 'pull_request' }}
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          reactions: "+1"
+          body: |
+            # 🚀 Pre-deploy Status
+
+            The Databricks bundle deployment workflow has validated the bundle configuration and is ready to deploy to production.
+            If this workflow was triggered by a pull request, the deployment step will be skipped, but the validation step will still run to ensure the bundle is correctly configured.
+
+            | Field | Value |
+            |-------|-------|
+            | **Environment** | PROD |
+            | **Bundle** | rats-kafka-producer |
+            | **Status** | ✅ Completed |
+            | **Commit** | ${{ github.sha }} |
+            | **Branch** | ${{ github.ref_name }} |
+            | **Actor** | ${{ github.actor }} |
+            | **Run URL** | [Link to workflow run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) |
+
+            > Let's merge this PR and monitor the deployment to ensure everything runs smoothly!
