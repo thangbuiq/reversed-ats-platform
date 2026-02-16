@@ -6,10 +6,11 @@ from pathlib import Path
 
 from datacontract.data_contract import DataContract
 from dotenv import load_dotenv
-from loguru import logger
 from pyspark.sql import SparkSession
 from rich.console import Console
 from rich.table import Table
+
+from rats_kafka_producer.config.utils import logger
 
 SPARK_VERSION = "4.1.1"
 SCALA_VERSION = "2.13"

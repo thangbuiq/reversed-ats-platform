@@ -1,0 +1,62 @@
+bundle:
+  name: rats-kafka-producer
+
+include:
+  - resources/*.yml
+  - targets.yml
+
+artifacts:
+  producer_wheel:
+    type: whl
+    path: .
+    build: uv build --wheel
+
+variables:
+  job_location:
+    description: Job search location.
+    default: Ho Chi Minh City, Vietnam
+  results_wanted:
+    description: Number of jobs per search term.
+    default: "50"
+  hours_old:
+    description: Lookback window in hours.
+    default: "24"
+  site_names:
+    description: Comma-separated site list.
+    default: linkedin
+  search_terms:
+    description: JSON array of search terms.
+    default: '["Data Engineer", "Data Analyst", "Data Scientist", "AI Engineer", "Software Engineer", "DevOps Engineer"]'
+  linkedin_fetch_description:
+    description: Whether to fetch full LinkedIn descriptions.
+    default: "true"
+  log_level:
+    description: Producer log level.
+    default: INFO
+  datacontract_kafka_bootstrap_servers:
+    description: Confluent Kafka bootstrap servers.
+  datacontract_kafka_sasl_username:
+    description: Confluent Kafka API key.
+  datacontract_kafka_sasl_password:
+    description: Confluent Kafka API secret.
+  datacontract_kafka_topic:
+    description: Kafka topic name.
+    default: rats.jobs.listing.v1
+  confluent_schema_registry_url:
+    description: Confluent Schema Registry URL.
+  confluent_schema_registry_api_key:
+    description: Schema Registry API key.
+  confluent_schema_registry_api_secret:
+    description: Schema Registry API secret.
+  confluent_kafka_client_id:
+    description: Kafka client ID.
+    default: rats-kafka-producer-databricks
+  daily_quartz_cron:
+    description: Quartz cron expression for the daily schedule.
+    default: "0 0 2,8,14 * * ?" # 3 times daily at 9AM, 3PM, 9PM GMT+7, originally UTC timezone
+  schedule_timezone:
+    description: Timezone used for scheduling.
+    default: UTC
+  schedule_pause_status:
+    description: Set to PAUSED to deploy without activating the schedule.
+    default: UNPAUSED

@@ -4,10 +4,12 @@ from __future__ import annotations
 
 import json
 import math
+import sys
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 import yaml  # type: ignore
+from loguru import logger  # type: ignore
 
 if TYPE_CHECKING:
     from rats_kafka_producer.config.models import ScraperConfig
@@ -72,3 +74,11 @@ def _deep_merge(base: dict, override: dict) -> dict:
         else:
             result[key] = value
     return result
+
+
+logger.remove()  # Remove default handler
+logger.add(
+    sys.stdout,
+    colorize=False,  # Disable ANSI colors
+    format="{time:YYYY-MM-DD HH:mm:ss} | {level} | {message}",
+)

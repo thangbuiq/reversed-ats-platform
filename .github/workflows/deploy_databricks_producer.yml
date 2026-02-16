@@ -1,0 +1,110 @@
+name: 🚀 Deploy
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: ["main"]
+    paths:
+      - "rats-kafka-producer/**"
+      - ".github/workflows/deploy_rats_kafka_producer_bundle.yml"
+  push:
+    branches: ["main"]
+    paths:
+      - "rats-kafka-producer/**"
+      - ".github/workflows/deploy_rats_kafka_producer_bundle.yml"
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: deploy-rats-kafka-producer-prod
+  cancel-in-progress: true
+
+jobs:
+  deploy-prod:
+    name: Deploy Databricks Bundle (PROD)
+    runs-on: ubuntu-latest
+    env:
+      DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
+      DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
+      KAFKA_CLIENT_ID: ${{ secrets.CONFLUENT_KAFKA_CLIENT_ID }}
+      KAFKA_BOOTSTRAP_SERVERS: ${{ secrets.DATACONTRACT_KAFKA_BOOTSTRAP_SERVERS }}
+      CONFLUENT_SCHEMA_REGISTRY_URL: ${{ secrets.CONFLUENT_SCHEMA_REGISTRY_URL }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+
+      - name: Setup Databricks CLI
+        uses: databricks/setup-cli@v0.288.0
+
+      - name: Create bundle variable overrides
+        run: |
+          mkdir -p rats-kafka-producer/.databricks/bundle/prod
+          cat > rats-kafka-producer/.databricks/bundle/prod/variable-overrides.json <<'JSON'
+          {
+            "job_location": "Ho Chi Minh City, Vietnam",
+            "results_wanted": "50",
+            "hours_old": "168",
+            "site_names": "linkedin",
+            "search_terms": "[\"Data Engineer\",\"ML Engineer\", \"Data Scientist\", \"Software Engineer\", \"Data Analyst\"]",
+            "datacontract_kafka_topic": "rats.jobs.listing.v1",
+            "datacontract_kafka_bootstrap_servers": "${{ env.KAFKA_BOOTSTRAP_SERVERS }}",
+            "datacontract_kafka_sasl_username": "{{secrets/rats-prod/kafka-api-key}}",
+            "datacontract_kafka_sasl_password": "{{secrets/rats-prod/kafka-api-secret}}",
+            "confluent_schema_registry_url": "${{ env.CONFLUENT_SCHEMA_REGISTRY_URL }}",
+            "confluent_schema_registry_api_key": "{{secrets/rats-prod/schema-api-key}}",
+            "confluent_schema_registry_api_secret": "{{secrets/rats-prod/schema-api-secret}}",
+            "confluent_kafka_client_id": "${{ env.KAFKA_CLIENT_ID }}"
+          }
+          JSON
+          cat > rats-kafka-producer/targets.yml <<'YAML'
+          targets:
+            prod:
+              workspace:
+                host: ${{ env.DATABRICKS_HOST }}
+          YAML
+
+      - name: Validate bundle
+        run: |
+          cd rats-kafka-producer
+          databricks bundle validate -t prod
+
+      - name: Deploy bundle
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            echo "This is a pull request, skipping bundle deployment."
+            exit 0
+          fi
+          cd rats-kafka-producer
+          databricks bundle deploy -t prod
+
+      - name: Create comment
+        uses: peter-evans/create-or-update-comment@v5
+        if: ${{ github.event_name == 'pull_request' }}
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          reactions: "+1"
+          body: |
+            # 🚀 Pre-deploy Status
+
+            The Databricks bundle deployment workflow has validated the bundle configuration and is ready to deploy to production.
+            If this workflow was triggered by a pull request, the deployment step will be skipped, but the validation step will still run to ensure the bundle is correctly configured.
+
+            | Field | Value |
+            |-------|-------|
+            | **Environment** | PROD |
+            | **Bundle** | rats-kafka-producer |
+            | **Status** | ✅ Completed |
+            | **Commit** | ${{ github.sha }} |
+            | **Branch** | ${{ github.ref_name }} |
+            | **Actor** | ${{ github.actor }} |
+            | **Run URL** | [Link to workflow run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) |
+
+            > Let's merge this PR and monitor the deployment to ensure everything runs smoothly!

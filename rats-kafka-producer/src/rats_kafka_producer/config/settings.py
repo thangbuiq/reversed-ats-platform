@@ -4,13 +4,15 @@ from __future__ import annotations
 
 import json
 import os
+import re
 from pathlib import Path
 from typing import List
 
 import dotenv
-from loguru import logger
 from pydantic import BaseModel, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+from rats_kafka_producer.config.utils import logger
 
 
 class KafkaConfig(BaseModel):
@@ -76,9 +78,40 @@ class ScraperConfig(BaseSettings):
         dotenv.load_dotenv()
         logger.debug("Loading configuration from environment variables")
 
+        def resolve_secret_reference(value: str | None) -> str | None:
+            """Resolve Databricks secret reference strings when running on Databricks."""
+            if not value:
+                return value
+
+            match = re.match(r"^\{\{secrets/([^/]+)/([^}]+)\}\}$", value.strip())
+            if not match:
+                return value
+
+            scope, key = match.group(1), match.group(2)
+
+            try:
+                from pyspark.dbutils import DBUtils
+                from pyspark.sql import SparkSession
+
+                spark = SparkSession.getActiveSession() or SparkSession.builder.getOrCreate()
+                dbutils = DBUtils(spark)
+                return dbutils.secrets.get(scope=scope, key=key)
+            except Exception as exc:
+                logger.warning(
+                    "Could not resolve Databricks secret reference for {}/{} ({}). Using raw value.",
+                    scope,
+                    key,
+                    str(exc),
+                )
+                return value
+
+        def env(key: str, default: str | None = None) -> str | None:
+            """Read an environment variable and resolve Databricks secret references."""
+            return resolve_secret_reference(os.getenv(key, default))
+
         # Helper to parse list from env
         def parse_list(key: str) -> list[str] | None:
-            val = os.getenv(key)
+            val = env(key)
             if not val:
                 return None
             try:
@@ -92,9 +125,9 @@ class ScraperConfig(BaseSettings):
             kwargs["site_names"] = site_names
         if search_terms := parse_list("SEARCH_TERMS"):
             kwargs["search_terms"] = search_terms
-        if (desc := os.getenv("LINKEDIN_FETCH_DESCRIPTION")) is not None:
+        if (desc := env("LINKEDIN_FETCH_DESCRIPTION")) is not None:
             kwargs["linkedin_fetch_description"] = desc.lower() == "true"
-        if (hours_old := os.getenv("HOURS_OLD")) is not None and hours_old != "":
+        if (hours_old := env("HOURS_OLD")) is not None and hours_old != "":
             kwargs["hours_old"] = int(hours_old)
 
         # BaseSettings may try to decode these list env vars as JSON. Remove them
@@ -107,18 +140,19 @@ class ScraperConfig(BaseSettings):
 
         try:
             return cls(
-                location=os.getenv("JOB_LOCATION", "Ho Chi Minh City, Vietnam"),
-                results_wanted=int(os.getenv("RESULTS_WANTED", "20")),
-                log_level=os.getenv("LOG_LEVEL", "INFO"),
+                location=env("JOB_LOCATION", "Ho Chi Minh City, Vietnam") or "Ho Chi Minh City, Vietnam",
+                results_wanted=int(env("RESULTS_WANTED", "20") or "20"),
+                log_level=env("LOG_LEVEL", "INFO") or "INFO",
                 kafka=KafkaConfig(
-                    bootstrap_servers=os.getenv("DATACONTRACT_KAFKA_BOOTSTRAP_SERVERS", "localhost:9092"),
-                    schema_registry_url=os.getenv("CONFLUENT_SCHEMA_REGISTRY_URL", "http://localhost:8081"),
-                    topic=os.getenv("DATACONTRACT_KAFKA_TOPIC", "rats.jobs.listing.v1"),
-                    api_key=os.getenv("DATACONTRACT_KAFKA_SASL_USERNAME", ""),
-                    api_secret=os.getenv("DATACONTRACT_KAFKA_SASL_PASSWORD", ""),
-                    schema_registry_api_key=os.getenv("CONFLUENT_SCHEMA_REGISTRY_API_KEY", ""),
-                    schema_registry_api_secret=os.getenv("CONFLUENT_SCHEMA_REGISTRY_API_SECRET", ""),
-                    client_id=os.getenv("CONFLUENT_KAFKA_CLIENT_ID", ""),
+                    bootstrap_servers=env("DATACONTRACT_KAFKA_BOOTSTRAP_SERVERS", "localhost:9092") or "localhost:9092",
+                    schema_registry_url=env("CONFLUENT_SCHEMA_REGISTRY_URL", "http://localhost:8081")
+                    or "http://localhost:8081",
+                    topic=env("DATACONTRACT_KAFKA_TOPIC", "rats.jobs.listing.v1") or "rats.jobs.listing.v1",
+                    api_key=env("DATACONTRACT_KAFKA_SASL_USERNAME", "") or "",
+                    api_secret=env("DATACONTRACT_KAFKA_SASL_PASSWORD", "") or "",
+                    schema_registry_api_key=env("CONFLUENT_SCHEMA_REGISTRY_API_KEY", "") or "",
+                    schema_registry_api_secret=env("CONFLUENT_SCHEMA_REGISTRY_API_SECRET", "") or "",
+                    client_id=env("CONFLUENT_KAFKA_CLIENT_ID", "") or "",
                 ),
                 **kwargs,
             )
