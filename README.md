@@ -26,11 +26,27 @@ Reversed ATS platform, a platform for analyzing job market trends, predicting sa
 
 - [Platform Features](#platform-features)
 - [Table of Contents](#table-of-contents)
+- [Project Backlog](#project-backlog)
 - [Monorepo Structure](#monorepo-structure)
 - [How It Works](#how-it-works)
 - [Quick Start](#quick-start)
 - [Prerequisites](#prerequisites)
 - [Development](#development)
+
+## Project Backlog
+
+📋 **Want to contribute?** Check out our comprehensive project backlog!
+
+- **[BACKLOG_SUMMARY.md](./BACKLOG_SUMMARY.md)** - Quick overview of all 15 issues with sprint planning
+- **[BACKLOG.md](./BACKLOG.md)** - Detailed backlog with requirements and acceptance criteria
+- **[ISSUE_TEMPLATES.md](./ISSUE_TEMPLATES.md)** - Ready-to-copy templates for creating GitHub issues
+- **[Project Board](https://github.com/users/thangbuiq/projects/2)** - Track progress and manage issues
+
+The backlog includes 15 well-documented issues covering:
+- 🔴 Core infrastructure (Kafka consumer, dbt models, ML pipeline)
+- 🟡 Enhanced features (Dashboard, NER skills extraction, testing)
+- 🟢 Security & performance (Auth, rate limiting, monitoring)
+- 🔵 Nice-to-have features (Exports, real-time updates)
 
 ## Monorepo Structure
 
