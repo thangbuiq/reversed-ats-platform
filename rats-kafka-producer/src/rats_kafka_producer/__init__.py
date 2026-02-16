@@ -1,6 +1,6 @@
 """Public interface for the RATS Kafka producer package."""
 
-__version__ = "0.1.0"
+__version__ = "0.1.5"
 __author__ = "RATS Team"
 
 from rats_kafka_producer.config.settings import ScraperConfig

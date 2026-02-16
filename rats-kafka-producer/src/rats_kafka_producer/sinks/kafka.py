@@ -8,7 +8,6 @@ from confluent_kafka.admin import AdminClient, NewTopic
 from confluent_kafka.schema_registry import SchemaRegistryClient
 from confluent_kafka.schema_registry.avro import AvroSerializer
 from confluent_kafka.serialization import MessageField, SerializationContext
-from loguru import logger
 from tenacity import (
     before_sleep_log,
     retry,
@@ -20,6 +19,7 @@ from tenacity import (
 from rats_kafka_producer.config.models import JobListing
 from rats_kafka_producer.config.schema import get_job_listing_schema
 from rats_kafka_producer.config.settings import ScraperConfig
+from rats_kafka_producer.config.utils import logger
 
 
 class KafkaJobProducer:

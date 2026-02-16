@@ -6,17 +6,20 @@
     {
       "name": "job_id",
       "doc": "Unique job identifier",
-      "type": ["null", "string"]
+      "type": ["null", "string"],
+      "default": null
     },
     {
       "name": "site",
       "doc": "Job board site name",
-      "type": ["null", "string"]
+      "type": ["null", "string"],
+      "default": null
     },
     {
       "name": "search_term",
       "doc": "Search term used to find this job",
-      "type": ["null", "string"]
+      "type": ["null", "string"],
+      "default": null
     },
     {
       "name": "job",
@@ -27,9 +30,76 @@
           "type": "record",
           "name": "job",
           "doc": "Primary job listing details",
-          "fields": []
+          "fields": [
+            {
+              "name": "job_url",
+              "type": ["null", "string"],
+              "default": null
+            },
+            {
+              "name": "job_url_direct",
+              "type": ["null", "string"],
+              "default": null
+            },
+            {
+              "name": "title",
+              "type": ["null", "string"],
+              "default": null
+            },
+            {
+              "name": "company",
+              "type": ["null", "string"],
+              "default": null
+            },
+            {
+              "name": "location",
+              "type": ["null", "string"],
+              "default": null
+            },
+            {
+              "name": "job_type",
+              "type": ["null", "string"],
+              "default": null
+            },
+            {
+              "name": "date_posted",
+              "type": ["null", "string"],
+              "default": null
+            },
+            {
+              "name": "is_remote",
+              "type": ["null", "boolean"],
+              "default": null
+            },
+            {
+              "name": "job_level",
+              "type": ["null", "string"],
+              "default": null
+            },
+            {
+              "name": "job_function",
+              "type": ["null", "string"],
+              "default": null
+            },
+            {
+              "name": "listing_type",
+              "type": ["null", "string"],
+              "default": null
+            },
+            {
+              "name": "emails",
+              "type": ["null", "string"],
+              "default": null
+            },
+            {
+              "name": "description",
+              "type": ["null", "string"],
+              "default": null
+            }
+          ]
         }
-      ]
+      ],
+      "default": null
     },
     {
       "name": "compensation",
@@ -40,9 +110,31 @@
           "type": "record",
           "name": "compensation",
           "doc": "Compensation details",
-          "fields": []
+          "fields": [
+            {
+              "name": "interval",
+              "type": ["null", "string"],
+              "default": null
+            },
+            {
+              "name": "min_amount",
+              "type": ["null", "double"],
+              "default": null
+            },
+            {
+              "name": "max_amount",
+              "type": ["null", "double"],
+              "default": null
+            },
+            {
+              "name": "currency",
+              "type": ["null", "string"],
+              "default": null
+            }
+          ]
         }
-      ]
+      ],
+      "default": null
     },
     {
       "name": "company_details",
@@ -53,9 +145,66 @@
           "type": "record",
           "name": "company_details",
           "doc": "Company details",
-          "fields": []
+          "fields": [
+            {
+              "name": "company_industry",
+              "type": ["null", "string"],
+              "default": null
+            },
+            {
+              "name": "company_url",
+              "type": ["null", "string"],
+              "default": null
+            },
+            {
+              "name": "company_url_direct",
+              "type": ["null", "string"],
+              "default": null
+            },
+            {
+              "name": "company_addresses",
+              "type": ["null", "string"],
+              "default": null
+            },
+            {
+              "name": "company_num_employees",
+              "type": ["null", "int"],
+              "default": null
+            },
+            {
+              "name": "company_revenue",
+              "type": ["null", "string"],
+              "default": null
+            },
+            {
+              "name": "company_description",
+              "type": ["null", "string"],
+              "default": null
+            },
+            {
+              "name": "logo_photo_url",
+              "type": ["null", "string"],
+              "default": null
+            },
+            {
+              "name": "banner_photo_url",
+              "type": ["null", "string"],
+              "default": null
+            },
+            {
+              "name": "ceo_name",
+              "type": ["null", "string"],
+              "default": null
+            },
+            {
+              "name": "ceo_photo_url",
+              "type": ["null", "string"],
+              "default": null
+            }
+          ]
         }
-      ]
+      ],
+      "default": null
     }
   ]
 }

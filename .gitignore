@@ -1,6 +1,7 @@
 # User-specific files
 logs/
 rats-dagster-app/requirements.txt
+targets.yml
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

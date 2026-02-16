@@ -1,8 +1,8 @@
 [project]
 name = "rats_kafka_producer"
-version = "0.1.0"
+version = "0.1.5"
 description = "A Kafka producer for RATS job scraper."
-requires-python = ">=3.12, <3.13"
+requires-python = ">=3.11, <3.13"
 readme = "README.md"
 dependencies = [
     # Data Processing
@@ -16,17 +16,15 @@ dependencies = [
     "pydantic>=2.5.0",
     "pydantic-settings>=2.12.0",
     "typer>=0.12.3",
+    "rich>=13.0.0",
     # JobSpy
     "python-jobspy>=1.1.82",
     # Kafka
     "confluent-kafka[avro,schemaregistry]>=2.13.0",
-    "datacontract-cli[all]>=0.10.16",
-    "datacontract-cli[kafka]>=0.10.16",
-    "datacontract-cli[s3]>=0.10.16",
 ]
 
 [project.scripts]
-rats-kafka-producer = "rats_kafka_producer.cli:app"
+rats-kafka-producer = "rats_kafka_producer.cli:main"
 rats-kafka-producer-datacontract = "rats_kafka_producer.datacontract.validate:main"
 
 [project.optional-dependencies]
@@ -35,9 +33,9 @@ dev = [
     "pytest>=7.4.0",
 ]
 datacontract = [
-    # DataContract validation script dependencies
+    # DataContract validation command dependencies
+    "datacontract-cli[all]>=0.10.16",
     "pyspark>=3.5.0",
-    "rich>=13.0.0",
 ]
 
 

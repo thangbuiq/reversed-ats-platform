@@ -1,7 +1,6 @@
 """LinkedIn scraper implementation powered by JobSpy."""
 
 from jobspy import scrape_jobs
-from loguru import logger
 from tenacity import (
     before_sleep_log,
     retry,
@@ -12,6 +11,7 @@ from tenacity import (
 
 from rats_kafka_producer.config.models import JobListing
 from rats_kafka_producer.config.settings import ScraperConfig
+from rats_kafka_producer.config.utils import logger
 
 UNSET = object()
 

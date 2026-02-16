@@ -1,0 +1,60 @@
+resources:
+  jobs:
+    rats_kafka_producer_daily:
+      name: rats-kafka-producer-daily-${bundle.target}
+      max_concurrent_runs: 1
+
+      schedule:
+        quartz_cron_expression: ${var.daily_quartz_cron}
+        timezone_id: ${var.schedule_timezone}
+        pause_status: ${var.schedule_pause_status}
+
+      tasks:
+        - task_key: produce_linkedin_jobs
+          python_wheel_task:
+            package_name: rats_kafka_producer
+            entry_point: rats-kafka-producer
+            parameters:
+              - run
+              - --job-location
+              - ${var.job_location}
+              - --results-wanted
+              - ${var.results_wanted}
+              - --hours-old
+              - ${var.hours_old}
+              - --site-names
+              - ${var.site_names}
+              - --search-terms
+              - ${var.search_terms}
+              - --linkedin-fetch-description
+              - ${var.linkedin_fetch_description}
+              - --log-level
+              - ${var.log_level}
+              - --datacontract-kafka-bootstrap-servers
+              - ${var.datacontract_kafka_bootstrap_servers}
+              - --datacontract-kafka-sasl-username
+              - ${var.datacontract_kafka_sasl_username}
+              - --datacontract-kafka-sasl-password
+              - ${var.datacontract_kafka_sasl_password}
+              - --datacontract-kafka-topic
+              - ${var.datacontract_kafka_topic}
+              - --confluent-schema-registry-url
+              - ${var.confluent_schema_registry_url}
+              - --confluent-schema-registry-api-key
+              - ${var.confluent_schema_registry_api_key}
+              - --confluent-schema-registry-api-secret
+              - ${var.confluent_schema_registry_api_secret}
+              - --confluent-kafka-client-id
+              - ${var.confluent_kafka_client_id}
+          environment_key: default
+
+      environments:
+        - environment_key: default
+          spec:
+            environment_version: "2"
+            dependencies:
+              - ../dist/*.whl
+
+      tags:
+        service: rats-kafka-producer
+        managed-by: databricks-asset-bundles

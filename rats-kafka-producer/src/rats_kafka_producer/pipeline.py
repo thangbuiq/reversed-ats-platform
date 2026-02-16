@@ -1,9 +1,8 @@
 """Pipeline orchestration for scraping jobs and publishing to Kafka."""
 
-from loguru import logger
-
 from rats_kafka_producer.config.models import PipelineStats, ScrapeProducerResult
 from rats_kafka_producer.config.settings import ScraperConfig
+from rats_kafka_producer.config.utils import logger
 from rats_kafka_producer.sinks.kafka import KafkaJobProducer
 from rats_kafka_producer.sources.linkedin import JobSpyScraper
 
