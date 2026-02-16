@@ -54,15 +54,21 @@ jobs:
             "site_names": "linkedin",
             "search_terms": "[\"Data Engineer\",\"ML Engineer\", \"Data Scientist\", \"Software Engineer\", \"Data Analyst\"]",
             "datacontract_kafka_topic": "rats.jobs.listing.v1",
-            "datacontract_kafka_bootstrap_servers": "{{ env.KAFKA_BOOTSTRAP_SERVERS }}",
+            "datacontract_kafka_bootstrap_servers": "${{ env.KAFKA_BOOTSTRAP_SERVERS }}",
             "datacontract_kafka_sasl_username": "{{secrets/rats-prod/kafka-api-key}}",
             "datacontract_kafka_sasl_password": "{{secrets/rats-prod/kafka-api-secret}}",
-            "confluent_schema_registry_url": "{{ env.CONFLUENT_SCHEMA_REGISTRY_URL }}",
+            "confluent_schema_registry_url": "${{ env.CONFLUENT_SCHEMA_REGISTRY_URL }}",
             "confluent_schema_registry_api_key": "{{secrets/rats-prod/schema-api-key}}",
             "confluent_schema_registry_api_secret": "{{secrets/rats-prod/schema-api-secret}}",
-            "confluent_kafka_client_id": {{ env.KAFKA_CLIENT_ID }}
+            "confluent_kafka_client_id": ${{ env.KAFKA_CLIENT_ID }}
           }
           JSON
+          cat > rats-kafka-producer/targets.yml <<'YAML'
+          targets:
+            prod:
+              workspace:
+                host: ${{ env.DATABRICKS_HOST }}
+          YAML
 
       - name: Validate bundle
         run: |
