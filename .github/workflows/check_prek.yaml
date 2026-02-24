@@ -9,14 +9,24 @@ jobs:
   prek:
     name: Run Checks
     runs-on: ubuntu-latest
+    env:
+      DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
+      DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v4
 
       - name: Setup uv
         uses: astral-sh/setup-uv@v7
         with:
           enable-cache: true
 
-      - uses: j178/prek-action@v1
-        with:
-          extra-args: "--all-files"
+      - name: Setup dbt profile from template
+        run: |
+          mkdir -p ~/.dbt
+          cp rats-dbt-transformer/profiles.yml.example ~/.dbt/profiles.yml
+
+      - name: Install prek
+        run: uv tool install prek
+
+      - name: Run prek checks
+        run: prek run --all-files
