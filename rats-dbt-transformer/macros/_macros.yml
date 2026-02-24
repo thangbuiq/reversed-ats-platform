@@ -1,0 +1,5 @@
+version: 2
+
+macros:
+  - name: generate_schema_name
+    description: "Overrides dbt schema generation to always use the active target schema."

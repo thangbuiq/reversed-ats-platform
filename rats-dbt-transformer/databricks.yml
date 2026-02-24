@@ -1,0 +1,43 @@
+bundle:
+  name: rats-dbt-transformer
+
+include:
+  - deploy/databricks/resources/*.yml
+
+variables:
+  dbt_job_name:
+    description: "Databricks Workflow name."
+    default: "rats-dbt-transformer"
+  dbt_select:
+    description: "dbt selection syntax for scheduled build."
+    default: "+linkedin_jobs"
+  quartz_cron_expression:
+    description: "Quartz cron expression for schedule (1h30 after producer runs)."
+    default: "0 30 3,9,15 * * ?"
+  timezone_id:
+    description: "Timezone for cron schedule."
+    default: "UTC"
+  pause_status:
+    description: "UNPAUSED or PAUSED."
+    default: "UNPAUSED"
+  dbt_catalog:
+    description: "Target catalog for dbt output."
+    default: "workspace"
+  dbt_schema:
+    description: "Target schema for dbt output."
+    default: "analytical_layer"
+  dbt_host:
+    description: "Databricks workspace host URL used by dbt profile."
+    default: "https://dbc-<workspace>.cloud.databricks.com"
+  dbt_http_path:
+    description: "Databricks SQL warehouse HTTP path used by dbt profile."
+    default: "/sql/1.0/warehouses/<warehouse-id>"
+  dbt_token:
+    description: "Databricks token or secret reference used by dbt profile."
+    default: "{{secrets/<scope>/<key>}}"
+
+targets:
+  prod:
+    mode: production
+    workspace:
+      root_path: /Workspace/Users/${workspace.current_user.userName}/.bundle/${bundle.name}/${bundle.target}

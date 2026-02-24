@@ -53,7 +53,7 @@ variables:
     default: rats-kafka-producer-databricks
   daily_quartz_cron:
     description: Quartz cron expression for the daily schedule.
-    default: "0 0 2,8,14 * * ?" # 3 times daily at 9AM, 3PM, 9PM GMT+7, originally UTC timezone
+    default: "0 0 2,8,14 * * ?" # 3 times daily at 02:00, 08:00, 14:00 UTC
   schedule_timezone:
     description: Timezone used for scheduling.
     default: UTC

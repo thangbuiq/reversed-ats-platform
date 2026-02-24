@@ -1,0 +1,24 @@
+version: 2
+
+models:
+  - name: stg_linkedin__jobs_posting
+    description: "Type-preserving staging passthrough of raw LinkedIn bronze job records."
+    columns:
+      - name: part_date
+        description: "Ingestion partition date propagated from the source table."
+        tests:
+          - not_null
+      - name: kafka_event_id
+        description: "Unique event identifier from Kafka metadata."
+      - name: kafka_timestamp
+        description: "Kafka event timestamp used for recency-aware deduplication."
+      - name: kafka_headers
+        description: "Kafka headers captured with the original message."
+      - name: kafka_payload
+        description: "Raw nested payload containing job and company fields."
+      - name: kafka_topic
+        description: "Kafka topic where the raw record was produced."
+      - name: kafka_offset
+        description: "Kafka message offset within the topic partition."
+      - name: kafka_partition
+        description: "Kafka partition number for the message."

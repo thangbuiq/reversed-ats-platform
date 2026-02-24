@@ -1,0 +1,51 @@
+version: 2
+
+models:
+  - name: linkedin_jobs
+    description: "Analytics-ready LinkedIn jobs mart with curated dimensions and job content."
+    columns:
+      - name: part_date
+        description: "Physical partition key and primary date slice for analytics."
+        tests:
+          - not_null
+      - name: job_snapshot_id
+        description: "Unique row key at the mart grain."
+        tests:
+          - not_null
+          - unique
+      - name: job_id
+        description: "Logical job identifier from the source payload."
+        tests:
+          - not_null
+      - name: site
+        description: "Crawler source site label."
+      - name: search_term
+        description: "Search term used to discover the job posting."
+      - name: company_name
+        description: "Hiring company name."
+      - name: company_industry
+        description: "Industry classification for the company."
+      - name: location
+        description: "Job location text."
+      - name: is_remote
+        description: "Boolean indicator for remote eligibility."
+      - name: job_title
+        description: "Job title for the posting."
+      - name: job_type
+        description: "Employment type category."
+      - name: job_level
+        description: "Seniority level of the role."
+      - name: job_function
+        description: "Functional role category."
+      - name: date_posted
+        description: "Date when the job was posted."
+      - name: job_description
+        description: "Normalized job description text."
+      - name: job_url
+        description: "Canonical URL of the job posting."
+      - name: job_url_direct
+        description: "Direct destination URL for the job posting."
+      - name: company_url
+        description: "Company profile or website URL."
+      - name: inserted_at
+        description: "Kafka ingestion timestamp of the source event."

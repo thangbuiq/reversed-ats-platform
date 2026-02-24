@@ -1,0 +1,91 @@
+version: 2
+
+models:
+  - name: int_linkedin__jobs_posting
+    description: "Deduplicated LinkedIn jobs model with normalized job, compensation, and company attributes."
+    columns:
+      - name: job_snapshot_id
+        description: "Deterministic surrogate key built from job_id and part_date."
+        tests:
+          - not_null
+          - unique
+      - name: part_date
+        description: "Ingestion partition date used for model partitioning."
+        tests:
+          - not_null
+      - name: kafka_event_id
+        description: "Kafka event identifier cast to string for consistency."
+      - name: kafka_timestamp
+        description: "Kafka event timestamp cast to timestamp type."
+      - name: kafka_topic
+        description: "Kafka topic name associated with the source message."
+      - name: kafka_partition
+        description: "Kafka partition identifier as integer."
+      - name: kafka_offset
+        description: "Kafka offset as bigint for deterministic ordering."
+      - name: site
+        description: "Crawler source site label from the ingestion payload."
+      - name: search_term
+        description: "Search keyword used when collecting the job posting."
+      - name: job_id
+        description: "Source-system logical job identifier from the payload."
+        tests:
+          - not_null
+      - name: job_url
+        description: "Canonical job posting URL."
+      - name: job_url_direct
+        description: "Direct destination URL to the job posting when available."
+      - name: job_title
+        description: "Job title extracted from the posting."
+      - name: company_name
+        description: "Company name as presented in the job posting."
+      - name: location
+        description: "Job location text from the posting."
+      - name: job_type
+        description: "Employment type classification such as full-time or contract."
+      - name: date_posted
+        description: "Posting date parsed from the source job metadata."
+      - name: is_remote
+        description: "Boolean flag indicating whether the role is remote."
+      - name: job_level
+        description: "Seniority level associated with the role."
+      - name: job_function
+        description: "Functional role family classification."
+      - name: listing_type
+        description: "Listing type metadata provided by the source."
+      - name: emails
+        description: "Email contacts detected in the job posting."
+      - name: description
+        description: "Full textual job description content."
+      - name: compensation_interval
+        description: "Compensation interval unit such as yearly or hourly."
+      - name: salary_min_amount
+        description: "Minimum salary value from compensation metadata."
+      - name: salary_max_amount
+        description: "Maximum salary value from compensation metadata."
+      - name: salary_mid_amount
+        description: "Midpoint salary derived from min and max salary values."
+      - name: salary_currency
+        description: "Currency code for salary amounts."
+      - name: company_industry
+        description: "Industry category of the hiring company."
+      - name: company_url
+        description: "Company profile URL from source metadata."
+      - name: company_url_direct
+        description: "Direct company website URL when provided."
+      - name: company_addresses
+        description: "Serialized list of company addresses."
+      - name: company_num_employees
+        description: "Reported company employee count."
+      - name: company_revenue
+        description: "Company revenue band or value as provided in source."
+      - name: company_description
+        description: "Company description text from profile metadata."
+      - name: logo_photo_url
+        description: "URL to the company logo image."
+      - name: banner_photo_url
+        description: "URL to the company banner image."
+      - name: ceo_name
+        description: "Chief executive officer name from company metadata."
+      - name: ceo_photo_url
+        description: "URL to the CEO profile photo."
