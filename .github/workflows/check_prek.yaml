@@ -22,8 +22,7 @@ jobs:
 
       - name: Setup dbt profile from template
         run: |
-          mkdir -p ~/.dbt
-          cp rats-dbt-transformer/profiles.yml.example ~/.dbt/profiles.yml
+          cp rats-dbt-transformer/profiles.yml.example rats-dbt-transformer/profiles.yml
 
       - name: Install prek
         run: uv tool install prek
