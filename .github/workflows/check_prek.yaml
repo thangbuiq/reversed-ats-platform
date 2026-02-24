@@ -12,6 +12,11 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+
       - uses: j178/prek-action@v1
         with:
           extra-args: "--all-files"
