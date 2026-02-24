@@ -1,0 +1,49 @@
+bundle:
+  name: rats-kafka-consumer
+
+include:
+  - resources/*.yml
+
+artifacts:
+  consumer_wheel:
+    type: whl
+    path: .
+    build: uv build --wheel
+
+variables:
+  datacontract_kafka_bootstrap_servers:
+    description: Confluent Kafka bootstrap servers.
+  datacontract_kafka_sasl_username:
+    description: Confluent Kafka API key.
+  datacontract_kafka_sasl_password:
+    description: Confluent Kafka API secret.
+  datacontract_kafka_sasl_mechanism:
+    description: Kafka SASL mechanism.
+    default: PLAIN
+  datacontract_kafka_topic:
+    description: Kafka topic name.
+    default: rats.jobs.listing.v1
+  confluent_schema_registry_url:
+    description: Confluent Schema Registry URL.
+  confluent_schema_registry_api_key:
+    description: Schema Registry API key.
+  confluent_schema_registry_api_secret:
+    description: Schema Registry API secret.
+  checkpoint_base_path:
+    description: Unity Catalog Volume path for streaming checkpoints.
+    default: /Volumes/workspace/bronze_layer/spark_streaming_checkpoints
+  daily_quartz_cron:
+    description: Quartz cron expression for schedule.
+    default: "0 */30 * * * ?" # every 30 minutes in UTC
+  schedule_timezone:
+    description: Timezone used for scheduling.
+    default: UTC
+  schedule_pause_status:
+    description: Set to PAUSED to deploy without activating the schedule.
+    default: UNPAUSED
+
+targets:
+  prod:
+    mode: production
+    workspace:
+      root_path: /Users/${workspace.current_user.userName}/.bundle/${bundle.name}/${bundle.target}
