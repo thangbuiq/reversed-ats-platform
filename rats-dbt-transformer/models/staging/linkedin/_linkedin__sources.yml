@@ -1,0 +1,27 @@
+version: 2
+
+sources:
+  - name: linkedin
+    description: "Raw LinkedIn data loaded into Databricks."
+    database: "{{ env_var('DATABRICKS_CATALOG', 'workspace') }}"
+    schema: "{{ env_var('DBT_LINKEDIN_SOURCE_SCHEMA', 'bronze_layer') }}"
+    tables:
+      - name: rats_jobs_listing_v1
+        description: "Raw job posting records."
+        columns:
+          - name: part_date
+            description: "Ingestion partition date derived from pipeline processing time."
+          - name: kafka_event_id
+            description: "Unique Kafka event identifier attached by the producer."
+          - name: kafka_timestamp
+            description: "Kafka message timestamp at event ingestion time."
+          - name: kafka_headers
+            description: "Kafka message headers serialized in the raw bronze record."
+          - name: kafka_payload
+            description: "Nested JSON payload containing crawled job and company attributes."
+          - name: kafka_topic
+            description: "Kafka topic name where the job record was published."
+          - name: kafka_offset
+            description: "Kafka offset for ordering events within a partition."
+          - name: kafka_partition
+            description: "Kafka partition number for the published message."

@@ -6,20 +6,20 @@ Reversed ATS platform, a platform for analyzing job market trends, predicting sa
 
 </div>
 
-<div align="center">
-<a href="https://github.com/thangbuiq/reversed-ats-platform/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-Apache%202.0-blue.svg" alt="License"/></a>
-<a href="https://github.com/thangbuiq/reversed-ats-platform/releases"><img src="https://img.shields.io/github/v/release/thangbuiq/reversed-ats-platform" alt="latest release version"/></a>
-</div>
-
-<p align="center">
-  <img src="https://repobeats.axiom.co/api/embed/ee98e46bc2a349af73f7be4965defbc12093b7b0.svg" alt="stats"/>
-</p>
+[![Databricks](https://img.shields.io/badge/Databricks-Connect-FF3621?style=for-the-badge&logo=databricks)](https://databricks.com)
+[![PySpark](https://img.shields.io/badge/PySpark-4.0+-E25A1C?style=for-the-badge&logo=apachespark)](https://spark.apache.org/)
+[![Confluent Cloud](https://img.shields.io/badge/Confluent%20Cloud-Producer%20%26%20Consumer-0052CC?style=for-the-badge&logo=apachekafka)](https://www.confluent.io/confluent-cloud/)
 
 ## Platform Features
 
+In development, the RATS platform includes the following key features:
+
 - Real-time Job Data Crawling: Automated daily scraping from LinkedIn.
-- Salary Prediction: ML models to predict salaries based on skills, location, and experience using data from Glassdoor.
 - Job-Resume Matching: Smart matching system using NLP and embeddings.
+
+Planned features include:
+
+- Salary Prediction: ML models to predict salaries based on skills, location, and experience using data from Glassdoor or other Vietnamese job platforms like 1900.com.vn...
 - Tech Stack Extraction: NER-based automatic skill extraction from job descriptions.
 
 ## Table of Contents
@@ -44,73 +44,122 @@ The monorepo is organized into the following key components:
 - [rats-dbt-transformer](./rats-dbt-transformer): dbt models for transforming raw data into analysis-ready datasets
 - [rats-kafka-consumer](./rats-kafka-consumer): Spark Streaming application for consuming and preprocessing data from Kafka
 - [rats-kafka-producer](./rats-kafka-producer): Data contract definitions and producer application for sending crawled data to Kafka
-- [rats-model-serving](./rats-model-serving): FastAPI application for serving trained ML models and providing prediction APIs for web application
+- [rats-model-serving](./rats-model-serving): FastAPI application for serving models and providing prediction APIs
 - [rats-model-training](./rats-model-training): Scripts and notebooks for training ML models
 
 ## Architecture Overview
 
-![Dataflow Diagram](./assets/docs/images/dfd.excalidraw.png)
+- Data Flow Diagram:
+
+  ![Dataflow Diagram](./assets/docs/images/dfd.excalidraw.png)
+
+- Data Lineage:
+
+  ```text
+  LinkedIn Crawler & Producer --> Confluent Cloud Kafka (rats.jobs.listing.v1)
+                                                    |
+                                                    |
+                                                    v
+                                  bronze_layer.rats_jobs_listing_v1 (Delta)
+                                                    |
+                                                    |
+                                                    v
+  Downstream Analytics & Apps <-- analytical_layer.linkedin_jobs (Iceberg)
+  ```
 
 ## Process Showcase
 
 - Producer pipeline output (crawl and send to Confluent Cloud Kafka):
 
-![Producer Output](./assets/docs/images/showcase/producer.png)
+  ![Producer Output](./assets/docs/images/showcase/producer.png)
+
+  ![Producer Kafka Topic](./assets/docs/images/showcase/kafka_confluent.png)
 
 - Consumer Delta output (consume from Kafka, preprocess, and write to Delta Lake):
 
-![Consumer Delta Output](./assets/docs/images/showcase/consumed_table.png)
+  ![Consumer Delta Output](./assets/docs/images/showcase/consumed_table.png)
+
+- dbt transformation output (transform raw Delta data into analysis-ready Iceberg tables):
+
+  ![dbt Transformation Output](./assets/docs/images/showcase/transformed_table.png)
 
 ## Output Schema
 
-```text
-root
- |-- kafka_event_id: string (nullable = true)
- |-- kafka_timestamp: string (nullable = true)
- |-- part_date: string (nullable = true)
- |-- kafka_headers: array (nullable = true)
- |    |-- element: struct (containsNull = true)
- |    |    |-- key: string (nullable = true)
- |    |    |-- value: binary (nullable = true)
- |-- kafka_payload: struct (nullable = true)
- |    |-- job_id: string (nullable = true)
- |    |-- site: string (nullable = true)
- |    |-- search_term: string (nullable = true)
- |    |-- job: struct (nullable = true)
- |    |    |-- job_url: string (nullable = true)
- |    |    |-- job_url_direct: string (nullable = true)
- |    |    |-- title: string (nullable = true)
- |    |    |-- company: string (nullable = true)
- |    |    |-- location: string (nullable = true)
- |    |    |-- job_type: string (nullable = true)
- |    |    |-- date_posted: string (nullable = true)
- |    |    |-- is_remote: boolean (nullable = true)
- |    |    |-- job_level: string (nullable = true)
- |    |    |-- job_function: string (nullable = true)
- |    |    |-- listing_type: string (nullable = true)
- |    |    |-- emails: string (nullable = true)
- |    |    |-- description: string (nullable = true)
- |    |-- compensation: struct (nullable = true)
- |    |    |-- interval: string (nullable = true)
- |    |    |-- min_amount: double (nullable = true)
- |    |    |-- max_amount: double (nullable = true)
- |    |    |-- currency: string (nullable = true)
- |    |-- company_details: struct (nullable = true)
- |    |    |-- company_industry: string (nullable = true)
- |    |    |-- company_url: string (nullable = true)
- |    |    |-- company_url_direct: string (nullable = true)
- |    |    |-- company_addresses: string (nullable = true)
- |    |    |-- company_num_employees: integer (nullable = true)
- |    |    |-- company_revenue: string (nullable = true)
- |    |    |-- company_description: string (nullable = true)
- |    |    |-- logo_photo_url: string (nullable = true)
- |    |    |-- banner_photo_url: string (nullable = true)
- |    |    |-- ceo_name: string (nullable = true)
- |    |    |-- ceo_photo_url: string (nullable = true)
- |-- kafka_topic: string (nullable = true)
- |-- kafka_offset: long (nullable = true)
- |-- kafka_partition: integer (nullable = true)
-```
+- Raw data output schema after consuming from Kafka and writing to Delta Lake:
+
+  ```text
+  root
+  |-- kafka_event_id: string (nullable = true)
+  |-- kafka_timestamp: string (nullable = true)
+  |-- part_date: string (nullable = true)
+  |-- kafka_headers: array (nullable = true)
+  |    |-- element: struct (containsNull = true)
+  |    |    |-- key: string (nullable = true)
+  |    |    |-- value: binary (nullable = true)
+  |-- kafka_payload: struct (nullable = true)
+  |    |-- job_id: string (nullable = true)
+  |    |-- site: string (nullable = true)
+  |    |-- search_term: string (nullable = true)
+  |    |-- job: struct (nullable = true)
+  |    |    |-- job_url: string (nullable = true)
+  |    |    |-- job_url_direct: string (nullable = true)
+  |    |    |-- title: string (nullable = true)
+  |    |    |-- company: string (nullable = true)
+  |    |    |-- location: string (nullable = true)
+  |    |    |-- job_type: string (nullable = true)
+  |    |    |-- date_posted: string (nullable = true)
+  |    |    |-- is_remote: boolean (nullable = true)
+  |    |    |-- job_level: string (nullable = true)
+  |    |    |-- job_function: string (nullable = true)
+  |    |    |-- listing_type: string (nullable = true)
+  |    |    |-- emails: string (nullable = true)
+  |    |    |-- description: string (nullable = true)
+  |    |-- compensation: struct (nullable = true)
+  |    |    |-- interval: string (nullable = true)
+  |    |    |-- min_amount: double (nullable = true)
+  |    |    |-- max_amount: double (nullable = true)
+  |    |    |-- currency: string (nullable = true)
+  |    |-- company_details: struct (nullable = true)
+  |    |    |-- company_industry: string (nullable = true)
+  |    |    |-- company_url: string (nullable = true)
+  |    |    |-- company_url_direct: string (nullable = true)
+  |    |    |-- company_addresses: string (nullable = true)
+  |    |    |-- company_num_employees: integer (nullable = true)
+  |    |    |-- company_revenue: string (nullable = true)
+  |    |    |-- company_description: string (nullable = true)
+  |    |    |-- logo_photo_url: string (nullable = true)
+  |    |    |-- banner_photo_url: string (nullable = true)
+  |    |    |-- ceo_name: string (nullable = true)
+  |    |    |-- ceo_photo_url: string (nullable = true)
+  |-- kafka_topic: string (nullable = true)
+  |-- kafka_offset: long (nullable = true)
+  |-- kafka_partition: integer (nullable = true)
+  ```
+
+- Transformed data schema after applying dbt transformations:
+
+  ```text
+  root
+  |-- part_date: date (nullable = true)
+  |-- job_snapshot_id: string (nullable = true)
+  |-- job_id: string (nullable = true)
+  |-- site: string (nullable = true)
+  |-- search_term: string (nullable = true)
+  |-- company_name: string (nullable = true)
+  |-- company_industry: string (nullable = true)
+  |-- company_url: string (nullable = true)
+  |-- location: string (nullable = true)
+  |-- is_remote: boolean (nullable = true)
+  |-- date_posted: date (nullable = true)
+  |-- job_title: string (nullable = true)
+  |-- job_type: string (nullable = true)
+  |-- job_level: string (nullable = true)
+  |-- job_function: string (nullable = true)
+  |-- job_description: string (nullable = true)
+  |-- job_url: string (nullable = true)
+  |-- job_url_direct: string (nullable = true)
+  |-- inserted_at: timestamp (nullable = true)
+  ```
 
 ## Quick Start
 
@@ -138,7 +187,6 @@ cd reversed-ats-platform
 
 Before running the RATS platform, ensure you have the following prerequisites installed:
 
-- `docker`: [Install Docker](https://docs.docker.com/get-docker/)
 - `uv`: [Install uv](https://docs.astral.sh/uv/)
 - `just` (optional): [Install Just](https://github.com/casey/just)
 

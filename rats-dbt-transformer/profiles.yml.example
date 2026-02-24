@@ -1,0 +1,12 @@
+rats_dbt_transformer:
+  target: dev
+  outputs:
+    dev:
+      type: databricks
+      method: token
+      host: "{{ env_var('DATABRICKS_HOST', 'https://dbc-<workspace>.cloud.databricks.com') }}"
+      http_path: "{{ env_var('DATABRICKS_HTTP_PATH', '/sql/1.0/warehouses/<warehouse-id>') }}"
+      token: "{{ env_var('DATABRICKS_TOKEN', 'dapi<personal-access-token>') }}"
+      catalog: "{{ env_var('DATABRICKS_CATALOG', 'workspace') }}"
+      schema: "{{ env_var('DATABRICKS_SCHEMA', 'analytical_layer') }}"
+      threads: 4

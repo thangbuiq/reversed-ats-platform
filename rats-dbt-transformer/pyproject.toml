@@ -1,0 +1,8 @@
+[project]
+name = "rats-dbt-transformer"
+version = "0.1.0"
+requires-python = ">=3.12"
+dependencies = [
+    "dbt-core==1.11.5",
+    "dbt-databricks==1.11.5",
+]

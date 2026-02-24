@@ -1,0 +1,41 @@
+resources:
+  jobs:
+    dbt_transform_schedule:
+      name: ${var.dbt_job_name}-${bundle.target}
+      schedule:
+        quartz_cron_expression: ${var.quartz_cron_expression}
+        timezone_id: ${var.timezone_id}
+        pause_status: ${var.pause_status}
+      environments:
+        - environment_key: dbt_env
+          spec:
+            client: "2"
+            dependencies:
+              - dbt-core==1.11.5
+              - dbt-databricks==1.11.5
+      tasks:
+        - task_key: dbt_build
+          environment_key: dbt_env
+          spark_python_task:
+            python_file: ${workspace.file_path}/deploy/databricks/scripts/run_dbt.py
+            parameters:
+              - --project-dir
+              - ${workspace.file_path}
+              - --profiles-dir
+              - /tmp/dbt_profiles
+              - --catalog
+              - ${var.dbt_catalog}
+              - --schema
+              - ${var.dbt_schema}
+              - --host
+              - ${var.dbt_host}
+              - --http-path
+              - ${var.dbt_http_path}
+              - --token
+              - ${var.dbt_token}
+              - --select
+              - ${var.dbt_select}
+          timeout_seconds: 0
+          max_retries: 1
+          min_retry_interval_millis: 0
+          retry_on_timeout: false
