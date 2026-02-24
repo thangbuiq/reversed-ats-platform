@@ -27,7 +27,9 @@ Reversed ATS platform, a platform for analyzing job market trends, predicting sa
 - [Platform Features](#platform-features)
 - [Table of Contents](#table-of-contents)
 - [Monorepo Structure](#monorepo-structure)
-- [How It Works](#how-it-works)
+- [Architecture Overview](#architecture-overview)
+- [Process Showcase](#process-showcase)
+- [Output Schema](#output-schema)
 - [Quick Start](#quick-start)
 - [Prerequisites](#prerequisites)
 - [Development](#development)
@@ -42,12 +44,73 @@ The monorepo is organized into the following key components:
 - [rats-dbt-transformer](./rats-dbt-transformer): dbt models for transforming raw data into analysis-ready datasets
 - [rats-kafka-consumer](./rats-kafka-consumer): Spark Streaming application for consuming and preprocessing data from Kafka
 - [rats-kafka-producer](./rats-kafka-producer): Data contract definitions and producer application for sending crawled data to Kafka
-- [rats-model-serving](./rats-model-serving): FastAPI application for serving trained ML models
+- [rats-model-serving](./rats-model-serving): FastAPI application for serving trained ML models and providing prediction APIs for web application
 - [rats-model-training](./rats-model-training): Scripts and notebooks for training ML models
 
-## How It Works
+## Architecture Overview
 
 ![Dataflow Diagram](./assets/docs/images/dfd.excalidraw.png)
+
+## Process Showcase
+
+- Producer pipeline output (crawl and send to Confluent Cloud Kafka):
+
+![Producer Output](./assets/docs/images/showcase/producer.png)
+
+- Consumer Delta output (consume from Kafka, preprocess, and write to Delta Lake):
+
+![Consumer Delta Output](./assets/docs/images/showcase/consumed_table.png)
+
+## Output Schema
+
+```text
+root
+ |-- kafka_event_id: string (nullable = true)
+ |-- kafka_timestamp: string (nullable = true)
+ |-- part_date: string (nullable = true)
+ |-- kafka_headers: array (nullable = true)
+ |    |-- element: struct (containsNull = true)
+ |    |    |-- key: string (nullable = true)
+ |    |    |-- value: binary (nullable = true)
+ |-- kafka_payload: struct (nullable = true)
+ |    |-- job_id: string (nullable = true)
+ |    |-- site: string (nullable = true)
+ |    |-- search_term: string (nullable = true)
+ |    |-- job: struct (nullable = true)
+ |    |    |-- job_url: string (nullable = true)
+ |    |    |-- job_url_direct: string (nullable = true)
+ |    |    |-- title: string (nullable = true)
+ |    |    |-- company: string (nullable = true)
+ |    |    |-- location: string (nullable = true)
+ |    |    |-- job_type: string (nullable = true)
+ |    |    |-- date_posted: string (nullable = true)
+ |    |    |-- is_remote: boolean (nullable = true)
+ |    |    |-- job_level: string (nullable = true)
+ |    |    |-- job_function: string (nullable = true)
+ |    |    |-- listing_type: string (nullable = true)
+ |    |    |-- emails: string (nullable = true)
+ |    |    |-- description: string (nullable = true)
+ |    |-- compensation: struct (nullable = true)
+ |    |    |-- interval: string (nullable = true)
+ |    |    |-- min_amount: double (nullable = true)
+ |    |    |-- max_amount: double (nullable = true)
+ |    |    |-- currency: string (nullable = true)
+ |    |-- company_details: struct (nullable = true)
+ |    |    |-- company_industry: string (nullable = true)
+ |    |    |-- company_url: string (nullable = true)
+ |    |    |-- company_url_direct: string (nullable = true)
+ |    |    |-- company_addresses: string (nullable = true)
+ |    |    |-- company_num_employees: integer (nullable = true)
+ |    |    |-- company_revenue: string (nullable = true)
+ |    |    |-- company_description: string (nullable = true)
+ |    |    |-- logo_photo_url: string (nullable = true)
+ |    |    |-- banner_photo_url: string (nullable = true)
+ |    |    |-- ceo_name: string (nullable = true)
+ |    |    |-- ceo_photo_url: string (nullable = true)
+ |-- kafka_topic: string (nullable = true)
+ |-- kafka_offset: long (nullable = true)
+ |-- kafka_partition: integer (nullable = true)
+```
 
 ## Quick Start
 

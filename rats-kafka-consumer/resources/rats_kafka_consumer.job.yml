@@ -1,0 +1,49 @@
+resources:
+  jobs:
+    rats_kafka_consumer_confluent_to_delta:
+      name: rats-kafka-consumer-confluent-to-delta-${bundle.target}
+      max_concurrent_runs: 1
+
+      schedule:
+        quartz_cron_expression: ${var.daily_quartz_cron}
+        timezone_id: ${var.schedule_timezone}
+        pause_status: ${var.schedule_pause_status}
+
+      tasks:
+        - task_key: consume_confluent_to_delta
+          python_wheel_task:
+            package_name: databricks_confluent_streaming
+            entry_point: databricks-confluent-streaming
+            parameters:
+              - --job_name
+              - confluent_to_delta
+              - --datacontract_kafka_bootstrap_servers
+              - ${var.datacontract_kafka_bootstrap_servers}
+              - --datacontract_kafka_sasl_username
+              - ${var.datacontract_kafka_sasl_username}
+              - --datacontract_kafka_sasl_password
+              - ${var.datacontract_kafka_sasl_password}
+              - --datacontract_kafka_sasl_mechanism
+              - ${var.datacontract_kafka_sasl_mechanism}
+              - --datacontract_kafka_topic
+              - ${var.datacontract_kafka_topic}
+              - --confluent_schema_registry_url
+              - ${var.confluent_schema_registry_url}
+              - --confluent_schema_registry_api_key
+              - ${var.confluent_schema_registry_api_key}
+              - --confluent_schema_registry_api_secret
+              - ${var.confluent_schema_registry_api_secret}
+              - --checkpoint_base_path
+              - ${var.checkpoint_base_path}
+          environment_key: default
+
+      environments:
+        - environment_key: default
+          spec:
+            environment_version: "2"
+            dependencies:
+              - ../dist/*.whl
+
+      tags:
+        service: rats-kafka-consumer
+        managed-by: databricks-asset-bundles
