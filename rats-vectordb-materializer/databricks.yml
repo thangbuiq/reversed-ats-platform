@@ -1,0 +1,41 @@
+bundle:
+  name: rats-vectordb-materializer
+
+include:
+  - resources/*.yml
+
+artifacts:
+  materializer_wheel:
+    type: whl
+    path: .
+    build: uv build --wheel
+
+variables:
+  qdrant_url:
+    description: Qdrant Cloud cluster URL.
+  qdrant_api_key:
+    description: Qdrant Cloud API key.
+  databricks_table:
+    description: Source table for materialization.
+    default: analytical_layer.linkedin_jobs
+  batch_size:
+    description: Embedding + upsert batch size.
+    default: "128"
+  recreate_collection:
+    description: Whether to recreate the Qdrant collection on each run.
+    default: "true"
+  daily_quartz_cron:
+    description: Quartz cron expression for schedule.
+    default: "0 0 6 * * ?"  # daily at 06:00 UTC (after dbt jobs)
+  schedule_timezone:
+    description: Timezone used for scheduling.
+    default: UTC
+  schedule_pause_status:
+    description: Set to PAUSED to deploy without activating the schedule.
+    default: UNPAUSED
+
+targets:
+  prod:
+    mode: production
+    workspace:
+      root_path: /Users/${workspace.current_user.userName}/.bundle/${bundle.name}/${bundle.target}

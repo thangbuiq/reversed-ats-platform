@@ -10,6 +10,9 @@ format:
 produce:
 	@cd rats-kafka-producer && uv run python3 src/rats_kafka_producer/cli.py run
 
+api:
+	@cd rats-dashboard-api && uv run uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload
+
 contract:
 	@echo "Validating data contract..."
 	@cd rats-kafka-producer && uv run datacontract lint src/rats_kafka_producer/datacontract/contract/com/rats/jobs/rats.jobs.listing.v1.yaml
