@@ -1,0 +1,41 @@
+resources:
+  jobs:
+    rats_vectordb_materializer:
+      name: rats-vectordb-materializer-${bundle.target}
+      max_concurrent_runs: 1
+
+      schedule:
+        quartz_cron_expression: ${var.daily_quartz_cron}
+        timezone_id: ${var.schedule_timezone}
+        pause_status: ${var.schedule_pause_status}
+
+      tasks:
+        - task_key: materialize_to_qdrant
+          python_wheel_task:
+            package_name: rats_vectordb_materializer
+            entry_point: rats-vectordb-materializer
+            parameters:
+              - --job_name
+              - materialize_to_qdrant
+              - --qdrant_url
+              - ${var.qdrant_url}
+              - --qdrant_api_key
+              - ${var.qdrant_api_key}
+              - --databricks_table
+              - ${var.databricks_table}
+              - --batch_size
+              - ${var.batch_size}
+              - --recreate_collection
+              - ${var.recreate_collection}
+          environment_key: default
+
+      environments:
+        - environment_key: default
+          spec:
+            environment_version: "2"
+            dependencies:
+              - ../dist/*.whl
+
+      tags:
+        service: rats-vectordb-materializer
+        managed-by: databricks-asset-bundles

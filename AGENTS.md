@@ -4,12 +4,13 @@
 
 Reversed ATS platform is a platform for analyzing job market trends, predicting salaries, and matching candidate to jobs market using real-time data from LinkedIn. It includes components for data crawling, preprocessing, model training, and deployment, all orchestrated through a robust MLOps pipeline. The codebase is organized into the following key components:
 
+- [rats-dashboard-api](./rats-dashboard-api): FastAPI application for serving models and providing prediction APIs
 - [rats-dashboard-app](./rats-dashboard-app): Next.js application for visualizing job market insights
 - [rats-dbt-transformer](./rats-dbt-transformer): dbt models for transforming raw data into analysis-ready datasets
 - [rats-kafka-consumer](./rats-kafka-consumer): Spark Streaming application for consuming and preprocessing data from Kafka
 - [rats-kafka-producer](./rats-kafka-producer): Data contract definitions and producer application for sending crawled data to Kafka
-- [rats-model-serving](./rats-model-serving): FastAPI application for serving models and providing prediction APIs
 - [rats-model-training](./rats-model-training): Scripts and notebooks for training ML models
+- [rats-vectordb-materializer](./rats-vectordb-materializer): Databricks job to materialize analytical jobs into Qdrant vector database
 
 ## Code Style Guidelines
 

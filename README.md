@@ -6,9 +6,17 @@ Reversed ATS platform, a platform for analyzing job market trends, predicting sa
 
 </div>
 
-[![Databricks](https://img.shields.io/badge/Databricks-Connect-FF3621?style=for-the-badge&logo=databricks)](https://databricks.com)
-[![PySpark](https://img.shields.io/badge/PySpark-4.0+-E25A1C?style=for-the-badge&logo=apachespark)](https://spark.apache.org/)
-[![Confluent Cloud](https://img.shields.io/badge/Confluent%20Cloud-Producer%20%26%20Consumer-0052CC?style=for-the-badge&logo=apachekafka)](https://www.confluent.io/confluent-cloud/)
+<div align="center">
+<a href="https://databricks.com" target="_blank">
+<img src="https://img.shields.io/badge/Databricks-Connect-FF3621?style=for-the-badge&logo=databricks" alt="Databricks" />
+</a>
+<a href="https://spark.apache.org/" target="_blank">
+<img src="https://img.shields.io/badge/PySpark-4.0+-E25A1C?style=for-the-badge&logo=apachespark" alt="PySpark" />
+</a>
+<a href="https://www.confluent.io/confluent-cloud/" target="_blank">
+<img src="https://img.shields.io/badge/Confluent%20Cloud-Producer%20%26%20Consumer-0052CC?style=for-the-badge&logo=apachekafka" alt="Confluent Cloud" />
+</a>
+</div>
 
 ## Platform Features
 
@@ -40,12 +48,13 @@ This project is designed to provide insights into the job market by leveraging m
 
 The monorepo is organized into the following key components:
 
+- [rats-dashboard-api](./rats-dashboard-api): FastAPI application for serving models and providing prediction APIs
 - [rats-dashboard-app](./rats-dashboard-app): Next.js application for visualizing job market insights
 - [rats-dbt-transformer](./rats-dbt-transformer): dbt models for transforming raw data into analysis-ready datasets
 - [rats-kafka-consumer](./rats-kafka-consumer): Spark Streaming application for consuming and preprocessing data from Kafka
 - [rats-kafka-producer](./rats-kafka-producer): Data contract definitions and producer application for sending crawled data to Kafka
-- [rats-model-serving](./rats-model-serving): FastAPI application for serving models and providing prediction APIs
 - [rats-model-training](./rats-model-training): Scripts and notebooks for training ML models
+- [rats-vectordb-materializer](./rats-vectordb-materializer): Databricks job to materialize analytical jobs into Qdrant vector database
 
 ## Architecture Overview
 
@@ -58,13 +67,17 @@ The monorepo is organized into the following key components:
   ```text
   LinkedIn Crawler & Producer --> Confluent Cloud Kafka (rats.jobs.listing.v1)
                                                     |
-                                                    |
                                                     v
                                   bronze_layer.rats_jobs_listing_v1 (Delta)
                                                     |
-                                                    |
                                                     v
   Downstream Analytics & Apps <-- analytical_layer.linkedin_jobs (Iceberg)
+                                                    |
+                                                    v
+  rats-vectordb-materializer ---> Qdrant (linkedin_jobs collection)
+                                                    |
+                                                    v
+  rats-dashboard-api (serve search & CV matching via Qdrant)
   ```
 
 ## Process Showcase
@@ -174,7 +187,7 @@ cd reversed-ats-platform
 
 2. Explore and run individual components:
 
-   Each component of the platform (e.g., `rats-dashboard-app`, `rats-kafka-consumer`, `rats-model-serving`, etc.) has its own `README.md` with detailed instructions for running and deploying that service.
+   Each component of the platform (e.g., `rats-dashboard-app`, `rats-kafka-consumer`, `rats-dashboard-api`, etc.) has its own `README.md` with detailed instructions for running and deploying that service.
 
    After cloning the repository, navigate to the component you're interested in and follow its README. For example:
 

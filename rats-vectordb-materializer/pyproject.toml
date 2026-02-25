@@ -1,0 +1,39 @@
+[project]
+name = "rats_vectordb_materializer"
+version = "0.1.0"
+description = "Databricks job to materialize analytical_layer.linkedin_jobs into Qdrant vector database"
+readme = "README.md"
+requires-python = ">=3.11, <3.13"
+dependencies = [
+    "pydantic>=2.11.8",
+    "pydantic-settings>=2.10.1",
+    "fastembed>=0.6.1",
+    "qdrant-client>=1.14.2",
+]
+
+[project.scripts]
+rats-vectordb-materializer = "rats_vectordb_materializer.pipeline:main"
+
+[project.optional-dependencies]
+dev = [
+    "ruff>=0.1.0",
+    "databricks-connect>=15.0.0",
+    "databricks-cli>=0.18.0",
+]
+
+[tool.uv]
+package = true
+
+[tool.ruff]
+line-length = 120
+exclude = [".venv", "build", "dist", "include"]
+
+[tool.ruff.lint]
+select = ["F", "I001", "RUF022"]
+
+[build-system]
+requires = ["hatchling>=1.18.0"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/rats_vectordb_materializer"]
