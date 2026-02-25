@@ -27,7 +27,13 @@ class VectorStoreService:
         qdrant_url = require_env("QDRANT_URL")
         qdrant_api_key = require_env("QDRANT_API_KEY")
         self._collection_name = COLLECTION_NAME
-        self._embedder = TextEmbedding(model_name=EMBEDDING_MODEL_NAME, cache_dir="/tmp")
+
+        from pathlib import Path
+
+        base_dir = Path(__file__).resolve().parent.parent.parent
+        cache_dir = base_dir / "api" / "model_cache"
+
+        self._embedder = TextEmbedding(model_name=EMBEDDING_MODEL_NAME, cache_dir=str(cache_dir))
         self._qdrant = QdrantClient(url=qdrant_url, api_key=qdrant_api_key)
 
     @property
