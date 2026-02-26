@@ -40,6 +40,23 @@ export default function JobsTable({
 
     const [renderLimit, setRenderLimit] = React.useState(50);
 
+    const loadingMessages = React.useMemo(() => [
+        "Personalizing jobs based on your profile...",
+        "Updating the latest opportunities...",
+        "Finding the best matches...",
+        "Fetching early bird roles..."
+    ], []);
+
+    const [loadingMsgIdx, setLoadingMsgIdx] = React.useState(0);
+
+    React.useEffect(() => {
+        if (!isLoading) return;
+        const interval = setInterval(() => {
+            setLoadingMsgIdx((prev) => (prev + 1) % loadingMessages.length);
+        }, 2000);
+        return () => clearInterval(interval);
+    }, [isLoading, loadingMessages]);
+
     const [now] = React.useState(() => Date.now());
 
     const passesDate = React.useCallback((j: JobRecord) => {
@@ -246,13 +263,24 @@ export default function JobsTable({
                             <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
                                 {isLoading ? (
                                     <TableRow>
-                                        <TableCell colSpan={7} className="px-5 py-12 text-center text-gray-400 dark:text-gray-500">
-                                            <div className="flex items-center justify-center gap-2">
-                                                <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                                                </svg>
-                                                Loading jobs…
+                                        <TableCell colSpan={7} className="px-5 py-24 text-center">
+                                            <div className="flex flex-col items-center justify-center gap-6">
+                                                <div className="relative flex items-center justify-center">
+                                                    <div className="absolute inset-0 rounded-full border-t-2 border-brand-500 animate-[spin_1s_linear_infinite]" />
+                                                    <div className="absolute inset-2 rounded-full border-r-2 border-brand-400 animate-[spin_1.5s_linear_infinite]" />
+                                                    <div className="absolute inset-4 rounded-full border-b-2 border-brand-300 animate-[spin_2s_linear_infinite]" />
+                                                    <svg className="w-12 h-12 text-brand-100 dark:text-brand-900/50" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
+                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                                    </svg>
+                                                </div>
+                                                <div className="flex flex-col items-center gap-2">
+                                                    <p className="min-h-[28px] text-gray-800 dark:text-white/90 font-medium text-lg animate-pulse">
+                                                        {loadingMessages[loadingMsgIdx]}
+                                                    </p>
+                                                    <p className="text-gray-400 dark:text-gray-500 text-sm max-w-sm">
+                                                        Hold on tight! We are pulling the freshest and most suitable jobs just for you.
+                                                    </p>
+                                                </div>
                                             </div>
                                         </TableCell>
                                     </TableRow>
@@ -275,7 +303,7 @@ export default function JobsTable({
                                                 <TableCell className="px-4 py-3 text-start">
                                                     <div className="flex items-center gap-2">
                                                         {fresh.isEarlyBird && (
-                                                            <span className="shrink-0 w-1.5 h-1.5 rounded-full bg-success-500 animate-pulse" />
+                                                            <span className="shrink-0 w-1.5 h-1.5 rounded-full bg-success-500 animate-pulse" title="Apply fast for early birds" />
                                                         )}
                                                         <span className="font-medium text-gray-800 text-theme-sm dark:text-white/90 max-w-[240px] truncate group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors">
                                                             {job.job_title ?? "—"}
@@ -294,7 +322,7 @@ export default function JobsTable({
                                                     </span>
                                                 </TableCell>
                                                 <TableCell className="px-4 py-3 text-start">
-                                                    <Badge size="sm" color={fresh.color}>
+                                                    <Badge size="sm" color={fresh.color} title={fresh.isEarlyBird ? "Apply fast for early birds" : undefined}>
                                                         {fresh.isEarlyBird ? `🐣 ${fresh.label}` : fresh.label}
                                                     </Badge>
                                                 </TableCell>
@@ -389,7 +417,7 @@ export default function JobsTable({
                                     {getPayloadField(selectedJob, "date_posted") !== "—" && (() => {
                                         const fi = freshnessInfo(getPayloadField(selectedJob, "date_posted"));
                                         return (
-                                            <Badge size="sm" color={fi.color}>
+                                            <Badge size="sm" color={fi.color} title={fi.isEarlyBird ? "Apply fast for early birds" : undefined}>
                                                 {fi.isEarlyBird ? `🐣 ${fi.label}` : fi.label}
                                             </Badge>
                                         );

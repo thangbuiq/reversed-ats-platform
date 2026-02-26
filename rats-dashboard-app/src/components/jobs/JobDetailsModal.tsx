@@ -78,7 +78,7 @@ export default function JobDetailsModal({ job, onClose }: JobDetailsModalProps) 
                         {getPayloadField("date_posted") !== "—" && (() => {
                             const fi = freshnessInfo(getPayloadField("date_posted"));
                             return (
-                                <Badge size="sm" color={fi.color}>
+                                <Badge size="sm" color={fi.color} title={fi.isEarlyBird ? "Apply fast for early birds" : undefined}>
                                     {fi.isEarlyBird ? `🐣 ${fi.label}` : fi.label}
                                 </Badge>
                             );

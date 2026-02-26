@@ -47,7 +47,7 @@ export default function MatchResults({
                                 <div className="flex-1 min-w-0">
                                     <div className="flex items-center gap-3 mb-2">
                                         {fresh.isEarlyBird && (
-                                            <span className="shrink-0 w-2 h-2 rounded-full bg-success-500 animate-pulse" />
+                                            <span className="shrink-0 w-2 h-2 rounded-full bg-success-500 animate-pulse" title="Apply fast for early birds" />
                                         )}
                                         <h4 className="font-semibold text-gray-800 dark:text-white/90 truncate group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors">
                                             {match.job_title ?? "Untitled Position"}

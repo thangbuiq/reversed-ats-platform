@@ -37,7 +37,7 @@ export function freshnessInfo(dateStr: string | null | undefined): {
  *
  * Result: the best match shows ~95%+ and worst ~50-60%, with clear gaps.
  */
-const MIN_DISPLAY = 0.50;
+const MIN_DISPLAY = 0.75;
 const MAX_DISPLAY = 0.98;
 
 export function spreadScores(matches: JobMatch[]): JobMatch[] {

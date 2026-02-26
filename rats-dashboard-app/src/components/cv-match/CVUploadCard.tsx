@@ -99,13 +99,7 @@ export default function CVUploadCard({
                         </p>
                         {previewUrl && (
                             <div className="w-full max-w-lg h-[400px] mt-2 overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-2 pointer-events-auto">
-                                {selectedFile.type === "application/pdf" ? (
-                                    <object data={previewUrl} type="application/pdf" className="w-full h-full rounded-md shadow-sm">
-                                        <p className="p-4 text-sm text-gray-500">PDF preview not available. Please view your local file.</p>
-                                    </object>
-                                ) : (
-                                    <iframe src={previewUrl} className="w-full h-full bg-white dark:bg-white rounded-md shadow-sm" title="CV Preview" />
-                                )}
+                                <iframe src={previewUrl} className="w-full h-full bg-white dark:bg-white rounded-md shadow-sm" title="CV Preview" />
                             </div>
                         )}
                     </div>

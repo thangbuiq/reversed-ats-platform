@@ -17,6 +17,7 @@ interface BadgeProps {
   color?: BadgeColor; // Badge color
   startIcon?: React.ReactNode; // Icon at the start
   endIcon?: React.ReactNode; // Icon at the end
+  title?: string; // Tooltip title
   children: React.ReactNode; // Badge content
 }
 
@@ -26,6 +27,7 @@ const Badge: React.FC<BadgeProps> = ({
   size = "md",
   startIcon,
   endIcon,
+  title,
   children,
 }) => {
   const baseStyles =
@@ -68,7 +70,7 @@ const Badge: React.FC<BadgeProps> = ({
   const colorStyles = variants[variant][color];
 
   return (
-    <span className={`${baseStyles} ${sizeClass} ${colorStyles}`}>
+    <span className={`${baseStyles} ${sizeClass} ${colorStyles}`} title={title}>
       {startIcon && <span className="mr-1">{startIcon}</span>}
       {children}
       {endIcon && <span className="ml-1">{endIcon}</span>}
