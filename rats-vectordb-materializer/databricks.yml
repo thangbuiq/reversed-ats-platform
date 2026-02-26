@@ -26,7 +26,7 @@ variables:
     default: "true"
   daily_quartz_cron:
     description: Quartz cron expression for schedule.
-    default: "0 0 6 * * ?"  # daily at 06:00 UTC (after dbt jobs)
+    default: "0 0 4,10,16 * * ?" # right after dbt runs
   schedule_timezone:
     description: Timezone used for scheduling.
     default: UTC

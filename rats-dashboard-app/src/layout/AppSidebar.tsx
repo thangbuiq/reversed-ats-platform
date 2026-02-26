@@ -4,6 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useSidebar } from '../context/SidebarContext';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { GridIcon, ChevronDownIcon, HorizontaLDots } from '../icons/index';
 
 type NavItem = {
@@ -260,9 +261,36 @@ const AppSidebar: React.FC = () => {
                 width={32}
                 height={32}
               />
-              <span className="text-sm font-semibold whitespace-nowrap text-gray-800 dark:text-white/90">
-                Reversed ATS Platform
-              </span>
+              <div className="flex items-center gap-1.5">
+                <span className="text-sm font-semibold whitespace-nowrap text-gray-800 dark:text-white/90">
+                  Reversed ATS Platform
+                </span>
+                <Tooltip>
+                  <TooltipTrigger asChild onClick={(e) => e.preventDefault()}>
+                    <button className="hover:text-brand-500 dark:hover:text-brand-400 text-gray-400 transition-colors dark:text-gray-500">
+                      <svg
+                        className="h-4 w-4"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth={2}
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                        />
+                      </svg>
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent side="right" className="max-w-[200px]">
+                    <p className="text-xs">
+                      ATS is a system used by HR to find the best candidates for their jobs
+                      automatically filtering CVs, Reversed ATS is find best job match your CV
+                    </p>
+                  </TooltipContent>
+                </Tooltip>
+              </div>
             </>
           ) : (
             <Image src="/images/logo/logo-icon.svg" alt="Logo" width={32} height={32} />

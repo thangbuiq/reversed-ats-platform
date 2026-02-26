@@ -51,8 +51,9 @@ export default function RemoteJobsChart({ remoteCount, onsiteCount }: RemoteJobs
       },
     },
     tooltip: {
-      theme: 'dark',
+      theme: 'light',
       style: { fontSize: '13px' },
+      fillSeriesColor: false,
       y: { formatter: (val: number) => `${val} jobs` },
     },
     responsive: [

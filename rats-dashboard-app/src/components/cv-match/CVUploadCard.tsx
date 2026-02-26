@@ -2,6 +2,7 @@
 import React, { useCallback, useState, useEffect } from 'react';
 import { useDropzone } from 'react-dropzone';
 import Button from '@/components/ui/button/Button';
+import { motion } from 'framer-motion';
 
 interface CVUploadCardProps {
   onUpload: (file: File) => void;
@@ -45,7 +46,12 @@ export default function CVUploadCard({ onUpload, isUploading }: CVUploadCardProp
   };
 
   return (
-    <div className="rounded-2xl border border-gray-200 bg-white p-6 md:p-8 dark:border-gray-800 dark:bg-white/[0.03]">
+    <motion.div
+      initial={{ opacity: 0, scale: 0.98, y: -10 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+      className="rounded-2xl border border-gray-200 bg-white p-6 md:p-8 dark:border-gray-800 dark:bg-white/[0.03]"
+    >
       <div className="mb-6">
         <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">Upload Your CV</h3>
         <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
@@ -195,6 +201,6 @@ export default function CVUploadCard({ onUpload, isUploading }: CVUploadCardProp
           )}
         </Button>
       </div>
-    </div>
+    </motion.div>
   );
 }

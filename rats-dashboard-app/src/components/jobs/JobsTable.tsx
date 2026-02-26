@@ -12,6 +12,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select/Select';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface JobsTableProps {
   jobs: JobRecord[];
@@ -180,7 +182,12 @@ export default function JobsTable({
 
   return (
     <>
-      <div className="rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
+      <motion.div
+        initial={{ opacity: 0, y: 15 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+        className="rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]"
+      >
         {/* Header */}
         <div className="flex flex-col gap-4 border-b border-gray-100 p-5 md:p-6 dark:border-gray-800">
           <div>
@@ -347,10 +354,14 @@ export default function JobsTable({
                         <TableCell className="px-4 py-3 text-start">
                           <div className="flex items-center gap-2">
                             {fresh.isEarlyBird && (
-                              <span
-                                className="bg-success-500 h-1.5 w-1.5 shrink-0 animate-pulse rounded-full"
-                                title="Apply fast for early birds"
-                              />
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <span className="bg-success-500 h-1.5 w-1.5 shrink-0 animate-pulse rounded-full" />
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p className="text-sm">Apply fast for early birds</p>
+                                </TooltipContent>
+                              </Tooltip>
                             )}
                             <span className="text-theme-sm group-hover:text-brand-600 dark:group-hover:text-brand-400 max-w-[240px] truncate font-medium text-gray-800 transition-colors dark:text-white/90">
                               {job.job_title ?? '—'}
@@ -369,13 +380,24 @@ export default function JobsTable({
                           </span>
                         </TableCell>
                         <TableCell className="px-4 py-3 text-start">
-                          <Badge
-                            size="sm"
-                            color={fresh.color}
-                            title={fresh.isEarlyBird ? 'Apply fast for early birds' : undefined}
-                          >
-                            {fresh.isEarlyBird ? `🐣 ${fresh.label}` : fresh.label}
-                          </Badge>
+                          {fresh.isEarlyBird ? (
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <div className="inline-block">
+                                  <Badge size="sm" color={fresh.color}>
+                                    🐣 {fresh.label}
+                                  </Badge>
+                                </div>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p className="text-sm">Apply fast for early birds</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          ) : (
+                            <Badge size="sm" color={fresh.color}>
+                              {fresh.label}
+                            </Badge>
+                          )}
                         </TableCell>
                         <TableCell className="px-4 py-3 text-start">
                           {getPayloadField(job, 'job_level') !== '—' ? (
@@ -436,7 +458,7 @@ export default function JobsTable({
             </button>
           </div>
         )}
-      </div>
+      </motion.div>
 
       {/* ── Shadcn-style Dialog ── */}
       {selectedJob && (
@@ -449,8 +471,12 @@ export default function JobsTable({
 
           {/* Content */}
           <div className="fixed inset-0 flex items-center justify-center p-4">
-            <div
-              className="animate-in zoom-in-95 fade-in relative w-full max-w-xl rounded-xl border border-gray-200 bg-white shadow-2xl dark:border-gray-700 dark:bg-gray-900"
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              transition={{ duration: 0.2 }}
+              className="relative w-full max-w-xl rounded-xl border border-gray-200 bg-white shadow-2xl dark:border-gray-700 dark:bg-gray-900"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Close button – top right, inside card */}
@@ -492,13 +518,22 @@ export default function JobsTable({
                   {getPayloadField(selectedJob, 'date_posted') !== '—' &&
                     (() => {
                       const fi = freshnessInfo(getPayloadField(selectedJob, 'date_posted'));
-                      return (
-                        <Badge
-                          size="sm"
-                          color={fi.color}
-                          title={fi.isEarlyBird ? 'Apply fast for early birds' : undefined}
-                        >
-                          {fi.isEarlyBird ? `🐣 ${fi.label}` : fi.label}
+                      return fi.isEarlyBird ? (
+                        <Tooltip key="earlybird-badge">
+                          <TooltipTrigger asChild>
+                            <div className="inline-block">
+                              <Badge size="sm" color={fi.color}>
+                                🐣 {fi.label}
+                              </Badge>
+                            </div>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p className="text-sm">Apply fast for early birds</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      ) : (
+                        <Badge key="date-badge" size="sm" color={fi.color}>
+                          {fi.label}
                         </Badge>
                       );
                     })()}
@@ -548,7 +583,7 @@ export default function JobsTable({
                   </a>
                 )}
               </div>
-            </div>
+            </motion.div>
           </div>
         </div>
       )}

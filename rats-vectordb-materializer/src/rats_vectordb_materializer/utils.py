@@ -3,18 +3,31 @@
 from __future__ import annotations
 
 import logging
-from typing import Any, Iterable
+import os
+from typing import Any, Iterable, TypeVar
 
 from rats_vectordb_materializer.config import DatabricksSettings
 
+T = TypeVar("T")
+
 
 def get_databricks_settings(databricks_host=None, databricks_token=None):
-    kwargs = {}
-    if databricks_host:
-        kwargs["databricks_host"] = databricks_host
-    if databricks_token:
-        kwargs["databricks_token"] = databricks_token
-    return DatabricksSettings(**kwargs)
+    if databricks_host and databricks_token:
+        databricks_settings = DatabricksSettings(
+            databricks_host=databricks_host,
+            databricks_token=databricks_token,
+        )
+    elif os.path.exists(".env"):
+        databricks_settings = DatabricksSettings()
+    elif os.environ.get("DATABRICKS_HOST") and os.environ.get("DATABRICKS_TOKEN"):
+        databricks_settings = DatabricksSettings(
+            databricks_host=os.environ["DATABRICKS_HOST"],
+            databricks_token=os.environ["DATABRICKS_TOKEN"],
+        )
+    else:
+        raise ValueError("Please provide DATABRICKS_HOST and DATABRICKS_TOKEN.")
+
+    return databricks_settings
 
 
 def get_logger(log_level=logging.INFO):
@@ -27,7 +40,7 @@ def get_logger(log_level=logging.INFO):
     return logger
 
 
-def chunks[T](items: list[T], size: int) -> Iterable[list[T]]:
+def chunks(items: list[T], size: int) -> Iterable[list[T]]:
     """Yield successive chunks of *size* from *items*."""
     for index in range(0, len(items), size):
         yield items[index : index + size]

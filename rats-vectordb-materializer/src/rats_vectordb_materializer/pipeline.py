@@ -2,6 +2,7 @@
 
 import argparse
 import importlib
+import os
 import traceback
 from types import ModuleType
 
@@ -50,21 +51,26 @@ def main():
     logger = get_logger()
     job_name = args.job_name
 
-    settings = get_databricks_settings(args.host, args.token)
-    databricks_spark_session: SparkSession = (
-        DatabricksSession.builder.host(settings.databricks_host)
-        .token(settings.databricks_token)
-        .serverless(True)
-        .getOrCreate()
-    )
+    if "DATABRICKS_RUNTIME_VERSION" in os.environ:
+        logger.info("Running in Databricks environment.")
+        databricks_spark_session: SparkSession = DatabricksSession.builder.serverless(True).getOrCreate()
+    else:
+        logger.warning("Not running in Databricks environment. Attempting to connect using Databricks Connect.")
+        settings = get_databricks_settings(args.host, args.token)
+        databricks_spark_session: SparkSession = (
+            DatabricksSession.builder.host(settings.databricks_host)
+            .token(settings.databricks_token)
+            .serverless(True)
+            .getOrCreate()
+        )
 
     try:
         for field_name in DatabricksAdditionalParams.model_fields.keys():
             param_value = vars(args).get(field_name)
             display_value = "***" if _is_sensitive_param(field_name) and param_value else param_value
             logger.info(f"Setting job parameter {field_name} from args: {display_value}")
-            safe_param_value = "" if param_value is None else str(param_value).replace("'", "\\'")
-            databricks_spark_session.sql(f"DECLARE OR REPLACE `params.{field_name}` = '{safe_param_value}'")
+            if param_value is not None:
+                os.environ[f"params_{field_name}"] = str(param_value)
         logger.info(f"Initialized Spark {databricks_spark_session.version} session.")
         logger.info(f"Running job: {job_name}")
         job_module = _load_job_module(job_name)

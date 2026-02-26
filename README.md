@@ -64,25 +64,12 @@ Planned features include:
 - [Platform Features](#platform-features)
 - [Architecture Overview](#architecture-overview)
 - [Table of Contents](#table-of-contents)
-- [Monorepo Structure](#monorepo-structure)
 - [Process Showcase](#process-showcase)
+- [Monorepo Structure](#monorepo-structure)
 - [Output Schema](#output-schema)
 - [Quick Start](#quick-start)
 - [Prerequisites](#prerequisites)
 - [Development](#development)
-
-## Monorepo Structure
-
-This project is designed to provide insights into the job market by leveraging machine learning and data engineering techniques. It includes components for data crawling, preprocessing, model training, and deployment, all orchestrated through a robust MLOps pipeline.
-
-The monorepo is organized into the following key components:
-
-- [rats-dashboard-api](./rats-dashboard-api): FastAPI application for serving models and providing prediction APIs
-- [rats-dashboard-app](./rats-dashboard-app): Next.js application for visualizing job market insights
-- [rats-dbt-transformer](./rats-dbt-transformer): dbt models for transforming raw data into analysis-ready datasets
-- [rats-kafka-consumer](./rats-kafka-consumer): Spark Streaming application for consuming and preprocessing data from Kafka
-- [rats-kafka-producer](./rats-kafka-producer): Data contract definitions and producer application for sending crawled data to Kafka
-- [rats-vectordb-materializer](./rats-vectordb-materializer): Databricks job to materialize analytical jobs into Qdrant vector database
 
 ## Process Showcase
 
@@ -99,6 +86,23 @@ The monorepo is organized into the following key components:
 - dbt transformation output (transform raw Delta data into analysis-ready Iceberg tables):
 
   ![dbt Transformation Output](./assets/docs/images/showcase/transformed_table.png)
+
+- VectorDB materialization output (materialize transformed data into Qdrant for fast similarity search):
+
+  ![VectorDB Materialization Output](./assets/docs/images/showcase/qdrant.png)
+
+## Monorepo Structure
+
+This project is designed to provide insights into the job market by leveraging machine learning and data engineering techniques. It includes components for data crawling, preprocessing, model training, and deployment, all orchestrated through a robust MLOps pipeline.
+
+The monorepo is organized into the following key components:
+
+- [rats-dashboard-api](./rats-dashboard-api): FastAPI application for serving models and providing prediction APIs
+- [rats-dashboard-app](./rats-dashboard-app): Next.js application for visualizing job market insights
+- [rats-dbt-transformer](./rats-dbt-transformer): dbt models for transforming raw data into analysis-ready datasets
+- [rats-kafka-consumer](./rats-kafka-consumer): Spark Streaming application for consuming and preprocessing data from Kafka
+- [rats-kafka-producer](./rats-kafka-producer): Data contract definitions and producer application for sending crawled data to Kafka
+- [rats-vectordb-materializer](./rats-vectordb-materializer): Databricks job to materialize analytical jobs into Qdrant vector database
 
 ## Output Schema
 

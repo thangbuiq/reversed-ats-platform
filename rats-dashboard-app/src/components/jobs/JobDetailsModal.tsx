@@ -2,6 +2,8 @@ import React, { useEffect } from 'react';
 import Markdown from 'react-markdown';
 import Badge from '@/components/ui/badge/Badge';
 import { freshnessInfo } from '@/lib/freshness';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 export interface JobDetailsModalProps {
   job: {
@@ -40,14 +42,23 @@ export default function JobDetailsModal({ job, onClose }: JobDetailsModalProps) 
   return (
     <div className="fixed inset-0 z-[99999]" role="dialog" aria-modal="true">
       {/* Overlay */}
-      <div
-        className="animate-in fade-in fixed inset-0 bg-black/60 backdrop-blur-sm"
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 bg-black/60 backdrop-blur-sm"
         onClick={onClose}
         aria-hidden="true"
       />
 
       {/* Content Frame (Shadcn Radix Dialog alike) */}
-      <div className="animate-in zoom-in-95 fade-in fixed top-[50%] left-[50%] z-50 grid w-full max-w-2xl translate-x-[-50%] translate-y-[-50%] gap-4 border border-gray-200 bg-white p-6 shadow-lg sm:rounded-xl dark:border-gray-800 dark:bg-gray-900">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95, y: '-50%', x: '-50%' }}
+        animate={{ opacity: 1, scale: 1, y: '-50%', x: '-50%' }}
+        exit={{ opacity: 0, scale: 0.95, y: '-50%', x: '-50%' }}
+        transition={{ duration: 0.2 }}
+        className="fixed top-[50%] left-[50%] z-50 grid w-full max-w-2xl gap-4 border border-gray-200 bg-white p-6 shadow-lg sm:rounded-xl dark:border-gray-800 dark:bg-gray-900"
+      >
         {/* Close Button */}
         <button
           onClick={onClose}
@@ -89,13 +100,22 @@ export default function JobDetailsModal({ job, onClose }: JobDetailsModalProps) 
             {getPayloadField('date_posted') !== '—' &&
               (() => {
                 const fi = freshnessInfo(getPayloadField('date_posted'));
-                return (
-                  <Badge
-                    size="sm"
-                    color={fi.color}
-                    title={fi.isEarlyBird ? 'Apply fast for early birds' : undefined}
-                  >
-                    {fi.isEarlyBird ? `🐣 ${fi.label}` : fi.label}
+                return fi.isEarlyBird ? (
+                  <Tooltip key="earlybird-badge">
+                    <TooltipTrigger asChild>
+                      <div className="inline-block">
+                        <Badge size="sm" color={fi.color}>
+                          🐣 {fi.label}
+                        </Badge>
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p className="text-sm">Apply fast for early birds</p>
+                    </TooltipContent>
+                  </Tooltip>
+                ) : (
+                  <Badge key="date-badge" size="sm" color={fi.color}>
+                    {fi.label}
                   </Badge>
                 );
               })()}
@@ -145,7 +165,7 @@ export default function JobDetailsModal({ job, onClose }: JobDetailsModalProps) 
             </a>
           )}
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }

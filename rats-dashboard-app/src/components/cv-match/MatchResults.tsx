@@ -4,6 +4,8 @@ import Badge from '@/components/ui/badge/Badge';
 import type { JobMatch } from '@/types/api';
 import { freshnessInfo } from '@/lib/freshness';
 import JobDetailsModal from '@/components/jobs/JobDetailsModal';
+import { motion } from 'framer-motion';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface MatchResultsProps {
   matches: JobMatch[];
@@ -19,7 +21,12 @@ function scoreColor(score: number): 'success' | 'warning' | 'error' {
 export default function MatchResults({ matches, totalMatches }: MatchResultsProps) {
   const [selectedJob, setSelectedJob] = useState<JobMatch | null>(null);
   return (
-    <div className="rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
+    <motion.div
+      initial={{ opacity: 0, y: 15 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
+      className="rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]"
+    >
       <div className="border-b border-gray-100 p-5 md:p-6 dark:border-gray-800">
         <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">Matched Jobs</h3>
         <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
@@ -33,7 +40,10 @@ export default function MatchResults({ matches, totalMatches }: MatchResultsProp
           const fresh = freshnessInfo(dateRaw);
 
           return (
-            <div
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.05 + 0.1, duration: 0.3 }}
               key={match.job_snapshot_id ?? `match-${index}`}
               onClick={() => setSelectedJob(match)}
               className={
@@ -44,10 +54,14 @@ export default function MatchResults({ matches, totalMatches }: MatchResultsProp
                 <div className="min-w-0 flex-1">
                   <div className="mb-2 flex items-center gap-3">
                     {fresh.isEarlyBird && (
-                      <span
-                        className="bg-success-500 h-2 w-2 shrink-0 animate-pulse rounded-full"
-                        title="Apply fast for early birds"
-                      />
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span className="bg-success-500 h-2 w-2 shrink-0 animate-pulse rounded-full" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p className="text-sm">Apply fast for early birds</p>
+                        </TooltipContent>
+                      </Tooltip>
                     )}
                     <h4 className="group-hover:text-brand-600 dark:group-hover:text-brand-400 truncate font-semibold text-gray-800 transition-colors dark:text-white/90">
                       {match.job_title ?? 'Untitled Position'}
@@ -149,12 +163,12 @@ export default function MatchResults({ matches, totalMatches }: MatchResultsProp
                   />
                 </div>
               </div>
-            </div>
+            </motion.div>
           );
         })}
       </div>
 
       <JobDetailsModal job={selectedJob as any} onClose={() => setSelectedJob(null)} />
-    </div>
+    </motion.div>
   );
 }

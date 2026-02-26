@@ -3,13 +3,13 @@ name = "rats_vectordb_materializer"
 version = "0.1.0"
 description = "Databricks job to materialize analytical_layer.linkedin_jobs into Qdrant vector database"
 readme = "README.md"
-requires-python = ">=3.12, <3.13"
+requires-python = ">=3.10, <3.13"
 dependencies = [
     "pydantic>=2.11.8",
     "pydantic-settings>=2.10.1",
     "fastembed>=0.6.1",
     "qdrant-client>=1.14.2",
-    "databricks-connect==17.1.2",
+    "databricks-connect>=16.1.7",
 ]
 
 [project.scripts]

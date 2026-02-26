@@ -9,6 +9,7 @@ transformations.
 from __future__ import annotations
 
 import logging
+import os
 from typing import Any
 
 from fastembed import TextEmbedding
@@ -99,12 +100,11 @@ def pipeline():
     """Entry point called by the pipeline runner."""
     spark = SparkSession.getActiveSession()
 
-    # Read params set by the pipeline runner
-    table = spark.sql("SELECT `params.databricks_table`").collect()[0][0] or "analytical_layer.linkedin_jobs"
-    qdrant_url = spark.sql("SELECT `params.qdrant_url`").collect()[0][0]
-    qdrant_api_key = spark.sql("SELECT `params.qdrant_api_key`").collect()[0][0]
-    batch_size_str = spark.sql("SELECT `params.batch_size`").collect()[0][0]
-    recreate_str = spark.sql("SELECT `params.recreate_collection`").collect()[0][0]
+    table = os.environ.get("params_databricks_table", "analytical_layer.linkedin_jobs")
+    qdrant_url = os.environ.get("params_qdrant_url")
+    qdrant_api_key = os.environ.get("params_qdrant_api_key")
+    batch_size_str = os.environ.get("params_batch_size")
+    recreate_str = os.environ.get("params_recreate_collection")
 
     batch_size = int(batch_size_str) if batch_size_str else DEFAULT_BATCH_SIZE
     recreate = str(recreate_str).lower() in ("true", "1", "yes", "")
