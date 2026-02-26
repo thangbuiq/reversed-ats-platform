@@ -22,38 +22,18 @@ Reversed ATS platform, a platform for analyzing job market trends, predicting sa
 
 In development, the RATS platform includes the following key features:
 
-- Real-time Job Data Crawling: Automated daily scraping from LinkedIn.
+- Near Real-time Job Dashboard: Automated each 2 hours to capture the latest job listings from LinkedIn.
+
+  ![Near Real-time Job Data Crawling](./assets/docs/images/showcase/job-table-dashboard.png)
+
 - Job-Resume Matching: Smart matching system using NLP and embeddings.
+
+  ![Job-Resume Matching](./assets/docs/images/showcase/cv-matching.png)
 
 Planned features include:
 
 - Salary Prediction: ML models to predict salaries based on skills, location, and experience using data from Glassdoor or other Vietnamese job platforms like 1900.com.vn...
 - Tech Stack Extraction: NER-based automatic skill extraction from job descriptions.
-
-## Table of Contents
-
-- [Platform Features](#platform-features)
-- [Table of Contents](#table-of-contents)
-- [Monorepo Structure](#monorepo-structure)
-- [Architecture Overview](#architecture-overview)
-- [Process Showcase](#process-showcase)
-- [Output Schema](#output-schema)
-- [Quick Start](#quick-start)
-- [Prerequisites](#prerequisites)
-- [Development](#development)
-
-## Monorepo Structure
-
-This project is designed to provide insights into the job market by leveraging machine learning and data engineering techniques. It includes components for data crawling, preprocessing, model training, and deployment, all orchestrated through a robust MLOps pipeline.
-
-The monorepo is organized into the following key components:
-
-- [rats-dashboard-api](./rats-dashboard-api): FastAPI application for serving models and providing prediction APIs
-- [rats-dashboard-app](./rats-dashboard-app): Next.js application for visualizing job market insights
-- [rats-dbt-transformer](./rats-dbt-transformer): dbt models for transforming raw data into analysis-ready datasets
-- [rats-kafka-consumer](./rats-kafka-consumer): Spark Streaming application for consuming and preprocessing data from Kafka
-- [rats-kafka-producer](./rats-kafka-producer): Data contract definitions and producer application for sending crawled data to Kafka
-- [rats-vectordb-materializer](./rats-vectordb-materializer): Databricks job to materialize analytical jobs into Qdrant vector database
 
 ## Architecture Overview
 
@@ -78,6 +58,31 @@ The monorepo is organized into the following key components:
                                                     v
   rats-dashboard-api (serve search & CV matching via Qdrant)
   ```
+
+## Table of Contents
+
+- [Platform Features](#platform-features)
+- [Architecture Overview](#architecture-overview)
+- [Table of Contents](#table-of-contents)
+- [Monorepo Structure](#monorepo-structure)
+- [Process Showcase](#process-showcase)
+- [Output Schema](#output-schema)
+- [Quick Start](#quick-start)
+- [Prerequisites](#prerequisites)
+- [Development](#development)
+
+## Monorepo Structure
+
+This project is designed to provide insights into the job market by leveraging machine learning and data engineering techniques. It includes components for data crawling, preprocessing, model training, and deployment, all orchestrated through a robust MLOps pipeline.
+
+The monorepo is organized into the following key components:
+
+- [rats-dashboard-api](./rats-dashboard-api): FastAPI application for serving models and providing prediction APIs
+- [rats-dashboard-app](./rats-dashboard-app): Next.js application for visualizing job market insights
+- [rats-dbt-transformer](./rats-dbt-transformer): dbt models for transforming raw data into analysis-ready datasets
+- [rats-kafka-consumer](./rats-kafka-consumer): Spark Streaming application for consuming and preprocessing data from Kafka
+- [rats-kafka-producer](./rats-kafka-producer): Data contract definitions and producer application for sending crawled data to Kafka
+- [rats-vectordb-materializer](./rats-vectordb-materializer): Databricks job to materialize analytical jobs into Qdrant vector database
 
 ## Process Showcase
 
