@@ -113,7 +113,7 @@ export default function CVUploadCard({ onUpload, isUploading }: CVUploadCardProp
               (selectedFile.type === 'application/pdf' ? (
                 <div className="pointer-events-auto mt-2 flex h-[200px] w-full max-w-lg flex-col items-center justify-center rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-800">
                   <svg
-                    className="text-error-400 dark:text-error-500 mb-3 h-12 w-12"
+                    className="text-success-400 dark:text-success-500 mb-3 h-12 w-12"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"

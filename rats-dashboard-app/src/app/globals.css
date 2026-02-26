@@ -740,21 +740,3 @@ span.flatpickr-weekday,
   opacity: 0.8;
   cursor: grabbing; /* Changes the cursor to indicate dragging */
 }
-
-@keyframes breath-outline-green {
-  0%,
-  100% {
-    outline: 1px solid rgba(18, 183, 106, 0.3);
-    outline-offset: -1px;
-  }
-  50% {
-    outline: 2px solid rgba(18, 183, 106, 0.9);
-    outline-offset: -2px;
-  }
-}
-
-.early-bird-row {
-  animation: breath-outline-green 2.5s ease-in-out infinite;
-  position: relative;
-  z-index: 10;
-}

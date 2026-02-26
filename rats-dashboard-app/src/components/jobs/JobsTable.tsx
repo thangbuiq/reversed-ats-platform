@@ -341,7 +341,7 @@ export default function JobsTable({
                     return (
                       <TableRow
                         key={job.point_id}
-                        className={`group hover:bg-brand-50/40 dark:hover:bg-brand-500/5 cursor-pointer transition-all duration-200 ${fresh.isEarlyBird ? 'early-bird-row' : ''}`}
+                        className={`group hover:bg-brand-50/40 dark:hover:bg-brand-500/5 cursor-pointer transition-all duration-200`}
                         onClick={() => setSelectedJob(job)}
                       >
                         <TableCell className="px-4 py-3 text-start">

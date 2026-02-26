@@ -36,7 +36,9 @@ export default function MatchResults({ matches, totalMatches }: MatchResultsProp
             <div
               key={match.job_snapshot_id ?? `match-${index}`}
               onClick={() => setSelectedJob(match)}
-              className={`group cursor-pointer p-5 transition-colors hover:bg-gray-50 md:p-6 dark:hover:bg-white/[0.02] ${fresh.isEarlyBird ? 'early-bird-row' : ''}`}
+              className={
+                'group cursor-pointer p-5 transition-colors hover:bg-gray-50 md:p-6 dark:hover:bg-white/[0.02]'
+              }
             >
               <div className="flex items-start justify-between gap-4">
                 <div className="min-w-0 flex-1">
