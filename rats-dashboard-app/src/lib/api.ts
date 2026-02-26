@@ -1,18 +1,15 @@
 /** Typed fetch helpers for the RATS Dashboard API. */
 
-import type { ShowAllJobsResponse, PredictResponse } from "@/types/api";
+import type { ShowAllJobsResponse, PredictResponse } from '@/types/api';
 
-const API_BASE = "/api";
+const API_BASE = '/api';
 
 /**
  * Fetch paginated jobs from Qdrant via the API.
  */
-export async function fetchJobs(
-  limit = 100,
-  offset?: string | null
-): Promise<ShowAllJobsResponse> {
+export async function fetchJobs(limit = 100, offset?: string | null): Promise<ShowAllJobsResponse> {
   const params = new URLSearchParams({ limit: String(limit) });
-  if (offset) params.set("offset", offset);
+  if (offset) params.set('offset', offset);
 
   const res = await fetch(`${API_BASE}/show-all-jobs?${params.toString()}`);
   if (!res.ok) {
@@ -31,14 +28,14 @@ export async function predictBestMatchJob(
   scoreThreshold?: number
 ): Promise<PredictResponse> {
   const form = new FormData();
-  form.append("cv_file", file);
-  form.append("top_k", String(topK));
+  form.append('cv_file', file);
+  form.append('top_k', String(topK));
   if (scoreThreshold !== undefined) {
-    form.append("score_threshold", String(scoreThreshold));
+    form.append('score_threshold', String(scoreThreshold));
   }
 
   const res = await fetch(`${API_BASE}/predict-best-match-job`, {
-    method: "POST",
+    method: 'POST',
     body: form,
   });
   if (!res.ok) {

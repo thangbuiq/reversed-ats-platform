@@ -1,9 +1,9 @@
 import { NextResponse } from 'next/server';
 
 const API_BASE =
-  process.env.NEXT_BASE_API_URL?.replace(/\/+$/, "") ??
-  process.env.NEXT_PUBLIC_API_URL?.replace(/\/+$/, "") ??
-  "http://127.0.0.1:8000";
+  process.env.NEXT_BASE_API_URL?.replace(/\/+$/, '') ??
+  process.env.NEXT_PUBLIC_API_URL?.replace(/\/+$/, '') ??
+  'http://127.0.0.1:8000';
 
 export async function POST(req: Request) {
   try {
@@ -19,7 +19,10 @@ export async function POST(req: Request) {
 
     if (!res.ok) {
       const body = await res.text();
-      return NextResponse.json({ error: `Backend returned ${res.status}: ${body}` }, { status: res.status });
+      return NextResponse.json(
+        { error: `Backend returned ${res.status}: ${body}` },
+        { status: res.status }
+      );
     }
 
     const data = await res.json();

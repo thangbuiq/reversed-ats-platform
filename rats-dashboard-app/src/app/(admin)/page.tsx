@@ -1,12 +1,12 @@
-"use client";
-import React, { useEffect, useState, useCallback, useMemo } from "react";
-import Link from "next/link";
-import { fetchJobs } from "@/lib/api";
-import type { JobRecord } from "@/types/api";
-import JobsMetrics from "@/components/jobs/JobsMetrics";
-import JobPostingChart from "@/components/jobs/JobPostingChart";
-import RemoteJobsChart from "@/components/jobs/RemoteJobsChart";
-import JobsTable from "@/components/jobs/JobsTable";
+'use client';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import Link from 'next/link';
+import { fetchJobs } from '@/lib/api';
+import type { JobRecord } from '@/types/api';
+import JobsMetrics from '@/components/jobs/JobsMetrics';
+import JobPostingChart from '@/components/jobs/JobPostingChart';
+import RemoteJobsChart from '@/components/jobs/RemoteJobsChart';
+import JobsTable from '@/components/jobs/JobsTable';
 
 const PAGE_SIZE = 50;
 
@@ -40,7 +40,7 @@ export default function DashboardPage() {
       setFilteredJobs(allJobs);
       setTotal(allJobs.length);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load jobs");
+      setError(err instanceof Error ? err.message : 'Failed to load jobs');
     } finally {
       setIsLoading(false);
     }
@@ -54,7 +54,7 @@ export default function DashboardPage() {
   const latestDate = useMemo(() => {
     for (const job of filteredJobs) {
       const d = job.payload?.date_posted;
-      if (d && d !== "—") return String(d);
+      if (d && d !== '—') return String(d);
     }
     return null;
   }, [filteredJobs]);
@@ -72,7 +72,7 @@ export default function DashboardPage() {
     const counts: Record<string, number> = {};
     for (const job of filteredJobs) {
       const d = job.payload?.date_posted;
-      if (d && d !== "—") {
+      if (d && d !== '—') {
         const date = String(d);
         counts[date] = (counts[date] || 0) + 1;
       }
@@ -88,7 +88,7 @@ export default function DashboardPage() {
     let onsite = 0;
     for (const job of filteredJobs) {
       const isRemote = job.payload?.is_remote;
-      if (isRemote === true || isRemote === "true") remote++;
+      if (isRemote === true || isRemote === 'true') remote++;
       else onsite++;
     }
     return { remote, onsite };
@@ -99,28 +99,36 @@ export default function DashboardPage() {
       {/* Page header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800 dark:text-white/90">
-            Dashboard
-          </h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+          <h1 className="text-2xl font-bold text-gray-800 dark:text-white/90">Dashboard</h1>
+          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
             Overview of scraped LinkedIn job listings
           </p>
         </div>
         <Link
           href="/cv-match"
-          className="inline-flex items-center gap-2 rounded-lg bg-brand-500 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-600 transition-colors shrink-0"
+          className="bg-brand-500 hover:bg-brand-600 inline-flex shrink-0 items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-medium text-white transition-colors"
         >
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+          <svg
+            className="h-4 w-4"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={1.5}
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"
+            />
           </svg>
           CV Matcher
         </Link>
       </div>
 
       {error && (
-        <div className="rounded-xl border border-error-200 bg-error-50 p-4 text-error-600 dark:border-error-500/30 dark:bg-error-500/10 dark:text-error-400">
+        <div className="border-error-200 bg-error-50 text-error-600 dark:border-error-500/30 dark:bg-error-500/10 dark:text-error-400 rounded-xl border p-4">
           <p className="font-medium">Error loading jobs</p>
-          <p className="text-sm mt-1">{error}</p>
+          <p className="mt-1 text-sm">{error}</p>
         </div>
       )}
 
@@ -137,26 +145,18 @@ export default function DashboardPage() {
           {chartData.length > 0 ? (
             <JobPostingChart data={chartData} />
           ) : (
-            <div className="rounded-2xl border border-gray-200 bg-white p-10 text-center dark:border-gray-800 dark:bg-white/[0.03] h-full flex items-center justify-center">
+            <div className="flex h-full items-center justify-center rounded-2xl border border-gray-200 bg-white p-10 text-center dark:border-gray-800 dark:bg-white/[0.03]">
               <p className="text-gray-400 dark:text-gray-500">No chart data available</p>
             </div>
           )}
         </div>
         <div className="xl:col-span-4">
-          <RemoteJobsChart
-            remoteCount={remoteStats.remote}
-            onsiteCount={remoteStats.onsite}
-          />
+          <RemoteJobsChart remoteCount={remoteStats.remote} onsiteCount={remoteStats.onsite} />
         </div>
       </div>
 
       {/* Jobs Table */}
-      <JobsTable
-        jobs={jobs}
-        total={total}
-        isLoading={isLoading}
-        onFilterChange={setFilteredJobs}
-      />
+      <JobsTable jobs={jobs} total={total} isLoading={isLoading} onFilterChange={setFilteredJobs} />
     </div>
   );
 }

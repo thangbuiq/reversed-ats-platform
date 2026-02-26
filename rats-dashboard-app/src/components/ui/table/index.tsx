@@ -1,4 +1,4 @@
-import React, { ReactNode } from "react";
+import React, { ReactNode } from 'react';
 
 // Props for Table
 interface TableProps {
@@ -36,7 +36,7 @@ interface TableCellProps {
 
 // Table Component
 const Table: React.FC<TableProps> = ({ children, className }) => {
-  return <table className={`min-w-full  ${className}`}>{children}</table>;
+  return <table className={`min-w-full ${className}`}>{children}</table>;
 };
 
 // TableHeader Component
@@ -51,7 +51,11 @@ const TableBody: React.FC<TableBodyProps> = ({ children, className }) => {
 
 // TableRow Component
 const TableRow: React.FC<TableRowProps> = ({ children, className, onClick }) => {
-  return <tr className={className} onClick={onClick}>{children}</tr>;
+  return (
+    <tr className={className} onClick={onClick}>
+      {children}
+    </tr>
+  );
 };
 
 // TableCell Component
@@ -62,8 +66,12 @@ const TableCell: React.FC<TableCellProps> = ({
   onClick,
   colSpan,
 }) => {
-  const CellTag = isHeader ? "th" : "td";
-  return <CellTag colSpan={colSpan} className={` ${className}`} onClick={onClick}>{children}</CellTag>;
+  const CellTag = isHeader ? 'th' : 'td';
+  return (
+    <CellTag colSpan={colSpan} className={` ${className}`} onClick={onClick}>
+      {children}
+    </CellTag>
+  );
 };
 
 export { Table, TableHeader, TableBody, TableRow, TableCell };
