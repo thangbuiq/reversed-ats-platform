@@ -21,7 +21,7 @@ Qdrant Cloud ──> rats-dashboard-api (serve search & CV matching)
 ```bash
 cd rats-vectordb-materializer
 cp .env.example .env
-# fill in DATABRICKS_HOST, DATABRICKS_TOKEN, QDRANT_URL, QDRANT_API_KEY
+# fill in DATABRICKS_HOST, DATABRICKS_TOKEN, DATABRICKS_HTTP_PATH, QDRANT_URL, QDRANT_API_KEY
 
 uv sync --all-groups --all-extras
 ```
@@ -33,6 +33,8 @@ Run the materializer locally using Databricks Connect:
 ```bash
 uv run rats-vectordb-materializer \
   --job_name materialize_to_qdrant \
+  --host "$DATABRICKS_HOST" \
+  --token "$DATABRICKS_TOKEN" \
   --qdrant_url "$QDRANT_URL" \
   --qdrant_api_key "$QDRANT_API_KEY"
 ```

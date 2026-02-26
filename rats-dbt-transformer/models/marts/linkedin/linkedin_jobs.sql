@@ -4,7 +4,7 @@
         table_format="iceberg",
         partition_by=["part_date"],
         incremental_strategy="merge",
-        unique_key="job_snapshot_id",
+        unique_key="job_hash_id",
     )
 }}
 
@@ -31,13 +31,34 @@ with
             company_url,
             kafka_timestamp as inserted_at
         from {{ ref("int_linkedin__jobs_posting") }}
+        {% if is_incremental() %}
+            where
+                part_date >= (
+                    select coalesce(max(part_date), cast('1900-01-01' as date))
+                    from {{ this }}
+                )
+        {% endif %}
+    ),
+
+    cte__deduplicated as (
+        select
+            *,
+            md5(
+                concat_ws(
+                    '||',
+                    coalesce(company_name, ''),
+                    coalesce(job_title, ''),
+                    coalesce(job_description, ''),
+                    coalesce(job_level, '')
+                )
+            ) as job_hash_id,
+            row_number() over (
+                partition by company_name, job_title, job_description
+                order by inserted_at desc
+            ) as rn
+        from cte__source
     )
 
-select *
-from cte__source
-
-{% if is_incremental() %}
-    where
-        part_date
-        >= (select coalesce(max(part_date), cast('1900-01-01' as date)) from {{ this }})
-{% endif %}
+select * except (rn)
+from cte__deduplicated
+where rn = 1

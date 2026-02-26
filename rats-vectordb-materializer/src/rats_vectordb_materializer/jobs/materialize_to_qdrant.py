@@ -11,8 +11,8 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from databricks.connect import DatabricksSession
 from fastembed import TextEmbedding
+from pyspark.sql import SparkSession
 from qdrant_client import QdrantClient, models
 
 from rats_vectordb_materializer.config import (
@@ -28,11 +28,18 @@ from rats_vectordb_materializer.utils import build_job_embedding_text, build_poi
 logger = logging.getLogger(__name__)
 
 
-def _read_all_jobs(spark: DatabricksSession, table: str) -> list[dict[str, Any]]:
-    """Read all rows from the analytical jobs table."""
+def _read_jobs(spark: SparkSession, table: str, full_scan: bool = True) -> list[dict[str, Any]]:
+    """Read rows from the analytical jobs table."""
     columns = ", ".join(OUTPUT_SCHEMA_COLUMNS)
-    query = f"SELECT {columns} FROM {table} ORDER BY part_date DESC, inserted_at DESC"
-    logger.info(f"Reading jobs from {table}")
+
+    where_clause = ""
+    if not full_scan:
+        where_clause = " WHERE part_date >= date_format(date_sub(current_date(), 3), 'yyyy-MM-dd')"
+        logger.info(f"Reading jobs from {table} for the last 3 days")
+    else:
+        logger.info(f"Reading all jobs from {table}")
+
+    query = f"SELECT {columns} FROM {table}{where_clause} ORDER BY part_date DESC, inserted_at DESC"
     df = spark.sql(query)
     rows = [row.asDict() for row in df.collect()]
     logger.info(f"Read {len(rows)} jobs from {table}")
@@ -48,7 +55,7 @@ def _materialize_to_qdrant(
 ) -> int:
     """Embed and upsert all jobs into Qdrant."""
     logger.info(f"Connecting to Qdrant at {qdrant_url}")
-    qdrant = QdrantClient(url=qdrant_url, api_key=qdrant_api_key)
+    qdrant = QdrantClient(url=qdrant_url, api_key=qdrant_api_key, timeout=60.0)
     embedder = TextEmbedding(model_name=EMBEDDING_MODEL_NAME)
 
     if recreate:
@@ -90,7 +97,7 @@ def _materialize_to_qdrant(
 
 def pipeline():
     """Entry point called by the pipeline runner."""
-    spark = DatabricksSession.builder.getOrCreate()
+    spark = SparkSession.getActiveSession()
 
     # Read params set by the pipeline runner
     table = spark.sql("SELECT `params.databricks_table`").collect()[0][0] or "analytical_layer.linkedin_jobs"
@@ -105,7 +112,7 @@ def pipeline():
     if not qdrant_url or not qdrant_api_key:
         raise RuntimeError("qdrant_url and qdrant_api_key are required parameters.")
 
-    jobs = _read_all_jobs(spark, table)
+    jobs = _read_jobs(spark, table, full_scan=recreate)
     if not jobs:
         logger.warning("No jobs found in source table. Nothing to materialize.")
         return

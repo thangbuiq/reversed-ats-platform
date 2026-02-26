@@ -10,7 +10,7 @@ from pyspark.errors import PySparkException
 from pyspark.sql import SparkSession
 
 from rats_vectordb_materializer.config import DatabricksAdditionalParams
-from rats_vectordb_materializer.utils import get_databricks_settings, get_logger, is_databricks_runtime
+from rats_vectordb_materializer.utils import get_databricks_settings, get_logger
 
 
 def _is_sensitive_param(param_name: str) -> bool:
@@ -50,17 +50,13 @@ def main():
     logger = get_logger()
     job_name = args.job_name
 
-    if is_databricks_runtime():
-        logger.info("Detected running in Databricks environment.")
-        databricks_spark_session = DatabricksSession.builder.getOrCreate()
-    else:
-        settings = get_databricks_settings(args.host, args.token)
-        databricks_spark_session: SparkSession = (
-            DatabricksSession.builder.host(settings.databricks_host)
-            .token(settings.databricks_token)
-            .serverless(True)
-            .getOrCreate()
-        )
+    settings = get_databricks_settings(args.host, args.token)
+    databricks_spark_session: SparkSession = (
+        DatabricksSession.builder.host(settings.databricks_host)
+        .token(settings.databricks_token)
+        .serverless(True)
+        .getOrCreate()
+    )
 
     try:
         for field_name in DatabricksAdditionalParams.model_fields.keys():

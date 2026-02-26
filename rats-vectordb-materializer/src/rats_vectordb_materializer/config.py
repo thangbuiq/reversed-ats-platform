@@ -50,8 +50,8 @@ class DatabricksAdditionalParams(BaseModel):
 
 class DatabricksSettings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
-    databricks_host: str
-    databricks_token: str
+    databricks_host: Optional[str] = None
+    databricks_token: Optional[str] = None
 
     def __init__(self, **data):
         super().__init__(**data)

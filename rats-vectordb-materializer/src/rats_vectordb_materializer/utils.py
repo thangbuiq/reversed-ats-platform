@@ -3,27 +3,18 @@
 from __future__ import annotations
 
 import logging
-import os
 from typing import Any, Iterable
 
 from rats_vectordb_materializer.config import OUTPUT_SCHEMA_COLUMNS, DatabricksSettings
 
 
-def is_databricks_runtime():
-    return "DATABRICKS_RUNTIME_VERSION" in os.environ
-
-
 def get_databricks_settings(databricks_host=None, databricks_token=None):
-    if databricks_host and databricks_token:
-        return DatabricksSettings(databricks_host=databricks_host, databricks_token=databricks_token)
-    if os.path.exists(".env"):
-        return DatabricksSettings()
-    if os.environ.get("DATABRICKS_HOST") and os.environ.get("DATABRICKS_TOKEN"):
-        return DatabricksSettings(
-            databricks_host=os.environ["DATABRICKS_HOST"],
-            databricks_token=os.environ["DATABRICKS_TOKEN"],
-        )
-    raise ValueError("Please provide DATABRICKS_HOST and DATABRICKS_TOKEN.")
+    kwargs = {}
+    if databricks_host:
+        kwargs["databricks_host"] = databricks_host
+    if databricks_token:
+        kwargs["databricks_token"] = databricks_token
+    return DatabricksSettings(**kwargs)
 
 
 def get_logger(log_level=logging.INFO):

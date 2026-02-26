@@ -8,11 +8,15 @@ models:
         description: "Physical partition key and primary date slice for analytics."
         tests:
           - not_null
-      - name: job_snapshot_id
-        description: "Unique row key at the mart grain."
+      - name: job_hash_id
+        description: "Unique row key derived from company name, job title, and description."
         tests:
           - not_null
           - unique
+      - name: job_snapshot_id
+        description: "Row snapshot id based on job id and part_date."
+        tests:
+          - not_null
       - name: job_id
         description: "Logical job identifier from the source payload."
         tests:
