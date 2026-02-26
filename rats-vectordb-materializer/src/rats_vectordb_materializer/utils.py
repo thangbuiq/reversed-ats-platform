@@ -5,7 +5,7 @@ from __future__ import annotations
 import logging
 from typing import Any, Iterable
 
-from rats_vectordb_materializer.config import OUTPUT_SCHEMA_COLUMNS, DatabricksSettings
+from rats_vectordb_materializer.config import DatabricksSettings
 
 
 def get_databricks_settings(databricks_host=None, databricks_token=None):
@@ -41,10 +41,14 @@ def stringify(value: Any) -> str:
     return str(value).strip()
 
 
+# Fields to include in the embedding text
+EMBEDDING_TEXT_FIELDS = ("company_name", "job_title", "job_description", "job_level")
+
+
 def build_job_embedding_text(job_row: dict[str, Any]) -> str:
-    """Build a deterministic embedding text from the output schema fields."""
+    """Build a deterministic embedding text from selected fields."""
     parts: list[str] = []
-    for column in OUTPUT_SCHEMA_COLUMNS:
+    for column in EMBEDDING_TEXT_FIELDS:
         value = stringify(job_row.get(column))
         if value:
             parts.append(f"{column}: {value}")

@@ -45,10 +45,12 @@ Build and deploy to Databricks:
 
 ```bash
 # validate the bundle
-databricks bundle validate
+databricks bundle validate \
+  --var qdrant_url="$QDRANT_URL" \
+  --var qdrant_api_key="$QDRANT_API_KEY"
 
 # deploy to production
-databricks bundle deploy --target prod \
+databricks bundle deploy --target prod --force-lock \
   --var qdrant_url="$QDRANT_URL" \
   --var qdrant_api_key="$QDRANT_API_KEY"
 
@@ -69,3 +71,7 @@ By default, the job is scheduled to run **daily at 06:00 UTC**, which should be 
 | `databricks_table` | Source table | `analytical_layer.linkedin_jobs` |
 | `batch_size` | Embedding + upsert batch size | `128` |
 | `recreate_collection` | Recreate Qdrant collection on each run | `true` |
+
+## Deployment Notes
+
+The VectorDB materializer job must run **after** the DBT transformer completes. Ensure your orchestration pipeline has the correct dependency order.
