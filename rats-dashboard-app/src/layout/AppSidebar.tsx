@@ -1,11 +1,12 @@
 'use client';
 import React, { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useSidebar } from '../context/SidebarContext';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { GridIcon, ChevronDownIcon, HorizontaLDots } from '../icons/index';
+import { motion, AnimatePresence } from 'framer-motion';
 
 type NavItem = {
   name: string;
@@ -51,6 +52,7 @@ const othersItems: NavItem[] = [];
 const AppSidebar: React.FC = () => {
   const { isExpanded, isMobileOpen, isHovered, setIsHovered } = useSidebar();
   const pathname = usePathname();
+  const [isHelpDialogOpen, setIsHelpDialogOpen] = useState(false);
 
   const renderMenuItems = (navItems: NavItem[], menuType: 'main' | 'others') => (
     <ul className="flex flex-col gap-4">
@@ -209,6 +211,20 @@ const AppSidebar: React.FC = () => {
     }
   }, [openSubmenu]);
 
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setIsHelpDialogOpen(false);
+    };
+    if (isHelpDialogOpen) {
+      document.addEventListener('keydown', handleEsc);
+      document.body.style.overflow = 'hidden';
+    }
+    return () => {
+      document.removeEventListener('keydown', handleEsc);
+      document.body.style.overflow = 'unset';
+    };
+  }, [isHelpDialogOpen]);
+
   const handleSubmenuToggle = (index: number, menuType: 'main' | 'others') => {
     setPathSubmenuPreference((prevPathSubmenuPreference) => {
       const currentOpenSubmenu = Object.prototype.hasOwnProperty.call(
@@ -235,7 +251,7 @@ const AppSidebar: React.FC = () => {
 
   return (
     <aside
-      className={`fixed top-0 left-0 z-50 mt-16 flex h-screen flex-col border-r border-gray-200 bg-white px-5 text-gray-900 transition-all duration-300 ease-in-out lg:mt-0 dark:border-gray-800 dark:bg-gray-900 ${
+      className={`fixed top-0 left-0 z-[100000] mt-16 flex h-screen flex-col border-r border-gray-200 bg-white px-5 text-gray-900 transition-all duration-300 ease-in-out lg:mt-0 dark:border-gray-800 dark:bg-gray-900 ${
         isExpanded || isMobileOpen ? 'w-[290px]' : isHovered ? 'w-[290px]' : 'w-[90px]'
       } ${isMobileOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0`}
       onMouseEnter={() => !isExpanded && setIsHovered(true)}
@@ -245,7 +261,7 @@ const AppSidebar: React.FC = () => {
         className={`flex py-8 ${!isExpanded && !isHovered ? 'lg:justify-center' : 'justify-start'}`}
       >
         <Link href="/" className="flex items-center gap-2">
-          {isExpanded || isHovered || isMobileOpen ? (
+          {isMobileOpen ? null : isExpanded || isHovered ? (
             <>
               <Image
                 className="dark:hidden"
@@ -265,31 +281,24 @@ const AppSidebar: React.FC = () => {
                 <span className="text-sm font-semibold whitespace-nowrap text-gray-800 dark:text-white/90">
                   Reversed ATS Platform
                 </span>
-                <Tooltip>
-                  <TooltipTrigger asChild onClick={(e) => e.preventDefault()}>
-                    <button className="hover:text-brand-500 dark:hover:text-brand-400 text-gray-400 transition-colors dark:text-gray-500">
-                      <svg
-                        className="h-4 w-4"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        strokeWidth={2}
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                        />
-                      </svg>
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent side="right" className="max-w-[200px]">
-                    <p className="text-xs">
-                      ATS is a system used by HR to find the best candidates for their jobs
-                      automatically filtering CVs, Reversed ATS is find best job match your CV
-                    </p>
-                  </TooltipContent>
-                </Tooltip>
+                <button
+                  onClick={() => setIsHelpDialogOpen(true)}
+                  className="hover:text-brand-500 dark:hover:text-brand-400 text-gray-400 transition-colors dark:text-gray-500"
+                >
+                  <svg
+                    className="h-4 w-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                </button>
               </div>
             </>
           ) : (
@@ -313,6 +322,83 @@ const AppSidebar: React.FC = () => {
           </div>
         </nav>
       </div>
+
+      {typeof window !== 'undefined' &&
+        createPortal(
+          <AnimatePresence>
+            {isHelpDialogOpen && (
+              <div className="fixed inset-0 z-[100001]" role="dialog" aria-modal="true">
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="fixed inset-0 bg-black/60 backdrop-blur-sm"
+                  onClick={() => setIsHelpDialogOpen(false)}
+                  aria-hidden="true"
+                />
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95, y: '-50%', x: '-50%' }}
+                  animate={{ opacity: 1, scale: 1, y: '-50%', x: '-50%' }}
+                  exit={{ opacity: 0, scale: 0.95, y: '-50%', x: '-50%' }}
+                  transition={{ duration: 0.2 }}
+                  className="fixed top-[50%] left-[50%] z-[100002] grid w-full max-w-md gap-4 border border-gray-200 bg-white p-6 shadow-lg sm:rounded-xl dark:border-gray-800 dark:bg-gray-900"
+                >
+                  <button
+                    onClick={() => setIsHelpDialogOpen(false)}
+                    className="ring-offset-background absolute top-4 right-4 rounded-sm p-1 opacity-70 transition-opacity hover:bg-gray-100 hover:opacity-100 focus:ring-2 focus:outline-none disabled:pointer-events-none dark:hover:bg-gray-800"
+                    aria-label="Close dialog"
+                  >
+                    <svg
+                      className="h-5 w-5 text-gray-500 dark:text-gray-400"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                  <div className="flex flex-col space-y-2">
+                    <h2 className="text-lg leading-none font-semibold tracking-tight text-gray-900 dark:text-white">
+                      What is Reversed ATS?
+                    </h2>
+                    <div className="space-y-3">
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                        You may have heard of Applicant Tracking Systems (ATS), software used by
+                        companies to automatically screen and filter job applications before they
+                        reach human recruiters.
+                      </p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                        <strong className="text-gray-700 dark:text-gray-300">Reversed ATS</strong>{' '}
+                        flips this process - instead of companies filtering candidates, our platform
+                        helps you:
+                      </p>
+                      <ul className="ml-4 space-y-1 text-sm text-gray-500 dark:text-gray-400">
+                        <li className="flex items-start">
+                          <span className="text-brand-500 mr-2">•</span>
+                          Analyze your CV against job requirements
+                        </li>
+                        <li className="flex items-start">
+                          <span className="text-brand-500 mr-2">•</span>
+                          Identify skill gaps and improvement areas
+                        </li>
+                        <li className="flex items-start">
+                          <span className="text-brand-500 mr-2">•</span>
+                          Find jobs that best match your profile
+                        </li>
+                        <li className="flex items-start">
+                          <span className="text-brand-500 mr-2">•</span>
+                          Optimize your CV for fit with specific roles (SOON!)
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </motion.div>
+              </div>
+            )}
+          </AnimatePresence>,
+          document.body
+        )}
     </aside>
   );
 };

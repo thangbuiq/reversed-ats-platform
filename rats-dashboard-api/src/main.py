@@ -11,7 +11,7 @@ from .routes import health_router, jobs_router, predict_router
 
 load_dotenv()
 
-app = FastAPI(title=APP_TITLE)
+app = FastAPI(title=APP_TITLE, docs_url="/swagger", redoc_url=None)
 
 app.add_middleware(
     CORSMiddleware,

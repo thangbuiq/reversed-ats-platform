@@ -38,10 +38,10 @@ export default function JobsTable({
 
   const loadingMessages = React.useMemo(
     () => [
-      'Personalizing jobs based on your profile...',
       'Updating the latest opportunities...',
       'Finding the best matches...',
       'Fetching early bird roles...',
+      'Almost there, preparing your job list...',
     ],
     []
   );
@@ -462,7 +462,7 @@ export default function JobsTable({
 
       {/* ── Shadcn-style Dialog ── */}
       {selectedJob && (
-        <div className="fixed inset-0 z-[99999]">
+        <div className="fixed inset-0 z-[100001]">
           {/* Overlay */}
           <div
             className="animate-in fade-in fixed inset-0 bg-black/60 backdrop-blur-sm"

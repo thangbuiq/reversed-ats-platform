@@ -40,7 +40,7 @@ export default function JobDetailsModal({ job, onClose }: JobDetailsModalProps) 
   };
 
   return (
-    <div className="fixed inset-0 z-[99999]" role="dialog" aria-modal="true">
+    <div className="fixed inset-0 z-[100001]" role="dialog" aria-modal="true">
       {/* Overlay */}
       <motion.div
         initial={{ opacity: 0 }}
@@ -57,7 +57,7 @@ export default function JobDetailsModal({ job, onClose }: JobDetailsModalProps) 
         animate={{ opacity: 1, scale: 1, y: '-50%', x: '-50%' }}
         exit={{ opacity: 0, scale: 0.95, y: '-50%', x: '-50%' }}
         transition={{ duration: 0.2 }}
-        className="fixed top-[50%] left-[50%] z-50 grid w-full max-w-2xl gap-4 border border-gray-200 bg-white p-6 shadow-lg sm:rounded-xl dark:border-gray-800 dark:bg-gray-900"
+        className="fixed top-[50%] left-[50%] z-[100002] grid w-full max-w-2xl gap-4 border border-gray-200 bg-white p-6 shadow-lg sm:rounded-xl dark:border-gray-800 dark:bg-gray-900"
       >
         {/* Close Button */}
         <button
