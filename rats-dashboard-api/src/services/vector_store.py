@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from datetime import datetime
+
 from typing import Any
 
 from fastembed import TextEmbedding
@@ -120,7 +122,7 @@ class VectorStoreService:
         if cutoff_date:
             filter_conditions = models.Filter(
                 must=[
-                    models.FieldCondition(key="date_posted", range=models.Range(gte=cutoff_date)),
+                    models.FieldCondition(key="date_posted", range=models.Range(gte=datetime.fromisoformat(cutoff_date))),
                 ]
             )
 
