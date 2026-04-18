@@ -33,12 +33,12 @@ def _read_jobs(spark: SparkSession, table: str, full_scan: bool = True) -> list[
     """Read rows from the analytical jobs table."""
     columns = ", ".join(OUTPUT_SCHEMA_COLUMNS)
 
-    where_clause = ""
+    where_clause = " WHERE date_posted IS NOT NULL AND date_posted >= date_sub(current_date(), 30)"
     if not full_scan:
-        where_clause = " WHERE part_date >= date_format(date_sub(current_date(), 3), 'yyyy-MM-dd')"
-        logger.info(f"Reading jobs from {table} for the last 3 days")
+        where_clause += " AND part_date >= date_format(date_sub(current_date(), 3), 'yyyy-MM-dd')"
+        logger.info(f"Reading jobs from {table} for the last 3 days (excluding null and >30 days old)")
     else:
-        logger.info(f"Reading all jobs from {table}")
+        logger.info(f"Reading jobs from {table} (excluding null and >30 days old)")
 
     query = f"SELECT {columns} FROM {table}{where_clause} ORDER BY part_date DESC, inserted_at DESC"
     df = spark.sql(query)

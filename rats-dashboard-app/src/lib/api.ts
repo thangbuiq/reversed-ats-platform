@@ -7,8 +7,12 @@ const API_BASE = '/api';
 /**
  * Fetch paginated jobs from Qdrant via the API.
  */
-export async function fetchJobs(limit = 100, offset?: string | null): Promise<ShowAllJobsResponse> {
-  const params = new URLSearchParams({ limit: String(limit) });
+export async function fetchJobs(
+  limit = 100,
+  offset?: string | null,
+  daysBack = 7
+): Promise<ShowAllJobsResponse> {
+  const params = new URLSearchParams({ limit: String(limit), days_back: String(daysBack) });
   if (offset) params.set('offset', offset);
 
   const res = await fetch(`${API_BASE}/show-all-jobs?${params.toString()}`);

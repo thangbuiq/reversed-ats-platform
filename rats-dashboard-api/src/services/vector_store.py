@@ -112,16 +112,27 @@ class VectorStoreService:
             )
         return matches
 
-    def list_jobs(self, limit: int, offset: int | str | None) -> tuple[list[JobRecord], str | None, int]:
+    def list_jobs(
+        self, limit: int, offset: int | str | None, cutoff_date: str | None = None
+    ) -> tuple[list[JobRecord], str | None, int]:
         """List jobs from Qdrant collection for frontend rendering."""
+        filter_conditions = None
+        if cutoff_date:
+            filter_conditions = models.Filter(
+                must=[
+                    models.FieldCondition(key="date_posted", range=models.Range(gte=cutoff_date)),
+                ]
+            )
+
         records, next_offset = self._qdrant.scroll(
             collection_name=self._collection_name,
             limit=limit,
             offset=offset,
             with_payload=True,
             with_vectors=False,
+            filter=filter_conditions,
         )
-        total = self._qdrant.count(collection_name=self._collection_name, exact=True).count
+        total = self._qdrant.count(collection_name=self._collection_name, exact=True, filter=filter_conditions).count
         jobs: list[JobRecord] = []
         for record in records:
             payload = dict(record.payload or {})

@@ -10,12 +10,20 @@ import JobsTable from '@/components/jobs/JobsTable';
 
 const PAGE_SIZE = 50;
 
+const DAYS_OPTIONS = [
+  { value: 7, label: '7 days' },
+  { value: 14, label: '14 days' },
+  { value: 21, label: '21 days' },
+  { value: 30, label: '30 days' },
+];
+
 export default function DashboardPage() {
   const [jobs, setJobs] = useState<JobRecord[]>([]);
   const [filteredJobs, setFilteredJobs] = useState<JobRecord[]>([]);
   const [total, setTotal] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [daysBack, setDaysBack] = useState(7);
 
   const loadJobs = useCallback(async () => {
     setIsLoading(true);
@@ -27,7 +35,7 @@ export default function DashboardPage() {
       let iterations = 0;
 
       while (hasMore && iterations < 20) {
-        const data = await fetchJobs(PAGE_SIZE * 4, offset);
+        const data = await fetchJobs(PAGE_SIZE * 4, offset, daysBack);
         allJobs = allJobs.concat(data.jobs);
         offset = data.next_offset;
         if (!offset) {
@@ -44,7 +52,7 @@ export default function DashboardPage() {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [daysBack]);
 
   useEffect(() => {
     loadJobs();
@@ -104,10 +112,22 @@ export default function DashboardPage() {
             Overview of scraped LinkedIn job listings
           </p>
         </div>
-        <Link
-          href="/cv-match"
-          className="bg-brand-500 hover:bg-brand-600 inline-flex shrink-0 items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-medium text-white transition-colors"
-        >
+        <div className="flex items-center gap-3">
+          <select
+            value={daysBack}
+            onChange={(e) => setDaysBack(Number(e.target.value))}
+            className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-800"
+          >
+            {DAYS_OPTIONS.map((opt) => (
+              <option key={opt.value} value={opt.value}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
+          <Link
+            href="/cv-match"
+            className="bg-brand-500 hover:bg-brand-600 inline-flex shrink-0 items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-medium text-white transition-colors"
+          >
           <svg
             className="h-4 w-4"
             fill="none"
