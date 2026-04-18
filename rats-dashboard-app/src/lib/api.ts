@@ -9,10 +9,9 @@ const API_BASE = '/api';
  */
 export async function fetchJobs(
   limit = 100,
-  offset?: string | null,
-  daysBack = 7
+  offset?: string | null
 ): Promise<ShowAllJobsResponse> {
-  const params = new URLSearchParams({ limit: String(limit), days_back: String(daysBack) });
+  const params = new URLSearchParams({ limit: String(limit) });
   if (offset) params.set('offset', offset);
 
   const res = await fetch(`${API_BASE}/show-all-jobs?${params.toString()}`);

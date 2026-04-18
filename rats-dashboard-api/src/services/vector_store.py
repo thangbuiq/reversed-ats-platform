@@ -2,12 +2,13 @@
 
 from __future__ import annotations
 
-from datetime import datetime
-
+import logging
 from typing import Any
 
 from fastembed import TextEmbedding
 from qdrant_client import QdrantClient, models
+
+logger = logging.getLogger(__name__)
 
 from ..config import (
     COLLECTION_NAME,
@@ -49,6 +50,11 @@ class VectorStoreService:
                 collection_name=self._collection_name,
                 vectors_config=models.VectorParams(size=VECTOR_SIZE, distance=models.Distance.COSINE),
             )
+            self._qdrant.create_payload_index(
+                collection_name=self._collection_name,
+                field_name="date_posted",
+                field_schema=models.PayloadSchemaType.FLOAT,
+            )
             return
 
         if not self._qdrant.collection_exists(self._collection_name):
@@ -56,6 +62,14 @@ class VectorStoreService:
                 collection_name=self._collection_name,
                 vectors_config=models.VectorParams(size=VECTOR_SIZE, distance=models.Distance.COSINE),
             )
+        try:
+            self._qdrant.create_payload_index(
+                collection_name=self._collection_name,
+                field_name="date_posted",
+                field_schema=models.PayloadSchemaType.FLOAT,
+            )
+        except Exception:
+            pass
 
     def collection_exists(self) -> bool:
         return self._qdrant.collection_exists(self._collection_name)
@@ -114,27 +128,16 @@ class VectorStoreService:
             )
         return matches
 
-    def list_jobs(
-        self, limit: int, offset: int | str | None, cutoff_date: str | None = None
-    ) -> tuple[list[JobRecord], str | None, int]:
+    def list_jobs(self, limit: int, offset: int | str | None) -> tuple[list[JobRecord], str | None, int]:
         """List jobs from Qdrant collection for frontend rendering."""
-        filter_conditions = None
-        if cutoff_date:
-            filter_conditions = models.Filter(
-                must=[
-                    models.FieldCondition(key="date_posted", range=models.Range(gte=datetime.fromisoformat(cutoff_date))),
-                ]
-            )
-
         records, next_offset = self._qdrant.scroll(
             collection_name=self._collection_name,
             limit=limit,
             offset=offset,
             with_payload=True,
             with_vectors=False,
-            filter=filter_conditions,
         )
-        total = self._qdrant.count(collection_name=self._collection_name, exact=True, filter=filter_conditions).count
+        total = self._qdrant.count(collection_name=self._collection_name, exact=True).count
         jobs: list[JobRecord] = []
         for record in records:
             payload = dict(record.payload or {})
