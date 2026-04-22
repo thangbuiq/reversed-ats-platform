@@ -124,6 +124,7 @@ export default function DashboardPage() {
           </svg>
           CV Matcher
         </Link>
+        </div>
       </div>
 
       {error && (
