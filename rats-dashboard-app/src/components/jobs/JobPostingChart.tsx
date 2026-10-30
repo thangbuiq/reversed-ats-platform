@@ -2,98 +2,149 @@
 import React from 'react';
 import dynamic from 'next/dynamic';
 import type { ApexOptions } from 'apexcharts';
+import { levelColor, type DailyStat } from '@/lib/jobStats';
+import { renderTooltip, type Trend } from '@/lib/chartTooltip';
 
 const ReactApexChart = dynamic(() => import('react-apexcharts'), {
   ssr: false,
 });
 
 interface JobPostingChartProps {
-  /** Array of { date: string; count: number } sorted by date ascending. */
-  data: { date: string; count: number }[];
+  /** Daily stats sorted by date ascending. */
+  data: DailyStat[];
+  /** Every level present, used to keep level colors consistent across charts. */
+  levels: string[];
 }
 
-export default function JobPostingChart({ data }: JobPostingChartProps) {
+const TREND_WINDOW = 7;
+const MAX_X_LABELS = 6;
+const CHART_HEIGHT = 300;
+const MOBILE_CHART_HEIGHT = 240;
+const MOBILE_MAX_X_LABELS = 3;
+
+function shortDate(date: string): string {
+  const parsed = new Date(date);
+  return Number.isNaN(parsed.getTime())
+    ? date
+    : parsed.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+}
+
+function describeChange(
+  current: number,
+  previous: number | undefined
+): { text: string; trend?: Trend } {
+  if (previous === undefined) return { text: 'First day' };
+  const diff = current - previous;
+  const trend: Trend = diff > 0 ? 'up' : diff < 0 ? 'down' : 'flat';
+  return { text: `${diff > 0 ? '+' : ''}${diff} vs previous day`, trend };
+}
+
+export default function JobPostingChart({ data, levels }: JobPostingChartProps) {
+  const total = data.reduce((sum, d) => sum + d.count, 0);
   const categories = data.map((d) => d.date);
-  const series = [{ name: 'Jobs Posted', data: data.map((d) => d.count) }];
 
   const options: ApexOptions = {
     chart: {
-      fontFamily: 'Outfit, sans-serif',
-      height: 240,
+      fontFamily: 'inherit',
+      height: CHART_HEIGHT,
+      width: '100%',
       type: 'area',
       toolbar: { show: false },
       zoom: { enabled: false },
     },
-    colors: ['#465FFF'],
-    stroke: {
-      curve: 'smooth',
-      width: 2,
-    },
+    colors: ['#DC2626'],
+    stroke: { curve: 'smooth', width: 2 },
     fill: {
       type: 'gradient',
-      gradient: {
-        shadeIntensity: 1,
-        opacityFrom: 0.45,
-        opacityTo: 0.05,
-        stops: [0, 100],
-      },
+      gradient: { shadeIntensity: 1, opacityFrom: 0.45, opacityTo: 0.05, stops: [0, 100] },
     },
-    markers: {
-      size: 0,
-      strokeColors: '#fff',
-      strokeWidth: 2,
-      hover: { size: 6 },
-    },
+    markers: { size: 0, strokeColors: '#fff', strokeWidth: 2, hover: { size: 6 } },
     grid: {
-      borderColor: '#e5e7eb',
       xaxis: { lines: { show: false } },
       yaxis: { lines: { show: true } },
     },
     dataLabels: { enabled: false },
     tooltip: {
-      enabled: true,
-      theme: 'light',
-      style: { fontSize: '12px' },
-      x: { format: 'dd MMM yyyy' },
+      custom: ({ dataPointIndex }: { dataPointIndex: number }) => {
+        const day = data[dataPointIndex];
+        const window = data.slice(
+          Math.max(0, dataPointIndex - TREND_WINDOW + 1),
+          dataPointIndex + 1
+        );
+        const average = window.reduce((sum, d) => sum + d.count, 0) / window.length;
+        const change = describeChange(day.count, data[dataPointIndex - 1]?.count);
+        return renderTooltip(
+          day.date,
+          { label: 'new jobs', value: day.count.toLocaleString() },
+          [
+            ['Change', change.text, change.trend],
+            [`${window.length}-day average`, average.toFixed(1)],
+            ['Share of range', `${((day.count / total) * 100).toFixed(1)}%`],
+            ['Most active company', day.topCompany ?? 'N/A'],
+          ],
+          {
+            title: 'By level',
+            items: Object.entries(day.levelCounts)
+              .sort((a, b) => b[1] - a[1])
+              .map(([label, value]) => ({ label, value, color: levelColor(label, levels) })),
+          }
+        );
+      },
     },
     xaxis: {
       type: 'category',
       categories,
       axisBorder: { show: false },
       axisTicks: { show: false },
+      tickAmount: Math.min(Math.max(categories.length - 1, 1), MAX_X_LABELS),
       labels: {
-        style: { fontSize: '12px', colors: '#6B7280' },
-        rotate: -45,
-        rotateAlways: categories.length > 14,
+        style: { fontSize: '12px' },
+        rotate: 0,
+        hideOverlappingLabels: true,
+        formatter: (value: string) => shortDate(value),
       },
       tooltip: { enabled: false },
     },
     yaxis: {
       labels: {
-        style: { fontSize: '12px', colors: ['#6B7280'] },
+        style: { fontSize: '12px' },
         formatter: (val: number) => Math.round(val).toString(),
       },
-      title: { text: '' },
     },
+    responsive: [
+      {
+        breakpoint: 640,
+        options: {
+          chart: { height: MOBILE_CHART_HEIGHT },
+          xaxis: {
+            tickAmount: Math.min(Math.max(categories.length - 1, 1), MOBILE_MAX_X_LABELS),
+            labels: { style: { fontSize: '11px' } },
+          },
+          yaxis: { labels: { style: { fontSize: '11px' } } },
+        },
+      },
+    ],
   };
 
   return (
-    <div className="rounded-2xl border border-gray-200 bg-white p-5 md:p-6 dark:border-gray-800 dark:bg-white/[0.03]">
-      <div className="mb-4 flex items-center justify-between">
+    <div className="h-full min-w-0 overflow-hidden rounded-2xl border border-gray-200 bg-white p-4 sm:p-5 md:p-6 dark:border-gray-400/20 dark:bg-gray-800">
+      <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
         <div>
           <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">
             Jobs Posted by Day
           </h3>
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            Daily count of new job postings
+            {total.toLocaleString()} new postings in {data.length} day{data.length === 1 ? '' : 's'}
           </p>
         </div>
       </div>
-      <div className="custom-scrollbar max-w-full overflow-x-auto">
-        <div className="h-[240px] min-w-[600px]">
-          <ReactApexChart options={options} series={series} type="area" height={240} />
-        </div>
-      </div>
+      <ReactApexChart
+        options={options}
+        series={[{ name: 'Jobs Posted', data: data.map((d) => d.count) }]}
+        type="area"
+        width="100%"
+        height={CHART_HEIGHT}
+      />
     </div>
   );
 }

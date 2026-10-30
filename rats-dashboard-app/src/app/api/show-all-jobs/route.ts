@@ -1,14 +1,10 @@
 import { NextResponse } from 'next/server';
-
-const API_BASE =
-  process.env.NEXT_BASE_API_URL?.replace(/\/+$/, '') ??
-  process.env.NEXT_PUBLIC_API_URL?.replace(/\/+$/, '') ??
-  'http://127.0.0.1:8000';
+import { BACKEND_API_URL } from '@/lib/apiBase';
 
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
-    const backendUrl = `${API_BASE}/show-all-jobs?${searchParams.toString()}`;
+    const backendUrl = `${BACKEND_API_URL}/show-all-jobs?${searchParams.toString()}`;
     const res = await fetch(backendUrl);
 
     if (!res.ok) {

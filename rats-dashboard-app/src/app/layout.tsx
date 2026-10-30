@@ -1,12 +1,13 @@
-import { Outfit } from 'next/font/google';
+import { JetBrains_Mono } from 'next/font/google';
+import './fonts.css';
 import './globals.css';
 import 'flatpickr/dist/flatpickr.css';
 import { SidebarProvider } from '@/context/SidebarContext';
-import { ThemeProvider } from '@/context/ThemeContext';
 import { TooltipProvider } from '@/components/ui/tooltip';
 
-const outfit = Outfit({
+const jetbrainsMono = JetBrains_Mono({
   subsets: ['latin'],
+  variable: '--font-jetbrains-mono',
 });
 
 export const metadata = {
@@ -25,12 +26,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${outfit.className} dark:bg-gray-900`}>
-        <ThemeProvider>
-          <TooltipProvider>
-            <SidebarProvider>{children}</SidebarProvider>
-          </TooltipProvider>
-        </ThemeProvider>
+      <body className={jetbrainsMono.variable} suppressHydrationWarning>
+        <TooltipProvider>
+          <SidebarProvider>{children}</SidebarProvider>
+        </TooltipProvider>
       </body>
     </html>
   );

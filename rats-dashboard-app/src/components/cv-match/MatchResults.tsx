@@ -12,9 +12,9 @@ interface MatchResultsProps {
   totalMatches: number;
 }
 
-function scoreColor(score: number): 'success' | 'warning' | 'error' {
+function scoreColor(score: number): 'success' | 'light' | 'error' {
   if (score >= 0.7) return 'success';
-  if (score >= 0.4) return 'warning';
+  if (score >= 0.4) return 'light';
   return 'error';
 }
 
@@ -25,9 +25,9 @@ export default function MatchResults({ matches, totalMatches }: MatchResultsProp
       initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
-      className="rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]"
+      className="rounded-2xl border border-gray-200 bg-white dark:border-gray-400/20 dark:bg-gray-800"
     >
-      <div className="border-b border-gray-100 p-5 md:p-6 dark:border-gray-800">
+      <div className="border-b border-gray-100 p-5 md:p-6 dark:border-gray-400/20">
         <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">Matched Jobs</h3>
         <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
           {totalMatches} matching {totalMatches === 1 ? 'job' : 'jobs'} found
@@ -122,7 +122,7 @@ export default function MatchResults({ matches, totalMatches }: MatchResultsProp
                     target="_blank"
                     rel="noopener noreferrer"
                     onClick={(e) => e.stopPropagation()}
-                    className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-gray-200 px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-white/[0.03]"
+                    className="btn btn-md shrink-0"
                   >
                     Apply
                     <svg
@@ -156,7 +156,7 @@ export default function MatchResults({ matches, totalMatches }: MatchResultsProp
                       match.score >= 0.7
                         ? 'bg-success-500'
                         : match.score >= 0.4
-                          ? 'bg-warning-500'
+                          ? 'bg-gray-400'
                           : 'bg-error-500'
                     }`}
                     style={{ width: `${Math.min(match.score * 100, 100)}%` }}

@@ -1,9 +1,5 @@
 import { NextResponse } from 'next/server';
-
-const API_BASE =
-  process.env.NEXT_BASE_API_URL?.replace(/\/+$/, '') ??
-  process.env.NEXT_PUBLIC_API_URL?.replace(/\/+$/, '') ??
-  'http://127.0.0.1:8000';
+import { BACKEND_API_URL } from '@/lib/apiBase';
 
 export async function POST(req: Request) {
   try {
@@ -11,7 +7,7 @@ export async function POST(req: Request) {
     // Reading as formData ensures we can pass it to the backend safely.
     const formData = await req.formData();
 
-    const backendUrl = `${API_BASE}/predict-best-match-job`;
+    const backendUrl = `${BACKEND_API_URL}/predict-best-match-job`;
     const res = await fetch(backendUrl, {
       method: 'POST',
       body: formData,

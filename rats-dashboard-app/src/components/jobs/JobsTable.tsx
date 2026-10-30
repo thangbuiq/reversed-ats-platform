@@ -5,34 +5,27 @@ import { Table, TableBody, TableCell, TableHeader, TableRow } from '@/components
 import Badge from '@/components/ui/badge/Badge';
 import type { JobRecord } from '@/types/api';
 import { fetchJobDetail } from '@/lib/api';
+import { countLevels, levelOf } from '@/lib/jobStats';
 import { freshnessInfo } from '@/lib/freshness';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select/Select';
+import { LevelLabel, LevelLegend } from '@/components/jobs/LevelLabel';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface JobsTableProps {
+  /** Jobs already filtered and sorted by the dashboard filters. */
   jobs: JobRecord[];
-  total: number;
+  /** Every level present, most frequent first; drives the legend colors shared with the charts. */
+  levels: string[];
   isLoading?: boolean;
-  onFilterChange?: (filteredJobs: JobRecord[]) => void;
+  hasActiveFilters?: boolean;
 }
 
 export default function JobsTable({
   jobs,
-  total,
+  levels,
   isLoading = false,
-  onFilterChange,
+  hasActiveFilters = false,
 }: JobsTableProps) {
-  const [search, setSearch] = React.useState('');
-  const [dateFilter, setDateFilter] = React.useState('');
-  const [companyFilter, setCompanyFilter] = React.useState('');
-  const [levelFilter, setLevelFilter] = React.useState('');
   const [selectedJob, setSelectedJob] = React.useState<JobRecord | null>(null);
   const [jobDetail, setJobDetail] = React.useState<JobRecord | null>(null);
 
@@ -74,97 +67,13 @@ export default function JobsTable({
     return () => clearInterval(interval);
   }, [isLoading, loadingMessages]);
 
-  const [now] = React.useState(() => Date.now());
-
-  const passesDate = React.useCallback(
-    (j: JobRecord) => {
-      let thresholdDays = 0;
-      if (dateFilter === '24h') thresholdDays = 1;
-      else if (dateFilter === '7d') thresholdDays = 7;
-      else if (dateFilter === '30d') thresholdDays = 30;
-
-      if (thresholdDays === 0) return true;
-      const d = j.payload?.date_posted;
-      if (!d || d === '—') return false;
-      const diff = (now - new Date(String(d)).getTime()) / 86400000;
-      return diff <= thresholdDays;
-    },
-    [dateFilter, now]
-  );
-
-  const passesSearch = React.useCallback(
-    (j: JobRecord) => {
-      if (!search.trim()) return true;
-      const q = search.toLowerCase();
-      return Boolean(
-        j.job_title?.toLowerCase().includes(q) ||
-        j.company_name?.toLowerCase().includes(q) ||
-        j.location?.toLowerCase().includes(q)
-      );
-    },
-    [search]
-  );
-
-  const uniqueCompanies = React.useMemo(() => {
-    const set = new Set<string>();
-    jobs.forEach((j) => {
-      if (j.company_name) {
-        if (levelFilter && j.payload?.job_level !== levelFilter) return;
-        if (!passesDate(j)) return;
-        if (!passesSearch(j)) return;
-        set.add(j.company_name);
-      }
-    });
-    return Array.from(set).sort();
-  }, [jobs, levelFilter, passesDate, passesSearch]);
-
-  const uniqueLevels = React.useMemo(() => {
-    const set = new Set<string>();
-    jobs.forEach((j) => {
-      const l = j.payload?.job_level;
-      if (l && typeof l === 'string' && l !== '—') {
-        if (companyFilter && j.company_name !== companyFilter) return;
-        if (!passesDate(j)) return;
-        if (!passesSearch(j)) return;
-        set.add(l);
-      }
-    });
-    return Array.from(set).sort();
-  }, [jobs, companyFilter, passesDate, passesSearch]);
-
-  const sortedAndFiltered = React.useMemo(() => {
-    let result = jobs.filter(
-      (j) =>
-        passesDate(j) &&
-        (!companyFilter || j.company_name === companyFilter) &&
-        (!levelFilter || j.payload?.job_level === levelFilter) &&
-        passesSearch(j)
-    );
-
-    result.sort((a, b) => {
-      const da =
-        a.payload?.date_posted && a.payload.date_posted !== '—'
-          ? new Date(String(a.payload.date_posted)).getTime()
-          : 0;
-      const db =
-        b.payload?.date_posted && b.payload.date_posted !== '—'
-          ? new Date(String(b.payload.date_posted)).getTime()
-          : 0;
-      return db - da;
-    });
-
-    return result;
-  }, [jobs, companyFilter, levelFilter, passesDate, passesSearch]);
-
-  React.useEffect(() => {
-    if (onFilterChange) onFilterChange(sortedAndFiltered);
-  }, [sortedAndFiltered, onFilterChange]);
-
   React.useEffect(() => {
     setRenderLimit(50);
-  }, [search, dateFilter, companyFilter, levelFilter]);
+  }, [jobs]);
 
-  const paginatedJobs = sortedAndFiltered.slice(0, renderLimit);
+  const levelCounts = React.useMemo(() => countLevels(jobs), [jobs]);
+
+  const paginatedJobs = jobs.slice(0, renderLimit);
 
   const getPayloadField = (job: JobRecord, key: string): string => {
     const val = job.payload?.[key];
@@ -204,93 +113,17 @@ export default function JobsTable({
         initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
-        className="rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]"
+        className="rounded-2xl border border-gray-200 bg-white dark:border-gray-400/20 dark:bg-gray-800"
       >
         {/* Header */}
-        <div className="flex flex-col gap-4 border-b border-gray-100 p-5 md:p-6 dark:border-gray-800">
+        <div className="flex flex-col gap-4 border-b border-gray-100 p-5 md:p-6 dark:border-gray-400/20">
           <div>
             <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">Job Listings</h3>
             <p className="text-sm text-gray-500 dark:text-gray-400">
-              {sortedAndFiltered.length.toLocaleString()} matching jobs
+              {jobs.length.toLocaleString()} matching jobs
             </p>
           </div>
-
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            <Select
-              value={dateFilter || 'all'}
-              onValueChange={(val) => setDateFilter(val === 'all' ? '' : val)}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Any time" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Any time</SelectItem>
-                <SelectItem value="24h">Past 24 hours</SelectItem>
-                <SelectItem value="7d">Past week</SelectItem>
-                <SelectItem value="30d">Past month</SelectItem>
-              </SelectContent>
-            </Select>
-
-            <Select
-              value={companyFilter || 'all'}
-              onValueChange={(val) => setCompanyFilter(val === 'all' ? '' : val)}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="All companies" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All companies</SelectItem>
-                {uniqueCompanies.map((c) => (
-                  <SelectItem key={c} value={c}>
-                    {c.substring(0, 30)}
-                    {c.length > 30 ? '...' : ''}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            <Select
-              value={levelFilter || 'all'}
-              onValueChange={(val) => setLevelFilter(val === 'all' ? '' : val)}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="All levels" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All levels</SelectItem>
-                {uniqueLevels.map((l) => (
-                  <SelectItem key={l} value={l}>
-                    {l}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            <div className="relative">
-              <span className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2">
-                <svg
-                  className="h-4 w-4 text-gray-400"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={2}
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"
-                  />
-                </svg>
-              </span>
-              <input
-                type="text"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Filter keywords…"
-                className="focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 h-10 w-full rounded-lg border border-gray-200 bg-transparent py-2 pr-3 pl-9 text-sm text-gray-800 placeholder:text-gray-400 focus:ring-3 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30"
-              />
-            </div>
-          </div>
+          <LevelLegend levels={levels} counts={levelCounts} />
         </div>
 
         {/* Table */}
@@ -348,13 +181,13 @@ export default function JobsTable({
                       </div>
                     </TableCell>
                   </TableRow>
-                ) : sortedAndFiltered.length === 0 ? (
+                ) : jobs.length === 0 ? (
                   <TableRow>
                     <TableCell
                       colSpan={7}
                       className="px-5 py-12 text-center text-gray-400 dark:text-gray-500"
                     >
-                      {search.trim()
+                      {hasActiveFilters
                         ? 'No jobs match your filter.'
                         : 'No jobs found. Try materializing jobs first.'}
                     </TableCell>
@@ -418,13 +251,7 @@ export default function JobsTable({
                           )}
                         </TableCell>
                         <TableCell className="px-4 py-3 text-start">
-                          {getPayloadField(job, 'job_level') !== '—' ? (
-                            <Badge size="sm" color="info">
-                              {getPayloadField(job, 'job_level')}
-                            </Badge>
-                          ) : (
-                            <span className="text-theme-xs text-gray-400">—</span>
-                          )}
+                          <LevelLabel level={levelOf(job)} levels={levels} />
                         </TableCell>
                         <TableCell
                           className="px-4 py-3 text-start"
@@ -466,12 +293,9 @@ export default function JobsTable({
         </div>
 
         {/* Pagination */}
-        {renderLimit < sortedAndFiltered.length && (
-          <div className="flex justify-center border-t border-gray-100 p-5 dark:border-gray-800">
-            <button
-              onClick={() => setRenderLimit((prev) => prev + 50)}
-              className="rounded-lg border border-gray-200 bg-white px-5 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
-            >
+        {renderLimit < jobs.length && (
+          <div className="flex justify-center border-t border-gray-100 p-5 dark:border-gray-400/20">
+            <button onClick={() => setRenderLimit((prev) => prev + 50)} className="btn btn-md px-5">
               Show More
             </button>
           </div>
@@ -500,7 +324,7 @@ export default function JobsTable({
               {/* Close button – top right, inside card */}
               <button
                 onClick={() => setSelectedJob(null)}
-                className="absolute top-4 right-4 z-10 rounded-md p-1 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-800 dark:hover:text-gray-200"
+                className="btn absolute top-4 right-4 z-10 size-8 p-0"
               >
                 <svg
                   className="h-4 w-4"
@@ -523,11 +347,7 @@ export default function JobsTable({
                   {selectedJob.location ? ` · ${selectedJob.location}` : ''}
                 </p>
                 <div className="mt-3 flex flex-wrap gap-2">
-                  {getPayloadField(selectedJob, 'job_level') !== '—' && (
-                    <Badge size="sm" color="info">
-                      {getPayloadField(selectedJob, 'job_level')}
-                    </Badge>
-                  )}
+                  <LevelLabel level={levelOf(selectedJob)} levels={levels} />
                   {getPayloadField(selectedJob, 'job_type') !== '—' && (
                     <Badge size="sm" color="light">
                       {getPayloadField(selectedJob, 'job_type')}
@@ -572,11 +392,8 @@ export default function JobsTable({
               </div>
 
               {/* Footer */}
-              <div className="flex items-center justify-end gap-3 border-t border-gray-100 px-6 py-4 dark:border-gray-800">
-                <button
-                  onClick={() => setSelectedJob(null)}
-                  className="rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
-                >
+              <div className="flex items-center justify-end gap-3 border-t border-gray-100 px-6 py-4 dark:border-gray-400/20">
+                <button onClick={() => setSelectedJob(null)} className="btn btn-md">
                   Close
                 </button>
                 {selectedJob.job_url && (
@@ -584,7 +401,7 @@ export default function JobsTable({
                     href={selectedJob.job_url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="bg-brand-500 hover:bg-brand-600 inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors"
+                    className="btn-accent btn-md"
                   >
                     Apply Now
                     <svg
