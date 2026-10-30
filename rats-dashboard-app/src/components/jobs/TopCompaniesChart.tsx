@@ -84,9 +84,7 @@ export default function TopCompaniesChart({ companies, levels }: TopCompaniesCha
 
   return (
     <div className="h-full min-w-0 overflow-hidden rounded-2xl border border-gray-200 bg-white p-4 sm:p-5 md:p-6 dark:border-gray-400/20 dark:bg-gray-800">
-      <h3 className="mb-1 text-lg font-semibold text-gray-800 dark:text-white/90">
-        Top Hiring Companies
-      </h3>
+      <h3 className="font-display mb-1 text-xl font-medium text-gray-900">Top Hiring Companies</h3>
       <p className="mb-4 text-sm text-gray-500 dark:text-gray-400">
         Open listings per company, split by level
       </p>

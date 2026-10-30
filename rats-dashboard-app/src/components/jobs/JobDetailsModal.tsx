@@ -1,9 +1,15 @@
-import React, { useEffect } from 'react';
+'use client';
+import React, { useEffect, useSyncExternalStore } from 'react';
+import { createPortal } from 'react-dom';
 import Markdown from 'react-markdown';
+import { AnimatePresence, motion } from 'framer-motion';
+import { ExternalLink, X } from 'lucide-react';
 import Badge from '@/components/ui/badge/Badge';
 import { freshnessInfo } from '@/lib/freshness';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { LevelLabel } from '@/components/jobs/LevelLabel';
+
+const EASE_OUT = [0.22, 1, 0.36, 1] as const;
+const noopSubscribe = () => () => {};
 
 export interface JobDetailsModalProps {
   job: {
@@ -14,155 +20,145 @@ export interface JobDetailsModalProps {
     payload: Record<string, unknown>;
   } | null;
   onClose: () => void;
+  /** Level order used by the charts, so the level dot keeps its color. */
+  levels?: string[];
+  /** True while the full description is still being fetched. */
+  isLoadingDescription?: boolean;
 }
 
-export default function JobDetailsModal({ job, onClose }: JobDetailsModalProps) {
+function payloadField(payload: Record<string, unknown> | undefined, key: string): string | null {
+  const val = payload?.[key];
+  return val === null || val === undefined || val === '' || val === '—' ? null : String(val);
+}
+
+/**
+ * Job details dialog. Rendered into document.body so transformed ancestors (reveal animations)
+ * cannot trap its fixed positioning; slides up as a bottom sheet on phones.
+ */
+export default function JobDetailsModal({
+  job,
+  onClose,
+  levels = [],
+  isLoadingDescription = false,
+}: JobDetailsModalProps) {
+  const isClient = useSyncExternalStore(
+    noopSubscribe,
+    () => true,
+    () => false
+  );
+
   useEffect(() => {
+    if (!job) return;
     const handleEsc = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
     };
-    if (job) {
-      document.addEventListener('keydown', handleEsc);
-      document.body.style.overflow = 'hidden';
-    }
+    document.addEventListener('keydown', handleEsc);
+    document.body.style.overflow = 'hidden';
     return () => {
       document.removeEventListener('keydown', handleEsc);
-      document.body.style.overflow = 'unset';
+      document.body.style.overflow = '';
     };
   }, [job, onClose]);
 
-  if (!job) return null;
+  if (!isClient) return null;
 
-  const getPayloadField = (key: string): string => {
-    const val = job.payload?.[key];
-    if (val === null || val === undefined || val === '') return '—';
-    return String(val);
-  };
+  const level = payloadField(job?.payload, 'job_level');
+  const jobType = payloadField(job?.payload, 'job_type');
+  const datePosted = payloadField(job?.payload, 'date_posted');
+  const description = payloadField(job?.payload, 'job_description');
+  const fresh = datePosted ? freshnessInfo(datePosted) : null;
 
-  return (
-    <div className="fixed inset-0 z-[100001]" role="dialog" aria-modal="true">
-      {/* Overlay */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        className="fixed inset-0 bg-black/60 backdrop-blur-sm"
-        onClick={onClose}
-        aria-hidden="true"
-      />
-
-      {/* Content Frame (Shadcn Radix Dialog alike) */}
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95, y: '-50%', x: '-50%' }}
-        animate={{ opacity: 1, scale: 1, y: '-50%', x: '-50%' }}
-        exit={{ opacity: 0, scale: 0.95, y: '-50%', x: '-50%' }}
-        transition={{ duration: 0.2 }}
-        className="fixed top-[50%] left-[50%] z-[100002] grid w-full max-w-2xl gap-4 border border-gray-200 bg-white p-6 shadow-lg sm:rounded-xl dark:border-gray-400/20 dark:bg-gray-900"
-      >
-        {/* Close Button */}
-        <button
-          onClick={onClose}
-          className="btn absolute top-4 right-4 size-8 p-0"
-          aria-label="Close dialog"
+  return createPortal(
+    <AnimatePresence>
+      {job && (
+        <div
+          className="fixed inset-0 z-[100001] flex items-end justify-center sm:items-center sm:p-6"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="job-details-title"
         >
-          <svg
-            className="h-4 w-4"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth={2}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.25 }}
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            onClick={onClose}
+            aria-hidden="true"
+          />
+          <motion.div
+            initial={{ opacity: 0, y: 48 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 48 }}
+            transition={{ duration: 0.4, ease: EASE_OUT }}
+            className="relative flex max-h-[88dvh] w-full max-w-2xl flex-col rounded-t-[16px] border border-gray-200 bg-white shadow-2xl sm:max-h-[85vh] sm:rounded-[9px]"
           >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
+            <div className="mx-auto mt-2.5 h-1 w-10 rounded-full bg-gray-200 sm:hidden" />
+            <div className="flex items-start gap-4 p-5 pb-4 sm:p-6 sm:pb-4">
+              <div className="min-w-0 flex-1">
+                <h2
+                  id="job-details-title"
+                  className="font-display text-xl leading-tight font-medium text-gray-900 sm:text-2xl"
+                >
+                  {job.job_title ?? 'Untitled position'}
+                </h2>
+                <p className="mt-1 text-sm text-gray-500">
+                  {job.company_name}
+                  {job.location ? ` · ${job.location}` : ''}
+                </p>
+                <div className="mt-3 flex flex-wrap items-center gap-2">
+                  {level && <LevelLabel level={level} levels={levels} />}
+                  {jobType && (
+                    <Badge size="sm" color="light">
+                      {jobType}
+                    </Badge>
+                  )}
+                  {fresh && (
+                    <Badge size="sm" color={fresh.isEarlyBird ? 'success' : 'light'}>
+                      {fresh.isEarlyBird ? `🐣 ${fresh.label}` : fresh.label}
+                    </Badge>
+                  )}
+                </div>
+              </div>
+              <button onClick={onClose} className="btn btn-icon" aria-label="Close dialog">
+                <X size={16} />
+              </button>
+            </div>
 
-        {/* Header */}
-        <div className="flex flex-col space-y-1.5 pr-8 text-center sm:text-left">
-          <h2 className="text-xl leading-none font-semibold tracking-tight text-gray-900 dark:text-white">
-            {job.job_title}
-          </h2>
-          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-            {job.company_name}
-            {job.location ? ` · ${job.location}` : ''}
-          </p>
+            <div className="custom-scrollbar min-h-0 flex-1 overflow-y-auto border-t border-gray-100 px-5 py-4 sm:px-6">
+              {isLoadingDescription ? (
+                <div className="space-y-3">
+                  {['w-full', 'w-11/12', 'w-4/5', 'w-full', 'w-2/3'].map((width, i) => (
+                    <div key={i} className={`skeleton h-3.5 rounded ${width}`} />
+                  ))}
+                </div>
+              ) : (
+                <div className="max-w-none text-sm leading-relaxed text-gray-700 [&_h1]:mt-5 [&_h1]:mb-2 [&_h1]:font-semibold [&_h1]:text-gray-900 [&_h2]:mt-4 [&_h2]:mb-2 [&_h2]:font-semibold [&_h2]:text-gray-900 [&_h3]:mt-3 [&_h3]:mb-1 [&_h3]:font-semibold [&_li]:mb-1 [&_ol]:mb-3 [&_ol]:list-decimal [&_ol]:pl-5 [&_p]:mb-3 [&_strong]:text-gray-900 [&_ul]:mb-3 [&_ul]:list-disc [&_ul]:pl-5">
+                  <Markdown>{description ?? '*No description available.*'}</Markdown>
+                </div>
+              )}
+            </div>
 
-          <div className="flex flex-wrap gap-2 pt-2">
-            {getPayloadField('job_level') !== '—' && (
-              <Badge size="sm" color="info">
-                {getPayloadField('job_level')}
-              </Badge>
-            )}
-            {getPayloadField('job_type') !== '—' && (
-              <Badge size="sm" color="light">
-                {getPayloadField('job_type')}
-              </Badge>
-            )}
-            {getPayloadField('date_posted') !== '—' &&
-              (() => {
-                const fi = freshnessInfo(getPayloadField('date_posted'));
-                return fi.isEarlyBird ? (
-                  <Tooltip key="earlybird-badge">
-                    <TooltipTrigger asChild>
-                      <div className="inline-block">
-                        <Badge size="sm" color={fi.color}>
-                          🐣 {fi.label}
-                        </Badge>
-                      </div>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p className="text-sm">Apply fast for early birds</p>
-                    </TooltipContent>
-                  </Tooltip>
-                ) : (
-                  <Badge key="date-badge" size="sm" color={fi.color}>
-                    {fi.label}
-                  </Badge>
-                );
-              })()}
-          </div>
+            <div className="flex gap-3 border-t border-gray-100 p-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:justify-end sm:px-6">
+              <button onClick={onClose} className="btn btn-md h-11 flex-1 sm:h-auto sm:flex-none">
+                Close
+              </button>
+              {job.job_url && (
+                <a
+                  href={job.job_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn-accent btn-md h-11 flex-1 sm:h-auto sm:flex-none"
+                >
+                  Apply now
+                  <ExternalLink size={14} />
+                </a>
+              )}
+            </div>
+          </motion.div>
         </div>
-
-        {/* Scrollable Body */}
-        <div className="custom-scrollbar my-2 max-h-[60vh] overflow-y-auto pr-2">
-          <div className="prose prose-sm dark:prose-invert max-w-none leading-8 text-gray-700 dark:text-gray-300 [&>h1]:mt-6 [&>h2]:mt-5 [&>h3]:mt-4 [&>li]:mb-2 [&>ol]:mb-4 [&>p]:mb-4 [&>ul]:mb-4">
-            <Markdown>
-              {getPayloadField('job_description') !== '—'
-                ? getPayloadField('job_description')
-                : '*No description available.*'}
-            </Markdown>
-          </div>
-        </div>
-
-        {/* Footer */}
-        <div className="flex flex-col-reverse pt-2 sm:flex-row sm:justify-end sm:space-x-3">
-          <button onClick={onClose} className="btn btn-md mt-3 w-full sm:mt-0 sm:w-auto">
-            Close
-          </button>
-          {job.job_url && (
-            <a
-              href={job.job_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn-accent btn-md w-full sm:w-auto"
-            >
-              Apply Now
-              <svg
-                className="h-3.5 w-3.5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-                />
-              </svg>
-            </a>
-          )}
-        </div>
-      </motion.div>
-    </div>
+      )}
+    </AnimatePresence>,
+    document.body
   );
 }

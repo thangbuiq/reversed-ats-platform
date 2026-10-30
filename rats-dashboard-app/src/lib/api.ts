@@ -7,10 +7,7 @@ const API_BASE = '/api';
 /**
  * Fetch a page of jobs (newest first, without descriptions) from Neon via the API.
  */
-export async function fetchJobs(
-  limit = 100,
-  offset?: string | null
-): Promise<ShowAllJobsResponse> {
+export async function fetchJobs(limit = 100, offset?: string | null): Promise<ShowAllJobsResponse> {
   const params = new URLSearchParams({ limit: String(limit) });
   if (offset) params.set('offset', offset);
 
@@ -53,9 +50,20 @@ export async function predictBestMatchJob(
     method: 'POST',
     body: form,
   });
-  if (!res.ok) {
-    const body = await res.text();
-    throw new Error(`Prediction failed: ${res.status} – ${body}`);
-  }
+  if (!res.ok) throw new Error(await readErrorMessage(res));
   return res.json();
+}
+
+/** Turn an error response into a sentence a user can act on. */
+async function readErrorMessage(res: Response): Promise<string> {
+  if (res.status === 413) return 'This file is too large. Upload a CV under 4 MB.';
+  const body = await res.text();
+  try {
+    const parsed = JSON.parse(body);
+    const message = parsed?.error ?? parsed?.detail;
+    if (typeof message === 'string' && message) return message;
+  } catch {
+    // Fall through to the generic message.
+  }
+  return `Matching failed (${res.status}). Please try again.`;
 }

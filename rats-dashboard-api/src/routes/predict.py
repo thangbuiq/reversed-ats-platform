@@ -23,15 +23,19 @@ async def predict_best_match_job(
     except RuntimeError as error:
         raise HTTPException(status_code=500, detail=str(error)) from error
 
-    if not vector_store.collection_exists():
-        raise HTTPException(
-            status_code=400,
-            detail="Collection linkedin_jobs does not exist. Run the rats-neon-backend pipeline first.",
-        )
-
     cv_text = await extract_cv_text(cv_file)
-    hits = vector_store.query_jobs(cv_text, top_k=top_k, score_threshold=score_threshold)
-    jobs = job_store.get_jobs([job_hash_id for job_hash_id, _ in hits])
+    try:
+        if not vector_store.collection_exists():
+            raise HTTPException(
+                status_code=503,
+                detail="Job vectors are not ready yet. Run the rats-neon-backend pipeline first.",
+            )
+        hits = vector_store.query_jobs(cv_text, top_k=top_k, score_threshold=score_threshold)
+        jobs = job_store.get_jobs([job_hash_id for job_hash_id, _ in hits])
+    except HTTPException:
+        raise
+    except Exception as error:
+        raise HTTPException(status_code=502, detail="Matching service is unavailable. Please try again.") from error
 
     matches = [
         JobMatch(

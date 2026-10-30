@@ -1,6 +1,8 @@
 'use client';
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import { MotionConfig } from 'framer-motion';
 import { fetchJobs } from '@/lib/api';
+import Reveal from '@/components/common/Reveal';
 import type { JobRecord } from '@/types/api';
 import JobsMetrics from '@/components/jobs/JobsMetrics';
 import JobPostingChart from '@/components/jobs/JobPostingChart';
@@ -60,53 +62,66 @@ export default function DashboardPage() {
   const allStats = useMemo(() => computeJobStats(jobs), [jobs]);
 
   return (
-    <div className="reveal-stagger space-y-6">
-      <h1 className="sr-only">Dashboard</h1>
+    <MotionConfig reducedMotion="user">
+      <div className="space-y-4 sm:space-y-6">
+        <h1 className="sr-only">Dashboard</h1>
 
-      {error && (
-        <div className="border-error-200 bg-error-50 text-error-600 dark:border-error-500/30 dark:bg-error-500/10 dark:text-error-400 rounded-xl border p-4">
-          <p className="font-medium">Error loading jobs</p>
-          <p className="mt-1 text-sm">{error}</p>
-        </div>
-      )}
-
-      <JobFilters
-        jobs={jobs}
-        filters={filters}
-        defaults={DEFAULT_FILTERS}
-        visibleCount={filteredJobs.length}
-        onChange={setFilters}
-      />
-
-      {/* Metric cards */}
-      <JobsMetrics stats={stats} />
-
-      <div className="grid grid-cols-1 gap-6 xl:grid-cols-12">
-        <div className="min-w-0 xl:col-span-7">
-          {stats.daily.length > 0 ? (
-            <JobPostingChart data={stats.daily} levels={stats.levels} />
-          ) : (
-            <div className="flex h-full items-center justify-center rounded-2xl border border-gray-200 bg-white p-10 text-center dark:border-gray-400/20 dark:bg-gray-800">
-              <p className="text-gray-400 dark:text-gray-500">No chart data available</p>
-            </div>
-          )}
-        </div>
-        {stats.topCompanies.length > 0 && (
-          <div className="min-w-0 xl:col-span-5">
-            <TopCompaniesChart companies={stats.topCompanies} levels={stats.levels} />
+        {error && (
+          <div className="border-brand-200 bg-brand-50 text-brand-700 rounded-[9px] border p-4">
+            <p className="font-medium">Error loading jobs</p>
+            <p className="mt-1 text-sm">{error}</p>
           </div>
         )}
+
+        <Reveal>
+          <CVMatchSection
+            totalListings={allStats.total}
+            totalCompanies={allStats.uniqueCompanies}
+          />
+        </Reveal>
+
+        <Reveal delay={0.08}>
+          <JobFilters
+            jobs={jobs}
+            filters={filters}
+            defaults={DEFAULT_FILTERS}
+            visibleCount={filteredJobs.length}
+            onChange={setFilters}
+          />
+        </Reveal>
+
+        <Reveal delay={0.16}>
+          <JobsMetrics stats={stats} />
+        </Reveal>
+
+        <div className="grid grid-cols-1 gap-4 sm:gap-6 xl:grid-cols-12">
+          <Reveal className="min-w-0 xl:col-span-7">
+            {stats.daily.length > 0 ? (
+              <JobPostingChart data={stats.daily} levels={stats.levels} />
+            ) : (
+              <div className="flex h-full min-h-60 items-center justify-center rounded-[9px] border border-gray-200 bg-white p-10 text-center">
+                <p className="text-gray-400">
+                  {isLoading ? 'Loading chart…' : 'No chart data available'}
+                </p>
+              </div>
+            )}
+          </Reveal>
+          {stats.topCompanies.length > 0 && (
+            <Reveal className="min-w-0 xl:col-span-5" delay={0.1}>
+              <TopCompaniesChart companies={stats.topCompanies} levels={stats.levels} />
+            </Reveal>
+          )}
+        </div>
+
+        <Reveal>
+          <JobsTable
+            jobs={filteredJobs}
+            levels={stats.levels}
+            isLoading={isLoading}
+            hasActiveFilters={!sameFilters(filters, { ...DEFAULT_FILTERS, range: 'all' })}
+          />
+        </Reveal>
       </div>
-
-      <CVMatchSection totalListings={allStats.total} totalCompanies={allStats.uniqueCompanies} />
-
-      {/* Jobs Table */}
-      <JobsTable
-        jobs={filteredJobs}
-        levels={stats.levels}
-        isLoading={isLoading}
-        hasActiveFilters={!sameFilters(filters, { ...DEFAULT_FILTERS, range: 'all' })}
-      />
-    </div>
+    </MotionConfig>
   );
 }

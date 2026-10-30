@@ -30,11 +30,14 @@ def extract_pdf_text(content: bytes) -> str:
             detail="PDF parsing requires pypdf. Install it before uploading PDF CV files.",
         ) from error
 
-    reader = PdfReader(io.BytesIO(content))
-    texts = []
-    for page in reader.pages:
-        texts.append(page.extract_text() or "")
-    return "\n".join(texts)
+    try:
+        reader = PdfReader(io.BytesIO(content))
+        return "\n".join(page.extract_text() or "" for page in reader.pages)
+    except Exception as error:
+        raise HTTPException(
+            status_code=400,
+            detail="Could not read this PDF. Try exporting it again or upload a .txt version.",
+        ) from error
 
 
 async def extract_cv_text(cv_file: UploadFile) -> str:
@@ -55,6 +58,6 @@ async def extract_cv_text(cv_file: UploadFile) -> str:
     if len(clean_text) < 50:
         raise HTTPException(
             status_code=400,
-            detail="CV text extraction failed or produced too little text.",
+            detail="Could not find enough text in this CV. Scanned or image-only PDFs are not supported.",
         )
     return clean_text
