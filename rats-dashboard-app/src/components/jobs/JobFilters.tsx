@@ -99,56 +99,65 @@ export default function JobFilters({
           )}
         </div>
       </div>
-      <div id="job-filters-body" hidden={!isOpen} className="space-y-3">
-        <div role="group" aria-label="Date range" className="flex flex-wrap gap-1">
-          {RANGE_OPTIONS.map(({ value, label }) => (
-            <button
-              key={value}
-              type="button"
-              aria-pressed={filters.range === value}
-              onClick={() => set({ range: value })}
-              className={`label-md px-3 py-1.5 ${filters.range === value ? 'btn-accent' : 'btn'}`}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          <FilterSelect
-            value={filters.company}
-            allLabel="All companies"
-            options={toOptions(facetOptions(jobs, filters, 'company'))}
-            onChange={(company) => set({ company })}
-          />
-          <FilterSelect
-            value={filters.level}
-            allLabel="All levels"
-            options={toOptions(facetOptions(jobs, filters, 'level'))}
-            onChange={(level) => set({ level })}
-          />
-          <div className="relative">
-            <span className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2">
-              <svg
-                className="h-4 w-4 text-gray-400"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2}
+      <div
+        id="job-filters-body"
+        aria-hidden={!isOpen}
+        inert={!isOpen}
+        className={`grid transition-[grid-template-rows,opacity] duration-300 ease-out ${
+          isOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'
+        }`}
+      >
+        <div className="-m-1 min-h-0 space-y-3 overflow-hidden p-1">
+          <div role="group" aria-label="Date range" className="flex flex-wrap gap-1">
+            {RANGE_OPTIONS.map(({ value, label }) => (
+              <button
+                key={value}
+                type="button"
+                aria-pressed={filters.range === value}
+                onClick={() => set({ range: value })}
+                className={`label-md px-3 py-1.5 ${filters.range === value ? 'btn-accent' : 'btn'}`}
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"
-                />
-              </svg>
-            </span>
-            <input
-              type="text"
-              value={filters.search}
-              onChange={(e) => set({ search: e.target.value })}
-              placeholder="Filter keywords…"
-              className="focus:border-brand-300 focus:ring-brand-500/10 h-10 w-full rounded-lg border border-gray-200 bg-transparent py-2 pr-3 pl-9 text-sm text-gray-800 placeholder:text-gray-400 focus:ring-3 focus:outline-hidden"
+                {label}
+              </button>
+            ))}
+          </div>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <FilterSelect
+              value={filters.company}
+              allLabel="All companies"
+              options={toOptions(facetOptions(jobs, filters, 'company'))}
+              onChange={(company) => set({ company })}
             />
+            <FilterSelect
+              value={filters.level}
+              allLabel="All levels"
+              options={toOptions(facetOptions(jobs, filters, 'level'))}
+              onChange={(level) => set({ level })}
+            />
+            <div className="relative">
+              <span className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2">
+                <svg
+                  className="h-4 w-4 text-gray-400"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"
+                  />
+                </svg>
+              </span>
+              <input
+                type="text"
+                value={filters.search}
+                onChange={(e) => set({ search: e.target.value })}
+                placeholder="Filter keywords…"
+                className="focus:border-brand-300 focus:ring-brand-500/10 h-10 w-full rounded-lg border border-gray-200 bg-transparent py-2 pr-3 pl-9 text-sm text-gray-800 placeholder:text-gray-400 focus:ring-3 focus:outline-hidden"
+              />
+            </div>
           </div>
         </div>
       </div>

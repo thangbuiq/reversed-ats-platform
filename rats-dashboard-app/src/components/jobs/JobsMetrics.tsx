@@ -18,7 +18,7 @@ function MetricCard({ label, value, icon, iconClassName = '', details, live }: M
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <div className="cursor-default rounded-xl border border-gray-200 bg-white p-4 text-left dark:border-gray-400/20 dark:bg-gray-800">
+        <div className="lift-hover cursor-default rounded-xl border border-gray-200 bg-white p-4 text-left dark:border-gray-400/20 dark:bg-gray-800">
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-3">
               <div

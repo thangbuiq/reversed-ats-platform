@@ -60,7 +60,7 @@ export default function DashboardPage() {
   const allStats = useMemo(() => computeJobStats(jobs), [jobs]);
 
   return (
-    <div className="space-y-6">
+    <div className="reveal-stagger space-y-6">
       <h1 className="sr-only">Dashboard</h1>
 
       {error && (

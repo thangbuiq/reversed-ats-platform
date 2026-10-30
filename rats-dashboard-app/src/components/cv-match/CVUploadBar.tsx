@@ -34,7 +34,7 @@ export default function CVUploadBar({ onUpload, isUploading }: CVUploadBarProps)
     <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-center">
       <div
         {...getRootProps()}
-        className={`flex h-14 min-w-0 flex-1 cursor-pointer items-center gap-3 rounded-xl border border-dashed px-4 text-sm sm:h-11 transition-colors ${tone} ${
+        className={`flex h-14 min-w-0 flex-1 cursor-pointer items-center gap-3 rounded-xl border border-dashed px-5 text-sm transition-colors duration-200 ${tone} ${
           isUploading ? 'pointer-events-none opacity-60' : ''
         }`}
       >
@@ -65,7 +65,7 @@ export default function CVUploadBar({ onUpload, isUploading }: CVUploadBarProps)
         disabled={!selectedFile || isUploading}
         size="md"
         variant="primary"
-        className="w-full sm:w-auto"
+        className="h-14 w-full sm:w-auto sm:px-8"
       >
         {isUploading ? (
           <span className="flex items-center gap-2">

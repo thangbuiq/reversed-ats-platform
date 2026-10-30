@@ -180,6 +180,9 @@
   [role='button']:not(:disabled) {
     cursor: pointer;
   }
+  html {
+    scroll-behavior: smooth;
+  }
   body {
     @apply font-sans relative z-1 bg-gray-50 text-base leading-[1.6] font-normal;
     @apply bg-background text-foreground;
@@ -191,11 +194,11 @@
 
 /* Buttons: solid black with white content; red is reserved for the one accent action. */
 @utility btn {
-  @apply inline-flex items-center justify-center gap-1.5 rounded-lg bg-black text-white transition-colors hover:bg-gray-800 disabled:opacity-50;
+  @apply inline-flex items-center justify-center gap-1.5 rounded-lg bg-black text-white transition-[color,background-color,transform,opacity] duration-200 ease-out hover:bg-gray-800 active:scale-[0.98] disabled:opacity-50;
 }
 
 @utility btn-accent {
-  @apply bg-brand-500 hover:bg-brand-600 inline-flex items-center justify-center gap-1.5 rounded-lg text-white transition-colors disabled:opacity-50;
+  @apply bg-brand-500 hover:bg-brand-600 inline-flex items-center justify-center gap-1.5 rounded-lg text-white transition-[color,background-color,transform,opacity] duration-200 ease-out active:scale-[0.98] disabled:opacity-50;
 }
 
 @utility btn-md {
@@ -885,4 +888,57 @@ span.flatpickr-weekday,
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: rgb(161 161 170 / 20%);
   --sidebar-ring: oklch(0.556 0 0);
+}
+
+/* Dashboard motion: sections rise in one after another; everything honours reduced motion. */
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@utility reveal-stagger {
+  & > * {
+    animation: rise-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  & > :nth-child(2) {
+    animation-delay: 60ms;
+  }
+  & > :nth-child(3) {
+    animation-delay: 120ms;
+  }
+  & > :nth-child(4) {
+    animation-delay: 180ms;
+  }
+  & > :nth-child(5) {
+    animation-delay: 240ms;
+  }
+  & > :nth-child(6) {
+    animation-delay: 300ms;
+  }
+  & > :nth-child(n + 7) {
+    animation-delay: 360ms;
+  }
+}
+
+@utility lift-hover {
+  @apply transition-[transform,box-shadow,border-color] duration-300 ease-out hover:-translate-y-0.5 hover:shadow-md;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }
