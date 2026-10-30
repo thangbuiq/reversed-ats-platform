@@ -39,8 +39,8 @@ export default function CVMatchSection({ totalListings, totalCompanies }: CVMatc
     <section aria-labelledby="cv-match-title" className="space-y-4">
       <div className="flex flex-col gap-4 rounded-2xl border border-gray-200 bg-white p-4 md:p-5 lg:flex-row lg:items-center lg:gap-8">
         <div className="flex items-center gap-3 lg:w-[34%] lg:shrink-0">
-          <div className="bg-brand-50 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg">
-            <FileText className="text-brand-500" size={20} strokeWidth={1.75} />
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-black text-white transition hover:bg-gray-800">
+            <FileText className="text-white" size={20} strokeWidth={1.75} />
           </div>
           <div className="min-w-0">
             <h2 id="cv-match-title" className="text-base font-semibold text-gray-800">
