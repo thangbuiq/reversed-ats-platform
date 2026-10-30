@@ -4,26 +4,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from pydantic import BaseModel, Field
-
-from .config import DEFAULT_BATCH_SIZE
-
-
-class MaterializeRequest(BaseModel):
-    """Request payload for loading the LinkedIn jobs table into Qdrant."""
-
-    limit: int | None = Field(default=None, ge=1)
-    recreate_collection: bool = True
-    batch_size: int = Field(default=DEFAULT_BATCH_SIZE, ge=1, le=2048)
-    source_page_size: int = Field(default=2000, ge=100, le=10000)
-
-
-class MaterializeResponse(BaseModel):
-    """Response payload for materialization requests."""
-
-    collection_name: str
-    processed_rows: int
-    upserted_points: int
+from pydantic import BaseModel
 
 
 class JobMatch(BaseModel):
@@ -48,7 +29,7 @@ class PredictResponse(BaseModel):
 
 
 class JobRecord(BaseModel):
-    """A job record loaded from Qdrant payload."""
+    """A job record loaded from Neon."""
 
     point_id: str
     job_snapshot_id: str | None = None
@@ -61,9 +42,8 @@ class JobRecord(BaseModel):
 
 
 class ShowAllJobsResponse(BaseModel):
-    """Response payload for listing jobs from Qdrant."""
+    """Response payload for listing jobs from Neon."""
 
-    collection_name: str
     total: int
     limit: int
     next_offset: str | None = None

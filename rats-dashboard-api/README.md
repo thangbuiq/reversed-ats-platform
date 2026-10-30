@@ -1,12 +1,14 @@
 # rats-dashboard-api
 
-FastAPI backend serving job search requests and managing CV-to-job matching routines, relying upon the underlying materialized job data stored in the Qdrant Vector Database.
+FastAPI backend serving the dashboard's job listings from Neon (PostgreSQL) and the CV-to-job matching feature, which is the only part that uses the Qdrant Vector Database.
 
-## Integration with Materialized Vector DB
+## Data flow
 
-- Raw crawled data flows from Kafka -> Delta Lake -> `rats-dbt-transformer`.
-- `rats-vectordb-materializer` runs as a Databricks Job, computing embeddings for `analytical_layer.linkedin_jobs` and up-serting them into Qdrant.
-- This `rats-dashboard-api` connects to Qdrant to perform Vector Search comparisons between user CV embeddings and job description embeddings, serving high-quality matching results to the `rats-dashboard-app`.
+- `rats-neon-backend` scrapes LinkedIn daily, upserts rows into Neon `linkedin_jobs`, and embeds new rows into Qdrant.
+- `GET /show-all-jobs` and `GET /jobs/{job_hash_id}` read only from Neon. The list omits `job_description`; the detail endpoint returns it.
+- `POST /predict-best-match-job` embeds the uploaded CV, finds the nearest vectors in Qdrant (ids only), then loads the matching rows from Neon.
+
+Required environment: `DATABASE_URL` (pooled Neon connection string), `QDRANT_URL`, `QDRANT_API_KEY`.
 
 ## Development
 
