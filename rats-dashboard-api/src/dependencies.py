@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from functools import lru_cache
 
-from .services.databricks import DatabricksStatementClient
+from .services.job_store import JobStore
 from .services.vector_store import VectorStoreService
 
 
@@ -15,6 +15,6 @@ def get_vector_store() -> VectorStoreService:
 
 
 @lru_cache(maxsize=1)
-def get_databricks_client() -> DatabricksStatementClient:
-    """Create and cache the Databricks client."""
-    return DatabricksStatementClient()
+def get_job_store() -> JobStore:
+    """Create and cache the Neon job store."""
+    return JobStore()

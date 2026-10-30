@@ -18,6 +18,12 @@ Reversed ATS platform, a platform for analyzing job market trends, predicting sa
 </a>
 </div>
 
+<div align="center">
+<a href="https://github.com/thangbuiq/reversed-ats-platform/actions/workflows/pipeline_daily.yml" target="_blank">
+<img src="https://github.com/thangbuiq/reversed-ats-platform/actions/workflows/pipeline_daily.yml/badge.svg?branch=main" alt="Daily data pipeline status" />
+</a>
+</div>
+
 ## Platform Features
 
 In development, the RATS platform includes the following key features:
@@ -103,6 +109,7 @@ The monorepo is organized into the following key components:
 - [rats-kafka-consumer](./rats-kafka-consumer): Spark Streaming application for consuming and preprocessing data from Kafka
 - [rats-kafka-producer](./rats-kafka-producer): Data contract definitions and producer application for sending crawled data to Kafka
 - [rats-vectordb-materializer](./rats-vectordb-materializer): Databricks job to materialize analytical jobs into Qdrant vector database
+- [rats-neon-backend](./rats-neon-backend): LinkedIn extraction that upserts jobs into Neon (Postgres) and optionally syncs vectors to Qdrant, run daily by GitHub Actions
 
 ## Output Schema
 

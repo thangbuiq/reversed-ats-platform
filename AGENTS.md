@@ -10,6 +10,7 @@ Reversed ATS platform is a platform for analyzing job market trends, predicting 
 - [rats-kafka-consumer](./rats-kafka-consumer): Spark Streaming application for consuming and preprocessing data from Kafka
 - [rats-kafka-producer](./rats-kafka-producer): Data contract definitions and producer application for sending crawled data to Kafka
 - [rats-vectordb-materializer](./rats-vectordb-materializer): Databricks job to materialize analytical jobs into Qdrant vector database
+- [rats-neon-backend](./rats-neon-backend): LinkedIn extraction that upserts jobs into Neon (Postgres) and optionally syncs vectors to Qdrant (replaces the Kafka/Databricks path)
 
 ## Code Style Guidelines
 
