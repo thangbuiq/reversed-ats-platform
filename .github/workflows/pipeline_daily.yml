@@ -1,0 +1,84 @@
+name: 🗓️ Daily Pipeline
+
+on:
+  pull_request:
+    paths:
+      - "rats-neon-backend/**"
+      - ".github/workflows/pipeline_daily.yml"
+  workflow_dispatch:
+    inputs:
+      recreate_collection:
+        description: "Drop and rebuild the Qdrant collection"
+        type: boolean
+        default: false
+  schedule:
+    # GitHub cron is UTC-only: 01:00 UTC = 08:00 Asia/Ho_Chi_Minh (UTC+7, no DST)
+    - cron: "0 1 * * *"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: rats-pipeline-daily
+  cancel-in-progress: false
+
+jobs:
+  test:
+    name: Unit tests
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+
+      - name: Run tests
+        working-directory: rats-neon-backend
+        run: |
+          uv sync --frozen --extra dev
+          uv run pytest -q
+
+  run-pipeline:
+    name: Scrape, upsert to Neon, sync vectors
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      QDRANT_URL: ${{ secrets.QDRANT_URL }}
+      QDRANT_API_KEY: ${{ secrets.QDRANT_API_KEY }}
+      SITE_NAMES: linkedin
+      JOB_LOCATION: Ho Chi Minh City, Vietnam
+      SEARCH_TERMS: '["Data Engineer","ML Engineer","Data Scientist","Software Engineer","Data Analyst"]'
+      RESULTS_WANTED: "50"
+      HOURS_OLD: "48"
+      LINKEDIN_FETCH_DESCRIPTION: "true"
+      JOB_RETENTION_DAYS: "30"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+
+      - name: Sync dependencies
+        working-directory: rats-neon-backend
+        run: uv sync --frozen --extra vectors
+
+      - name: Run pipeline
+        working-directory: rats-neon-backend
+        run: |
+          args=""
+          if [ "${{ inputs.recreate_collection }}" = "true" ]; then
+            args="--recreate-collection"
+          fi
+          uv run rats-neon-backend run $args
