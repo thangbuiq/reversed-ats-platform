@@ -27,6 +27,12 @@ uv run rats-neon-backend run                 # scrape + Neon + Qdrant (if config
 uv run rats-neon-backend run --no-vectors    # skip Qdrant even when configured
 ```
 
+## Scheduling and manual runs
+
+The [Daily Pipeline workflow](../.github/workflows/pipeline_daily.yml) runs at 01:00 UTC (08:00 Asia/Ho_Chi_Minh).
+Run it on demand from the Actions tab ("Run workflow", optionally rebuilding the Qdrant collection) or with
+`gh workflow run pipeline_daily.yml`. The README badge shows the status of the latest run on `main`.
+
 ## Qdrant
 
 Qdrant is optional and only used by the CV upload feature. Vectors are keyed by
