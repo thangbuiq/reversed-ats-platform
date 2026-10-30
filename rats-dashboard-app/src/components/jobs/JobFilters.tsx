@@ -125,25 +125,29 @@ export default function JobFilters({
           isOpen ? 'mt-3 grid-rows-[1fr] opacity-100' : 'mt-0 grid-rows-[0fr] opacity-0'
         }`}
       >
-        <div className="-m-1 min-h-0 space-y-3 overflow-hidden p-1">
-          <div
-            role="group"
-            aria-label="Date range"
-            className="no-scrollbar -mx-1 flex gap-1.5 overflow-x-auto px-1"
-          >
-            {RANGE_OPTIONS.map(({ value, label }) => (
-              <button
-                key={value}
-                type="button"
-                aria-pressed={filters.range === value}
-                onClick={() => set({ range: value })}
-                className={`label-md h-9 shrink-0 px-4 ${filters.range === value ? 'btn-accent' : 'btn'}`}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
-          <div className="grid grid-cols-2 gap-2 sm:gap-3 lg:grid-cols-3">
+        <div className="-m-1 min-h-0 overflow-hidden p-1">
+          <div className="grid grid-cols-2 gap-2 sm:gap-3 lg:grid-cols-[auto_1fr_1fr_1fr]">
+            <div
+              role="group"
+              aria-label="Date range"
+              className="col-span-2 flex h-10 items-center gap-0.5 rounded-lg border border-gray-200 bg-white p-1 lg:col-span-1"
+            >
+              {RANGE_OPTIONS.map(({ value, label }) => (
+                <button
+                  key={value}
+                  type="button"
+                  aria-pressed={filters.range === value}
+                  onClick={() => set({ range: value })}
+                  className={`label-md h-full flex-1 rounded-md px-3 transition-colors duration-200 lg:flex-none ${
+                    filters.range === value
+                      ? 'bg-brand-500 text-white'
+                      : 'text-gray-900 hover:bg-gray-100'
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
             <FilterSelect
               value={filters.company}
               allLabel="All companies"

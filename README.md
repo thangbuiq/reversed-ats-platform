@@ -1,6 +1,5 @@
 <div align="center">
-<img src="assets/docs/images/logo.png" alt="logo" width="100px"/>
-<h3>RATS - Reversed ATS Platform </h3>
+<img src="assets/docs/images/banner.png" alt="RATS - Reversed ATS Platform: job market insights and CV-to-job matching" width="100%"/>
 
 Reversed ATS platform, a platform for analyzing job market trends, predicting salaries, and matching candidate to jobs market using real-time data from LinkedIn and Glassdoor.
 
