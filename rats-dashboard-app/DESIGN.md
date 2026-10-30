@@ -52,6 +52,19 @@ components:
     textColor: "{colors.on-primary}"
     typography: "{typography.label-md}"
     rounded: "{rounded.control}"
+  button-accent:
+    backgroundColor: "{colors.accent}"
+    textColor: "{colors.on-primary}"
+    typography: "{typography.label-md}"
+    rounded: "{rounded.control}"
+  menu-item:
+    backgroundColor: "{colors.primary}"
+    textColor: "{colors.on-primary}"
+    rounded: "{rounded.control}"
+  menu-item-active:
+    backgroundColor: "{colors.accent}"
+    textColor: "{colors.on-primary}"
+    rounded: "{rounded.control}"
   highlight:
     backgroundColor: "{colors.accent}"
     textColor: "{colors.on-primary}"
@@ -95,6 +108,8 @@ Use Bricolage Grotesque (sans serif, with -apple-system as fallback) for display
 Keep spacing deliberate and stable. Favor the same grid direction, max-width behavior, card density, and responsive stacking seen in the HTML. Do not replace distinctive source structures with generic SaaS sections.
 ## Components
 Dashboard, chart, and data panels should preserve their compact operational hierarchy, nested surfaces, and metric emphasis.
+
+Buttons: every button is solid black (primary) with white text or icon, the control radius and no border. Red (accent) marks the single most important or currently selected button in a group, such as the active range chip, the current page, the main call to action and the active menu item. Icon-only buttons are 40px squares. Sidebar menu items are buttons too: black by default, red for the current page, with white icons.
 ## Motion
 Preserve existing motion cues such as masked reveals, staggered entrance, hover lift, scroll-triggered transitions, and ambient movement. Keep easing smooth and restrained.
 ## WebGL & Effects

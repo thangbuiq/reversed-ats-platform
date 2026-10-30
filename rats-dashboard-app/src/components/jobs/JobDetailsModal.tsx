@@ -62,11 +62,11 @@ export default function JobDetailsModal({ job, onClose }: JobDetailsModalProps) 
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="ring-offset-background absolute top-4 right-4 rounded-sm p-1 opacity-70 transition-opacity hover:bg-gray-100 hover:opacity-100 focus:ring-2 focus:outline-none disabled:pointer-events-none dark:hover:bg-gray-800"
+          className="btn absolute top-4 right-4 size-8 p-0"
           aria-label="Close dialog"
         >
           <svg
-            className="h-5 w-5 text-gray-500 dark:text-gray-400"
+            className="h-4 w-4"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -135,10 +135,7 @@ export default function JobDetailsModal({ job, onClose }: JobDetailsModalProps) 
 
         {/* Footer */}
         <div className="flex flex-col-reverse pt-2 sm:flex-row sm:justify-end sm:space-x-3">
-          <button
-            onClick={onClose}
-            className="mt-3 inline-flex w-full items-center justify-center rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium transition-colors hover:bg-gray-50 sm:mt-0 sm:w-auto dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
-          >
+          <button onClick={onClose} className="btn btn-md mt-3 w-full sm:mt-0 sm:w-auto">
             Close
           </button>
           {job.job_url && (
@@ -146,7 +143,7 @@ export default function JobDetailsModal({ job, onClose }: JobDetailsModalProps) 
               href={job.job_url}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex w-full items-center justify-center gap-1.5 rounded-lg border border-gray-400/40 bg-black px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-gray-800 sm:w-auto"
+              className="btn-accent btn-md w-full sm:w-auto"
             >
               Apply Now
               <svg

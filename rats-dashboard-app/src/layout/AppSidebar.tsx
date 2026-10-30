@@ -66,7 +66,7 @@ const AppSidebar: React.FC = () => {
                 <ChevronDownIcon
                   className={`ml-auto h-5 w-5 transition-transform duration-200 ${
                     openSubmenu?.type === menuType && openSubmenu?.index === index
-                      ? 'text-brand-500 rotate-180'
+                      ? 'rotate-180'
                       : ''
                   }`}
                 />
@@ -262,10 +262,7 @@ const AppSidebar: React.FC = () => {
                 <span className="text-sm font-semibold whitespace-nowrap text-gray-800 dark:text-white/90">
                   Reversed ATS Platform
                 </span>
-                <button
-                  onClick={() => setIsHelpDialogOpen(true)}
-                  className="hover:text-brand-500 dark:hover:text-brand-400 text-gray-400 transition-colors dark:text-gray-500"
-                >
+                <button onClick={() => setIsHelpDialogOpen(true)} className="btn size-7 p-0">
                   <svg
                     className="h-4 w-4"
                     fill="none"
@@ -326,11 +323,11 @@ const AppSidebar: React.FC = () => {
                 >
                   <button
                     onClick={() => setIsHelpDialogOpen(false)}
-                    className="ring-offset-background absolute top-4 right-4 rounded-sm p-1 opacity-70 transition-opacity hover:bg-gray-100 hover:opacity-100 focus:ring-2 focus:outline-none disabled:pointer-events-none dark:hover:bg-gray-800"
+                    className="btn absolute top-4 right-4 size-8 p-0"
                     aria-label="Close dialog"
                   >
                     <svg
-                      className="h-5 w-5 text-gray-500 dark:text-gray-400"
+                      className="h-4 w-4"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"

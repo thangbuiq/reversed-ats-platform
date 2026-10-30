@@ -189,6 +189,23 @@
   }
 }
 
+/* Buttons: solid black with white content; red is reserved for the one accent action. */
+@utility btn {
+  @apply inline-flex items-center justify-center gap-1.5 rounded-lg bg-black text-white transition-colors hover:bg-gray-800 disabled:opacity-50;
+}
+
+@utility btn-accent {
+  @apply bg-brand-500 hover:bg-brand-600 inline-flex items-center justify-center gap-1.5 rounded-lg text-white transition-colors disabled:opacity-50;
+}
+
+@utility btn-md {
+  @apply px-4 py-2 text-sm font-medium;
+}
+
+@utility btn-icon {
+  @apply size-10 shrink-0 p-0;
+}
+
 @utility label-md {
   @apply font-mono text-xs leading-[1.2] font-semibold;
 }
@@ -202,11 +219,11 @@
 }
 
 @utility menu-item-active {
-  @apply bg-brand-50 text-brand-500 dark:bg-brand-500/[0.12] dark:text-brand-400;
+  @apply bg-brand-500 text-white;
 }
 
 @utility menu-item-inactive {
-  @apply text-gray-700 group-hover:text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/5 dark:hover:text-gray-300;
+  @apply bg-black text-white transition-colors hover:bg-gray-800;
 }
 
 @utility menu-item-icon {
@@ -214,11 +231,11 @@
 }
 
 @utility menu-item-icon-active {
-  @apply text-brand-500 dark:text-brand-400;
+  @apply text-white;
 }
 
 @utility menu-item-icon-inactive {
-  @apply text-gray-500 group-hover:text-gray-700 dark:text-gray-400 dark:group-hover:text-gray-300;
+  @apply text-white;
 }
 
 @utility menu-item-arrow {
@@ -226,11 +243,11 @@
 }
 
 @utility menu-item-arrow-active {
-  @apply text-brand-500 dark:text-brand-400 rotate-180;
+  @apply rotate-180 text-white;
 }
 
 @utility menu-item-arrow-inactive {
-  @apply text-gray-500 group-hover:text-gray-700 dark:text-gray-400 dark:group-hover:text-gray-300;
+  @apply text-white;
 }
 
 @utility menu-dropdown-item {

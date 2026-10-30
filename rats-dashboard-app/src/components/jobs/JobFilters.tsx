@@ -73,11 +73,7 @@ export default function JobFilters({
               type="button"
               aria-pressed={filters.range === value}
               onClick={() => set({ range: value })}
-              className={`label-md rounded-lg border px-3 py-1.5 transition-colors ${
-                filters.range === value
-                  ? 'border-brand-500 bg-brand-50 text-brand-500'
-                  : 'border-gray-200 text-gray-500 hover:border-gray-300 hover:text-gray-800'
-              }`}
+              className={`label-md px-3 py-1.5 ${filters.range === value ? 'btn-accent' : 'btn'}`}
             >
               {label}
             </button>
@@ -91,7 +87,7 @@ export default function JobFilters({
             <button
               type="button"
               onClick={() => onChange(defaults)}
-              className="label-md hover:text-brand-600 text-brand-500 transition-colors"
+              className="btn label-md px-3 py-1.5"
             >
               Reset
             </button>

@@ -295,10 +295,7 @@ export default function JobsTable({
         {/* Pagination */}
         {renderLimit < jobs.length && (
           <div className="flex justify-center border-t border-gray-100 p-5 dark:border-gray-400/20">
-            <button
-              onClick={() => setRenderLimit((prev) => prev + 50)}
-              className="rounded-lg border border-gray-200 bg-white px-5 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
-            >
+            <button onClick={() => setRenderLimit((prev) => prev + 50)} className="btn btn-md px-5">
               Show More
             </button>
           </div>
@@ -327,7 +324,7 @@ export default function JobsTable({
               {/* Close button – top right, inside card */}
               <button
                 onClick={() => setSelectedJob(null)}
-                className="absolute top-4 right-4 z-10 rounded-md p-1 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-800 dark:hover:text-gray-200"
+                className="btn absolute top-4 right-4 z-10 size-8 p-0"
               >
                 <svg
                   className="h-4 w-4"
@@ -396,10 +393,7 @@ export default function JobsTable({
 
               {/* Footer */}
               <div className="flex items-center justify-end gap-3 border-t border-gray-100 px-6 py-4 dark:border-gray-400/20">
-                <button
-                  onClick={() => setSelectedJob(null)}
-                  className="rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
-                >
+                <button onClick={() => setSelectedJob(null)} className="btn btn-md">
                   Close
                 </button>
                 {selectedJob.job_url && (
@@ -407,7 +401,7 @@ export default function JobsTable({
                     href={selectedJob.job_url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 rounded-lg border border-gray-400/40 bg-black px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-gray-800"
+                    className="btn-accent btn-md"
                   >
                     Apply Now
                     <svg

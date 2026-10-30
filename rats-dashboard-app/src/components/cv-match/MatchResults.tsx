@@ -122,7 +122,7 @@ export default function MatchResults({ matches, totalMatches }: MatchResultsProp
                     target="_blank"
                     rel="noopener noreferrer"
                     onClick={(e) => e.stopPropagation()}
-                    className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-gray-200 px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-white/[0.03]"
+                    className="btn btn-md shrink-0"
                   >
                     Apply
                     <svg
