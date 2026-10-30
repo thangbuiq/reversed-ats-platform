@@ -34,7 +34,7 @@ export default function CVUploadBar({ onUpload, isUploading }: CVUploadBarProps)
     <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-center">
       <div
         {...getRootProps()}
-        className={`flex h-11 min-w-0 flex-1 cursor-pointer items-center gap-3 rounded-xl border border-dashed px-4 text-sm transition-colors ${tone} ${
+        className={`flex h-14 min-w-0 flex-1 cursor-pointer items-center gap-3 rounded-xl border border-dashed px-4 text-sm sm:h-11 transition-colors ${tone} ${
           isUploading ? 'pointer-events-none opacity-60' : ''
         }`}
       >
@@ -45,11 +45,16 @@ export default function CVUploadBar({ onUpload, isUploading }: CVUploadBarProps)
           <Upload className="shrink-0 text-gray-400" size={16} strokeWidth={1.75} />
         )}
         <span className="min-w-0 flex-1 truncate text-gray-700">
-          {selectedFile
-            ? selectedFile.name
-            : isDragActive
-              ? 'Drop your CV here'
-              : 'Drop your CV or click to browse'}
+          {selectedFile ? (
+            selectedFile.name
+          ) : isDragActive ? (
+            'Drop your CV here'
+          ) : (
+            <>
+              <span className="sm:hidden">Tap to choose your CV</span>
+              <span className="hidden sm:inline">Drop your CV or click to browse</span>
+            </>
+          )}
         </span>
         <span className="label-md shrink-0 text-gray-400">
           {selectedFile ? `${(selectedFile.size / 1024).toFixed(0)} KB` : 'PDF · TXT'}
@@ -60,6 +65,7 @@ export default function CVUploadBar({ onUpload, isUploading }: CVUploadBarProps)
         disabled={!selectedFile || isUploading}
         size="md"
         variant="primary"
+        className="w-full sm:w-auto"
       >
         {isUploading ? (
           <span className="flex items-center gap-2">
