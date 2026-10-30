@@ -1,4 +1,5 @@
--- Run once against the Neon database (SQL editor or `psql "$DATABASE_URL" -f sql/001_init.sql`).
+-- Run once against the Neon database (SQL editor or `psql "$DATABASE_URL" -f
+-- sql/001_init.sql`).
 -- Dedicated schema keeps these tables out of ORMs/migration tools that manage `public`.
 create schema if not exists rats;
 
