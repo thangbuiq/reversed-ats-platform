@@ -19,6 +19,8 @@ interface JobPostingChartProps {
 const TREND_WINDOW = 7;
 const MAX_X_LABELS = 6;
 const CHART_HEIGHT = 300;
+const MOBILE_CHART_HEIGHT = 240;
+const MOBILE_MAX_X_LABELS = 3;
 
 function shortDate(date: string): string {
   const parsed = new Date(date);
@@ -45,6 +47,7 @@ export default function JobPostingChart({ data, levels }: JobPostingChartProps) 
     chart: {
       fontFamily: 'inherit',
       height: CHART_HEIGHT,
+      width: '100%',
       type: 'area',
       toolbar: { show: false },
       zoom: { enabled: false },
@@ -108,10 +111,23 @@ export default function JobPostingChart({ data, levels }: JobPostingChartProps) 
         formatter: (val: number) => Math.round(val).toString(),
       },
     },
+    responsive: [
+      {
+        breakpoint: 640,
+        options: {
+          chart: { height: MOBILE_CHART_HEIGHT },
+          xaxis: {
+            tickAmount: Math.min(Math.max(categories.length - 1, 1), MOBILE_MAX_X_LABELS),
+            labels: { style: { fontSize: '11px' } },
+          },
+          yaxis: { labels: { style: { fontSize: '11px' } } },
+        },
+      },
+    ],
   };
 
   return (
-    <div className="h-full rounded-2xl border border-gray-200 bg-white p-5 md:p-6 dark:border-gray-400/20 dark:bg-gray-800">
+    <div className="h-full min-w-0 overflow-hidden rounded-2xl border border-gray-200 bg-white p-4 sm:p-5 md:p-6 dark:border-gray-400/20 dark:bg-gray-800">
       <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
         <div>
           <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">
@@ -126,6 +142,7 @@ export default function JobPostingChart({ data, levels }: JobPostingChartProps) 
         options={options}
         series={[{ name: 'Jobs Posted', data: data.map((d) => d.count) }]}
         type="area"
+        width="100%"
         height={CHART_HEIGHT}
       />
     </div>

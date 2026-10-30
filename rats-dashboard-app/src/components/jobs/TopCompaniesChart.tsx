@@ -10,6 +10,7 @@ const ReactApexChart = dynamic(() => import('react-apexcharts'), {
 });
 
 const CHART_HEIGHT = 300;
+const MOBILE_Y_LABEL_WIDTH = 80;
 
 interface TopCompaniesChartProps {
   companies: CompanyStat[];
@@ -22,6 +23,7 @@ export default function TopCompaniesChart({ companies, levels }: TopCompaniesCha
     chart: {
       fontFamily: 'inherit',
       type: 'bar',
+      width: '100%',
       stacked: true,
       toolbar: { show: false },
     },
@@ -47,6 +49,17 @@ export default function TopCompaniesChart({ companies, levels }: TopCompaniesCha
       axisTicks: { show: false },
     },
     yaxis: { labels: { maxWidth: 140 } },
+    responsive: [
+      {
+        breakpoint: 640,
+        options: {
+          legend: { fontSize: '11px', itemMargin: { horizontal: 4, vertical: 2 } },
+          xaxis: { labels: { style: { fontSize: '11px' } } },
+          yaxis: { labels: { maxWidth: MOBILE_Y_LABEL_WIDTH, style: { fontSize: '11px' } } },
+          tooltip: { fixed: { enabled: false } },
+        },
+      },
+    ],
     tooltip: {
       fixed: { enabled: true, position: 'bottomRight', offsetX: 0, offsetY: 0 },
       custom: ({ dataPointIndex }: { dataPointIndex: number }) => {
@@ -70,7 +83,7 @@ export default function TopCompaniesChart({ companies, levels }: TopCompaniesCha
   };
 
   return (
-    <div className="h-full rounded-2xl border border-gray-200 bg-white p-5 md:p-6 dark:border-gray-400/20 dark:bg-gray-800">
+    <div className="h-full min-w-0 overflow-hidden rounded-2xl border border-gray-200 bg-white p-4 sm:p-5 md:p-6 dark:border-gray-400/20 dark:bg-gray-800">
       <h3 className="mb-1 text-lg font-semibold text-gray-800 dark:text-white/90">
         Top Hiring Companies
       </h3>
@@ -84,6 +97,7 @@ export default function TopCompaniesChart({ companies, levels }: TopCompaniesCha
           data: companies.map((c) => c.levelCounts[level] ?? 0),
         }))}
         type="bar"
+        width="100%"
         height={CHART_HEIGHT}
       />
     </div>

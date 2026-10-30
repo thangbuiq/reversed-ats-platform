@@ -82,7 +82,7 @@ export default function DashboardPage() {
       <JobsMetrics stats={stats} />
 
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-12">
-        <div className="xl:col-span-7">
+        <div className="min-w-0 xl:col-span-7">
           {stats.daily.length > 0 ? (
             <JobPostingChart data={stats.daily} levels={stats.levels} />
           ) : (
@@ -92,7 +92,7 @@ export default function DashboardPage() {
           )}
         </div>
         {stats.topCompanies.length > 0 && (
-          <div className="xl:col-span-5">
+          <div className="min-w-0 xl:col-span-5">
             <TopCompaniesChart companies={stats.topCompanies} levels={stats.levels} />
           </div>
         )}

@@ -8,13 +8,13 @@ interface MetricCardProps {
   label: string;
   value: string;
   icon: React.ReactNode;
-  iconClassName: string;
+  iconClassName?: string;
   details: [label: string, value: string][];
   /** Shows a green dot next to the value when the figure is current. */
   live?: boolean;
 }
 
-function MetricCard({ label, value, icon, iconClassName, details, live }: MetricCardProps) {
+function MetricCard({ label, value, icon, iconClassName = '', details, live }: MetricCardProps) {
   return (
     <Tooltip>
       <TooltipTrigger asChild>
@@ -22,7 +22,7 @@ function MetricCard({ label, value, icon, iconClassName, details, live }: Metric
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-3">
               <div
-                className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${iconClassName}`}
+                className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-black text-white transition hover:bg-gray-800 ${iconClassName}`}
               >
                 {icon}
               </div>
@@ -64,8 +64,7 @@ export default function JobsMetrics({ stats }: { stats: JobStats }) {
       <MetricCard
         label="Total Jobs"
         value={stats.total.toLocaleString()}
-        icon={<Briefcase className="text-brand-500" size={20} strokeWidth={1.75} />}
-        iconClassName="bg-brand-50"
+        icon={<Briefcase className="text-white" size={20} strokeWidth={1.75} />}
         details={[
           ['Days with postings', stats.daily.length.toLocaleString()],
           ['Top location', stats.topLocation ?? 'N/A'],
@@ -75,8 +74,7 @@ export default function JobsMetrics({ stats }: { stats: JobStats }) {
         label="Latest Posting"
         value={stats.latestDate ?? 'N/A'}
         live={stats.latestDate ? daysSince(stats.latestDate) === 'Today' : false}
-        icon={<CalendarDays className="text-brand-500" size={20} strokeWidth={1.75} />}
-        iconClassName="bg-brand-50"
+        icon={<CalendarDays className="text-white" size={20} strokeWidth={1.75} />}
         details={[
           ['Posted', stats.latestDate ? daysSince(stats.latestDate) : 'N/A'],
           ['Jobs that day', stats.latestCount.toLocaleString()],
@@ -85,8 +83,7 @@ export default function JobsMetrics({ stats }: { stats: JobStats }) {
       <MetricCard
         label="Unique Companies"
         value={stats.uniqueCompanies.toLocaleString()}
-        icon={<Building2 className="text-brand-500" size={20} strokeWidth={1.75} />}
-        iconClassName="bg-brand-50"
+        icon={<Building2 className="text-white" size={20} strokeWidth={1.75} />}
         details={[
           ['Avg jobs per company', stats.avgPerCompany.toFixed(1)],
           ['Top hirer', stats.topCompanies[0]?.name ?? 'N/A'],
