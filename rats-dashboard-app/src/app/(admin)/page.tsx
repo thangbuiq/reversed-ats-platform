@@ -8,7 +8,7 @@ import JobPostingChart from '@/components/jobs/JobPostingChart';
 import RemoteJobsChart from '@/components/jobs/RemoteJobsChart';
 import JobsTable from '@/components/jobs/JobsTable';
 
-const PAGE_SIZE = 50;
+const FETCH_PAGE_SIZE = 1000;
 
 export default function DashboardPage() {
   const [jobs, setJobs] = useState<JobRecord[]>([]);
@@ -27,7 +27,7 @@ export default function DashboardPage() {
       let iterations = 0;
 
       while (hasMore && iterations < 20) {
-        const data = await fetchJobs(PAGE_SIZE * 4, offset);
+        const data = await fetchJobs(FETCH_PAGE_SIZE, offset);
         allJobs = allJobs.concat(data.jobs);
         offset = data.next_offset;
         if (!offset) {

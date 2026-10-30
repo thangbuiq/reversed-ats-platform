@@ -4,6 +4,7 @@ import Markdown from 'react-markdown';
 import { Table, TableBody, TableCell, TableHeader, TableRow } from '@/components/ui/table';
 import Badge from '@/components/ui/badge/Badge';
 import type { JobRecord } from '@/types/api';
+import { fetchJobDetail } from '@/lib/api';
 import { freshnessInfo } from '@/lib/freshness';
 import {
   Select,
@@ -33,6 +34,23 @@ export default function JobsTable({
   const [companyFilter, setCompanyFilter] = React.useState('');
   const [levelFilter, setLevelFilter] = React.useState('');
   const [selectedJob, setSelectedJob] = React.useState<JobRecord | null>(null);
+  const [jobDetail, setJobDetail] = React.useState<JobRecord | null>(null);
+
+  React.useEffect(() => {
+    setJobDetail(null);
+    if (!selectedJob) return;
+    let cancelled = false;
+    fetchJobDetail(selectedJob.point_id)
+      .then((detail) => {
+        if (!cancelled) setJobDetail(detail);
+      })
+      .catch(() => {
+        if (!cancelled) setJobDetail(selectedJob);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedJob]);
 
   const [renderLimit, setRenderLimit] = React.useState(50);
 
@@ -544,9 +562,11 @@ export default function JobsTable({
               <div className="max-h-[50vh] overflow-y-auto px-6 pb-2">
                 <div className="prose prose-sm dark:prose-invert max-w-none leading-relaxed text-gray-700 dark:text-gray-300 [&>h1]:mt-5 [&>h2]:mt-4 [&>h3]:mt-3 [&>li]:mb-1 [&>ol]:mb-3 [&>p]:mb-3 [&>ul]:mb-3">
                   <Markdown>
-                    {getPayloadField(selectedJob, 'job_description') !== '—'
-                      ? getPayloadField(selectedJob, 'job_description')
-                      : '*No description available.*'}
+                    {jobDetail === null
+                      ? '*Loading description...*'
+                      : getPayloadField(jobDetail, 'job_description') !== '—'
+                        ? getPayloadField(jobDetail, 'job_description')
+                        : '*No description available.*'}
                   </Markdown>
                 </div>
               </div>

@@ -1,11 +1,11 @@
 /** Typed fetch helpers for the RATS Dashboard API. */
 
-import type { ShowAllJobsResponse, PredictResponse } from '@/types/api';
+import type { JobRecord, ShowAllJobsResponse, PredictResponse } from '@/types/api';
 
 const API_BASE = '/api';
 
 /**
- * Fetch paginated jobs from Qdrant via the API.
+ * Fetch a page of jobs (newest first, without descriptions) from Neon via the API.
  */
 export async function fetchJobs(
   limit = 100,
@@ -18,6 +18,18 @@ export async function fetchJobs(
   if (!res.ok) {
     const body = await res.text();
     throw new Error(`Failed to fetch jobs: ${res.status} – ${body}`);
+  }
+  return res.json();
+}
+
+/**
+ * Fetch one job including its full description.
+ */
+export async function fetchJobDetail(jobHashId: string): Promise<JobRecord> {
+  const res = await fetch(`${API_BASE}/jobs/${encodeURIComponent(jobHashId)}`);
+  if (!res.ok) {
+    const body = await res.text();
+    throw new Error(`Failed to fetch job: ${res.status} – ${body}`);
   }
   return res.json();
 }

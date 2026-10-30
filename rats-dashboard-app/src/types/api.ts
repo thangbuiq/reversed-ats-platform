@@ -12,7 +12,6 @@ export interface JobRecord {
 }
 
 export interface ShowAllJobsResponse {
-  collection_name: string;
   total: number;
   limit: number;
   next_offset: string | null;
