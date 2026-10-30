@@ -28,13 +28,21 @@ Reversed ATS platform, a platform for analyzing job market trends, predicting sa
 
 In development, the RATS platform includes the following key features:
 
-- Near Real-time Job Dashboard: Automated each 2 hours to capture the latest job listings from LinkedIn.
+- Near Real-time Job Dashboard: Automated each 2 hours to capture the latest job listings from LinkedIn, with filters, posting trends and top hiring companies.
 
-  ![Near Real-time Job Data Crawling](./assets/docs/images/showcase/job-table-dashboard.png)
+  ![Job market dashboard](./assets/docs/images/showcase/dashboard-overview.png)
 
-- Job-Resume Matching: Smart matching system using NLP and embeddings.
+  ![Job listings table](./assets/docs/images/showcase/job-table-dashboard.png)
+
+- Job-Resume Matching: Upload a CV (PDF, TXT or Markdown) and get the closest live listings, ranked by embedding similarity.
 
   ![Job-Resume Matching](./assets/docs/images/showcase/cv-matching.png)
+
+- Mobile-first layout: the dashboard, CV matching and job details are built for phone screens too.
+
+  ![Mobile dashboard, CV matching and job details](./assets/docs/images/showcase/mobile.png)
+
+> Screenshots use sample data; company names are fictional.
 
 Planned features include:
 
