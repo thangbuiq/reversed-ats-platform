@@ -1,5 +1,5 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useSyncExternalStore } from 'react';
 import { ChevronDown, SlidersHorizontal } from 'lucide-react';
 import type { JobRecord } from '@/types/api';
 import {
@@ -25,6 +25,22 @@ interface JobFiltersProps {
 }
 
 const ALL = 'all';
+const PHONE_QUERY = '(max-width: 767px)';
+
+function subscribeToPhoneQuery(onChange: () => void) {
+  const query = window.matchMedia(PHONE_QUERY);
+  query.addEventListener('change', onChange);
+  return () => query.removeEventListener('change', onChange);
+}
+
+/** Filters start collapsed on phones so the CV matcher and metrics stay above the fold. */
+function useIsPhone(): boolean {
+  return useSyncExternalStore(
+    subscribeToPhoneQuery,
+    () => window.matchMedia(PHONE_QUERY).matches,
+    () => false
+  );
+}
 
 interface FilterSelectProps {
   value: string;
@@ -61,38 +77,40 @@ export default function JobFilters({
   visibleCount,
   onChange,
 }: JobFiltersProps) {
-  const [isOpen, setIsOpen] = useState(true);
+  const isPhone = useIsPhone();
+  const [openOverride, setOpenOverride] = useState<boolean | null>(null);
+  const isOpen = openOverride ?? !isPhone;
   const isFiltered = !sameFilters(filters, defaults);
   const set = (patch: Partial<JobFiltersState>) => onChange({ ...filters, ...patch });
   const toOptions = (values: string[]) => values.map((v) => ({ value: v, label: truncate(v) }));
 
   return (
-    <div className="space-y-3 rounded-2xl border border-gray-200 bg-white p-4 md:p-5">
-      <div className="flex flex-wrap items-center justify-between gap-3">
+    <div className="rounded-[9px] border border-gray-200 bg-white p-3 sm:p-4 md:p-5">
+      <div className="flex items-center justify-between gap-3">
         <button
           type="button"
           aria-expanded={isOpen}
           aria-controls="job-filters-body"
-          onClick={() => setIsOpen((open) => !open)}
-          className="btn label-md inline-flex items-center gap-2 px-3 py-1.5"
+          onClick={() => setOpenOverride(!isOpen)}
+          className="btn label-md h-9 gap-2 px-3"
         >
           <SlidersHorizontal size={14} strokeWidth={2} />
-          {isOpen ? 'Hide filters' : 'Show filters'}
+          {isOpen ? 'Hide filters' : 'Filters'}
           <ChevronDown
             size={14}
             strokeWidth={2}
-            className={`transition-transform ${isOpen ? 'rotate-180' : ''}`}
+            className={`transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}
           />
         </button>
-        <div className="flex items-center gap-3">
-          <p className="label-md text-gray-500">
+        <div className="flex min-w-0 items-center gap-2 sm:gap-3">
+          <p className="label-md truncate text-gray-500">
             {visibleCount.toLocaleString()} of {jobs.length.toLocaleString()} jobs
           </p>
           {isFiltered && (
             <button
               type="button"
               onClick={() => onChange(defaults)}
-              className="btn label-md px-3 py-1.5"
+              className="btn label-md h-9 shrink-0 px-3"
             >
               Reset
             </button>
@@ -103,25 +121,33 @@ export default function JobFilters({
         id="job-filters-body"
         aria-hidden={!isOpen}
         inert={!isOpen}
-        className={`grid transition-[grid-template-rows,opacity] duration-300 ease-out ${
-          isOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'
+        className={`grid transition-[grid-template-rows,opacity,margin] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+          isOpen ? 'mt-3 grid-rows-[1fr] opacity-100' : 'mt-0 grid-rows-[0fr] opacity-0'
         }`}
       >
-        <div className="-m-1 min-h-0 space-y-3 overflow-hidden p-1">
-          <div role="group" aria-label="Date range" className="flex flex-wrap gap-1">
-            {RANGE_OPTIONS.map(({ value, label }) => (
-              <button
-                key={value}
-                type="button"
-                aria-pressed={filters.range === value}
-                onClick={() => set({ range: value })}
-                className={`label-md px-3 py-1.5 ${filters.range === value ? 'btn-accent' : 'btn'}`}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="-m-1 min-h-0 overflow-hidden p-1">
+          <div className="grid grid-cols-2 gap-2 sm:gap-3 lg:grid-cols-[auto_1fr_1fr_1fr]">
+            <div
+              role="group"
+              aria-label="Date range"
+              className="col-span-2 flex h-10 items-center gap-0.5 rounded-lg border border-gray-200 bg-white p-1 lg:col-span-1"
+            >
+              {RANGE_OPTIONS.map(({ value, label }) => (
+                <button
+                  key={value}
+                  type="button"
+                  aria-pressed={filters.range === value}
+                  onClick={() => set({ range: value })}
+                  className={`label-md h-full flex-1 rounded-md px-3 transition-colors duration-200 lg:flex-none ${
+                    filters.range === value
+                      ? 'bg-brand-500 text-white'
+                      : 'text-gray-900 hover:bg-gray-100'
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
             <FilterSelect
               value={filters.company}
               allLabel="All companies"
@@ -134,7 +160,7 @@ export default function JobFilters({
               options={toOptions(facetOptions(jobs, filters, 'level'))}
               onChange={(level) => set({ level })}
             />
-            <div className="relative">
+            <div className="relative col-span-2 lg:col-span-1">
               <span className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2">
                 <svg
                   className="h-4 w-4 text-gray-400"

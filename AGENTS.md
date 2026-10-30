@@ -23,3 +23,9 @@ Reversed ATS platform is a platform for analyzing job market trends, predicting 
 
 - Install with `uv tool install prek` and run checks via `prek run --all-files`.
 - Enable the hooks with `prek install --install-hooks` so they run automatically on each commit.
+
+## Frontend Design System
+
+- Every UI change in [rats-dashboard-app](./rats-dashboard-app) must follow [rats-dashboard-app/DESIGN.md](./rats-dashboard-app/DESIGN.md): its colors, typography, radii, button rules, motion and guardrails. Read it before touching components or styles.
+- Check layouts at phone width (375px) as well as desktop; the dashboard must not scroll horizontally on mobile.
+- Keep motion smooth and restrained, and honour `prefers-reduced-motion`.

@@ -130,9 +130,7 @@ export default function JobPostingChart({ data, levels }: JobPostingChartProps) 
     <div className="h-full min-w-0 overflow-hidden rounded-2xl border border-gray-200 bg-white p-4 sm:p-5 md:p-6 dark:border-gray-400/20 dark:bg-gray-800">
       <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">
-            Jobs Posted by Day
-          </h3>
+          <h3 className="font-display text-xl font-medium text-gray-900">Jobs Posted by Day</h3>
           <p className="text-sm text-gray-500 dark:text-gray-400">
             {total.toLocaleString()} new postings in {data.length} day{data.length === 1 ? '' : 's'}
           </p>
