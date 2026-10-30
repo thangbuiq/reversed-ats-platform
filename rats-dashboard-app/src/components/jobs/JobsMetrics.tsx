@@ -1,97 +1,97 @@
 'use client';
 import React from 'react';
-import Badge from '@/components/ui/badge/Badge';
-import { ArrowUpIcon, BoxIconLine, GroupIcon } from '@/icons';
+import { Briefcase, CalendarDays, Building2 } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import type { JobStats } from '@/lib/jobStats';
 
-interface JobsMetricsProps {
-  totalJobs: number;
-  latestDate: string | null;
-  topCompanies: number;
+interface MetricCardProps {
+  label: string;
+  value: string;
+  icon: React.ReactNode;
+  iconClassName: string;
+  details: [label: string, value: string][];
+  /** Shows a green dot next to the value when the figure is current. */
+  live?: boolean;
 }
 
-export default function JobsMetrics({ totalJobs, latestDate, topCompanies }: JobsMetricsProps) {
+function MetricCard({ label, value, icon, iconClassName, details, live }: MetricCardProps) {
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <div className="cursor-default rounded-xl border border-gray-200 bg-white p-4 text-left dark:border-gray-400/20 dark:bg-gray-800">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div
+                className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${iconClassName}`}
+              >
+                {icon}
+              </div>
+              <span className="label-md text-gray-500 dark:text-gray-400">{label}</span>
+            </div>
+            <h4 className="font-display flex items-center gap-2 text-xl font-medium text-gray-800 dark:text-white/90">
+              {live && (
+                <span
+                  className="bg-success-500 h-2 w-2 shrink-0 animate-pulse rounded-full"
+                  aria-hidden="true"
+                />
+              )}
+              {value}
+            </h4>
+          </div>
+        </div>
+      </TooltipTrigger>
+      <TooltipContent side="bottom" sideOffset={6} className="space-y-1 px-3 py-2">
+        {details.map(([detailLabel, detailValue]) => (
+          <div key={detailLabel} className="flex justify-between gap-6">
+            <span className="opacity-70">{detailLabel}</span>
+            <span className="font-mono font-semibold">{detailValue}</span>
+          </div>
+        ))}
+      </TooltipContent>
+    </Tooltip>
+  );
+}
+
+function daysSince(date: string): string {
+  const days = Math.floor((Date.now() - new Date(date).getTime()) / 86_400_000);
+  if (Number.isNaN(days)) return 'N/A';
+  return days <= 0 ? 'Today' : `${days} day${days === 1 ? '' : 's'} ago`;
+}
+
+export default function JobsMetrics({ stats }: { stats: JobStats }) {
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 md:gap-5">
-      {/* Total Jobs */}
-      <div className="rounded-xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-white/[0.03]">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="bg-brand-50 dark:bg-brand-500/15 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg">
-              <BoxIconLine className="text-brand-500 h-5 w-5" />
-            </div>
-            <div className="flex flex-col items-start gap-1">
-              <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
-                Total Jobs
-              </span>
-              <Badge color="primary">
-                <ArrowUpIcon />
-                Active
-              </Badge>
-            </div>
-          </div>
-          <div className="text-right">
-            <h4 className="text-xl font-semibold text-gray-800 dark:text-white/90">
-              {totalJobs.toLocaleString()}
-            </h4>
-          </div>
-        </div>
-      </div>
-
-      {/* Latest Posting */}
-      <div className="rounded-xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-white/[0.03]">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="bg-success-50 dark:bg-success-500/15 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg">
-              <svg
-                className="text-success-500 h-5 w-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                />
-              </svg>
-            </div>
-            <div className="flex flex-col items-start gap-1">
-              <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
-                Latest Posting
-              </span>
-              <Badge color="success">Recent</Badge>
-            </div>
-          </div>
-          <div className="text-right">
-            <h4 className="text-lg font-semibold text-gray-800 dark:text-white/90">
-              {latestDate ?? 'N/A'}
-            </h4>
-          </div>
-        </div>
-      </div>
-
-      {/* Unique Companies */}
-      <div className="rounded-xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-white/[0.03]">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="bg-warning-50 dark:bg-warning-500/15 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg">
-              <GroupIcon className="text-warning-500 h-5 w-5" />
-            </div>
-            <div className="flex flex-col items-start gap-1">
-              <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
-                Unique Companies
-              </span>
-              <Badge color="warning">Diverse</Badge>
-            </div>
-          </div>
-          <div className="text-right">
-            <h4 className="text-xl font-semibold text-gray-800 dark:text-white/90">
-              {topCompanies.toLocaleString()}
-            </h4>
-          </div>
-        </div>
-      </div>
+      <MetricCard
+        label="Total Jobs"
+        value={stats.total.toLocaleString()}
+        icon={<Briefcase className="text-brand-500" size={20} strokeWidth={1.75} />}
+        iconClassName="bg-brand-50"
+        details={[
+          ['Days with postings', stats.daily.length.toLocaleString()],
+          ['Top location', stats.topLocation ?? 'N/A'],
+        ]}
+      />
+      <MetricCard
+        label="Latest Posting"
+        value={stats.latestDate ?? 'N/A'}
+        live={stats.latestDate ? daysSince(stats.latestDate) === 'Today' : false}
+        icon={<CalendarDays className="text-brand-500" size={20} strokeWidth={1.75} />}
+        iconClassName="bg-brand-50"
+        details={[
+          ['Posted', stats.latestDate ? daysSince(stats.latestDate) : 'N/A'],
+          ['Jobs that day', stats.latestCount.toLocaleString()],
+        ]}
+      />
+      <MetricCard
+        label="Unique Companies"
+        value={stats.uniqueCompanies.toLocaleString()}
+        icon={<Building2 className="text-brand-500" size={20} strokeWidth={1.75} />}
+        iconClassName="bg-brand-50"
+        details={[
+          ['Avg jobs per company', stats.avgPerCompany.toFixed(1)],
+          ['Top hirer', stats.topCompanies[0]?.name ?? 'N/A'],
+        ]}
+      />
     </div>
   );
 }

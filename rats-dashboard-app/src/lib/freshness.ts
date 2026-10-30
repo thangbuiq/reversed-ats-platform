@@ -21,6 +21,7 @@ export function freshnessInfo(dateStr: string | null | undefined): {
 } {
   const days = daysSincePosted(dateStr);
   if (isNaN(days)) return { label: 'Reposted', color: 'info', isEarlyBird: false };
+  if (days <= 0) return { label: 'Just today', color: 'success', isEarlyBird: true };
   if (days <= EARLY_BIRD_DAYS)
     return { label: `${days}d ago`, color: 'success', isEarlyBird: true };
   if (days <= FRESH_DAYS) return { label: `${days}d ago`, color: 'success', isEarlyBird: false };

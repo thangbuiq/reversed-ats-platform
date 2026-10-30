@@ -1,19 +1,26 @@
 'use client';
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
-import Link from 'next/link';
 import { fetchJobs } from '@/lib/api';
 import type { JobRecord } from '@/types/api';
 import JobsMetrics from '@/components/jobs/JobsMetrics';
 import JobPostingChart from '@/components/jobs/JobPostingChart';
-import RemoteJobsChart from '@/components/jobs/RemoteJobsChart';
+import TopCompaniesChart from '@/components/jobs/TopCompaniesChart';
+import { computeJobStats } from '@/lib/jobStats';
+import CVMatchSection from '@/components/cv-match/CVMatchSection';
 import JobsTable from '@/components/jobs/JobsTable';
+import JobFilters from '@/components/jobs/JobFilters';
+import {
+  DEFAULT_FILTERS,
+  filterJobs,
+  sameFilters,
+  type JobFilters as JobFiltersState,
+} from '@/lib/jobFilters';
 
 const FETCH_PAGE_SIZE = 1000;
 
 export default function DashboardPage() {
   const [jobs, setJobs] = useState<JobRecord[]>([]);
-  const [filteredJobs, setFilteredJobs] = useState<JobRecord[]>([]);
-  const [total, setTotal] = useState(0);
+  const [filters, setFilters] = useState<JobFiltersState>(DEFAULT_FILTERS);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -37,8 +44,6 @@ export default function DashboardPage() {
       }
 
       setJobs(allJobs);
-      setFilteredJobs(allJobs);
-      setTotal(allJobs.length);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load jobs');
     } finally {
@@ -50,82 +55,13 @@ export default function DashboardPage() {
     loadJobs();
   }, [loadJobs]);
 
-  // ---- Derived metrics ----
-  const latestDate = useMemo(() => {
-    for (const job of filteredJobs) {
-      const d = job.payload?.date_posted;
-      if (d && d !== '—') return String(d);
-    }
-    return null;
-  }, [filteredJobs]);
-
-  const uniqueCompanies = useMemo(() => {
-    const set = new Set<string>();
-    for (const job of filteredJobs) {
-      if (job.company_name) set.add(job.company_name);
-    }
-    return set.size;
-  }, [filteredJobs]);
-
-  // ---- Chart data: count jobs by date_posted ----
-  const chartData = useMemo(() => {
-    const counts: Record<string, number> = {};
-    for (const job of filteredJobs) {
-      const d = job.payload?.date_posted;
-      if (d && d !== '—') {
-        const date = String(d);
-        counts[date] = (counts[date] || 0) + 1;
-      }
-    }
-    return Object.entries(counts)
-      .map(([date, count]) => ({ date, count }))
-      .sort((a, b) => a.date.localeCompare(b.date));
-  }, [filteredJobs]);
-
-  // ---- Remote vs on-site ----
-  const remoteStats = useMemo(() => {
-    let remote = 0;
-    let onsite = 0;
-    for (const job of filteredJobs) {
-      const isRemote = job.payload?.is_remote;
-      if (isRemote === true || isRemote === 'true') remote++;
-      else onsite++;
-    }
-    return { remote, onsite };
-  }, [filteredJobs]);
+  const filteredJobs = useMemo(() => filterJobs(jobs, filters), [jobs, filters]);
+  const stats = useMemo(() => computeJobStats(filteredJobs), [filteredJobs]);
+  const allStats = useMemo(() => computeJobStats(jobs), [jobs]);
 
   return (
     <div className="space-y-6">
-      {/* Page header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-800 dark:text-white/90">Dashboard</h1>
-          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-            Overview of scraped LinkedIn job listings
-          </p>
-        </div>
-        <div className="flex items-center gap-3">
-          <Link
-            href="/cv-match"
-            className="bg-brand-500 hover:bg-brand-600 inline-flex shrink-0 items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-medium text-white transition-colors"
-          >
-          <svg
-            className="h-4 w-4"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth={1.5}
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"
-            />
-          </svg>
-          CV Matcher
-        </Link>
-        </div>
-      </div>
+      <h1 className="sr-only">Dashboard</h1>
 
       {error && (
         <div className="border-error-200 bg-error-50 text-error-600 dark:border-error-500/30 dark:bg-error-500/10 dark:text-error-400 rounded-xl border p-4">
@@ -134,31 +70,43 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {/* Metric cards */}
-      <JobsMetrics
-        totalJobs={filteredJobs.length}
-        latestDate={latestDate}
-        topCompanies={uniqueCompanies}
+      <JobFilters
+        jobs={jobs}
+        filters={filters}
+        defaults={DEFAULT_FILTERS}
+        visibleCount={filteredJobs.length}
+        onChange={setFilters}
       />
 
-      {/* Charts row: line chart + donut chart side-by-side */}
+      {/* Metric cards */}
+      <JobsMetrics stats={stats} />
+
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-12">
-        <div className="xl:col-span-8">
-          {chartData.length > 0 ? (
-            <JobPostingChart data={chartData} />
+        <div className="xl:col-span-7">
+          {stats.daily.length > 0 ? (
+            <JobPostingChart data={stats.daily} levels={stats.levels} />
           ) : (
-            <div className="flex h-full items-center justify-center rounded-2xl border border-gray-200 bg-white p-10 text-center dark:border-gray-800 dark:bg-white/[0.03]">
+            <div className="flex h-full items-center justify-center rounded-2xl border border-gray-200 bg-white p-10 text-center dark:border-gray-400/20 dark:bg-gray-800">
               <p className="text-gray-400 dark:text-gray-500">No chart data available</p>
             </div>
           )}
         </div>
-        <div className="xl:col-span-4">
-          <RemoteJobsChart remoteCount={remoteStats.remote} onsiteCount={remoteStats.onsite} />
-        </div>
+        {stats.topCompanies.length > 0 && (
+          <div className="xl:col-span-5">
+            <TopCompaniesChart companies={stats.topCompanies} levels={stats.levels} />
+          </div>
+        )}
       </div>
 
+      <CVMatchSection totalListings={allStats.total} totalCompanies={allStats.uniqueCompanies} />
+
       {/* Jobs Table */}
-      <JobsTable jobs={jobs} total={total} isLoading={isLoading} onFilterChange={setFilteredJobs} />
+      <JobsTable
+        jobs={filteredJobs}
+        levels={stats.levels}
+        isLoading={isLoading}
+        hasActiveFilters={!sameFilters(filters, { ...DEFAULT_FILTERS, range: 'all' })}
+      />
     </div>
   );
 }

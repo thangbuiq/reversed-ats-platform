@@ -26,25 +26,6 @@ const navItems: NavItem[] = [
     name: 'Dashboard',
     path: '/',
   },
-  {
-    icon: (
-      <svg
-        className="size-6"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke="currentColor"
-        strokeWidth={1.5}
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"
-        />
-      </svg>
-    ),
-    name: 'CV Matcher',
-    path: '/cv-match',
-  },
 ];
 
 const othersItems: NavItem[] = [];
@@ -251,7 +232,7 @@ const AppSidebar: React.FC = () => {
 
   return (
     <aside
-      className={`fixed top-0 left-0 z-[100000] mt-16 flex h-screen flex-col border-r border-gray-200 bg-white px-5 text-gray-900 transition-all duration-300 ease-in-out lg:mt-0 dark:border-gray-800 dark:bg-gray-900 ${
+      className={`fixed top-0 left-0 z-[100000] mt-16 flex h-screen flex-col border-r border-gray-200 bg-white px-5 text-gray-900 transition-all duration-300 ease-in-out lg:mt-0 dark:border-gray-400/20 dark:bg-gray-900 ${
         isExpanded || isMobileOpen ? 'w-[290px]' : isHovered ? 'w-[290px]' : 'w-[90px]'
       } ${isMobileOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0`}
       onMouseEnter={() => !isExpanded && setIsHovered(true)}
@@ -341,7 +322,7 @@ const AppSidebar: React.FC = () => {
                   animate={{ opacity: 1, scale: 1, y: '-50%', x: '-50%' }}
                   exit={{ opacity: 0, scale: 0.95, y: '-50%', x: '-50%' }}
                   transition={{ duration: 0.2 }}
-                  className="fixed top-[50%] left-[50%] z-[100002] grid w-full max-w-md gap-4 border border-gray-200 bg-white p-6 shadow-lg sm:rounded-xl dark:border-gray-800 dark:bg-gray-900"
+                  className="fixed top-[50%] left-[50%] z-[100002] grid w-full max-w-md gap-4 border border-gray-200 bg-white p-6 shadow-lg sm:rounded-xl dark:border-gray-400/20 dark:bg-gray-900"
                 >
                   <button
                     onClick={() => setIsHelpDialogOpen(false)}

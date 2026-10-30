@@ -57,7 +57,7 @@ export default function JobDetailsModal({ job, onClose }: JobDetailsModalProps) 
         animate={{ opacity: 1, scale: 1, y: '-50%', x: '-50%' }}
         exit={{ opacity: 0, scale: 0.95, y: '-50%', x: '-50%' }}
         transition={{ duration: 0.2 }}
-        className="fixed top-[50%] left-[50%] z-[100002] grid w-full max-w-2xl gap-4 border border-gray-200 bg-white p-6 shadow-lg sm:rounded-xl dark:border-gray-800 dark:bg-gray-900"
+        className="fixed top-[50%] left-[50%] z-[100002] grid w-full max-w-2xl gap-4 border border-gray-200 bg-white p-6 shadow-lg sm:rounded-xl dark:border-gray-400/20 dark:bg-gray-900"
       >
         {/* Close Button */}
         <button
@@ -146,7 +146,7 @@ export default function JobDetailsModal({ job, onClose }: JobDetailsModalProps) 
               href={job.job_url}
               target="_blank"
               rel="noopener noreferrer"
-              className="bg-brand-500 hover:bg-brand-600 inline-flex w-full items-center justify-center gap-1.5 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors sm:w-auto"
+              className="inline-flex w-full items-center justify-center gap-1.5 rounded-lg border border-gray-400/40 bg-black px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-gray-800 sm:w-auto"
             >
               Apply Now
               <svg
