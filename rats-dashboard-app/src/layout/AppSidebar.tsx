@@ -262,7 +262,10 @@ const AppSidebar: React.FC = () => {
                 <span className="text-sm font-semibold whitespace-nowrap text-gray-800 dark:text-white/90">
                   Reversed ATS Platform
                 </span>
-                <button onClick={() => setIsHelpDialogOpen(true)} className="btn size-7 p-0">
+                <button
+                  onClick={() => setIsHelpDialogOpen(true)}
+                  className="hover:text-brand-500 dark:hover:text-brand-400 text-gray-400 transition-colors dark:text-gray-500"
+                >
                   <svg
                     className="h-4 w-4"
                     fill="none"
