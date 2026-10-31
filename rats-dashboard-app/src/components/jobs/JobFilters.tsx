@@ -85,7 +85,7 @@ export default function JobFilters({
   const toOptions = (values: string[]) => values.map((v) => ({ value: v, label: truncate(v) }));
 
   return (
-    <div className="rounded-[9px] border border-gray-200 bg-white p-3 sm:p-4 md:p-5">
+    <div className="border border-gray-200 bg-white p-3 sm:p-4 md:p-5">
       <div className="flex items-center justify-between gap-3">
         <button
           type="button"
@@ -130,7 +130,7 @@ export default function JobFilters({
             <div
               role="group"
               aria-label="Date range"
-              className="col-span-2 flex h-10 items-center gap-0.5 rounded-lg border border-gray-200 bg-white p-1 lg:col-span-1"
+              className="col-span-2 flex h-10 items-center gap-0.5 border border-gray-200 bg-white p-1 lg:col-span-1"
             >
               {RANGE_OPTIONS.map(({ value, label }) => (
                 <button
@@ -138,7 +138,7 @@ export default function JobFilters({
                   type="button"
                   aria-pressed={filters.range === value}
                   onClick={() => set({ range: value })}
-                  className={`label-md h-full flex-1 rounded-md px-3 transition-colors duration-200 lg:flex-none ${
+                  className={`label-md h-full flex-1 px-3 transition-colors duration-200 lg:flex-none ${
                     filters.range === value
                       ? 'bg-brand-500 text-white'
                       : 'text-gray-900 hover:bg-gray-100'
@@ -181,7 +181,7 @@ export default function JobFilters({
                 value={filters.search}
                 onChange={(e) => set({ search: e.target.value })}
                 placeholder="Filter keywords…"
-                className="focus:border-brand-300 focus:ring-brand-500/10 h-10 w-full rounded-lg border border-gray-200 bg-transparent py-2 pr-3 pl-9 text-sm text-gray-800 placeholder:text-gray-400 focus:ring-3 focus:outline-hidden"
+                className="focus:border-brand-300 focus:ring-brand-500/10 h-10 w-full border border-gray-200 bg-transparent py-2 pr-3 pl-9 text-sm text-gray-800 placeholder:text-gray-400 focus:ring-3 focus:outline-hidden"
               />
             </div>
           </div>

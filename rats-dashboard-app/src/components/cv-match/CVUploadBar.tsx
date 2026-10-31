@@ -70,13 +70,13 @@ export default function CVUploadBar({ onUpload, isUploading }: CVUploadBarProps)
         {...getRootProps({ onClick: open })}
         role="button"
         aria-label="Choose a CV to match"
-        className={`group flex min-h-16 w-full cursor-pointer items-center gap-3 rounded-[10px] border border-dashed px-4 py-3 backdrop-blur-sm transition-[transform,background-color,border-color] duration-300 ease-out sm:px-5 ${tone} ${
+        className={`group flex min-h-16 w-full cursor-pointer items-center gap-3 border border-dashed px-4 py-3 backdrop-blur-sm transition-[transform,background-color,border-color] duration-300 ease-out sm:px-5 ${tone} ${
           isUploading ? 'pointer-events-none' : ''
         }`}
       >
         <input {...getInputProps()} />
         <span
-          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-[10px] text-white transition-colors ${
+          className={`flex h-10 w-10 shrink-0 items-center justify-center text-white transition-colors ${
             selectedFile && !isUploading ? 'bg-success-500' : 'bg-black group-hover:bg-gray-800'
           }`}
         >

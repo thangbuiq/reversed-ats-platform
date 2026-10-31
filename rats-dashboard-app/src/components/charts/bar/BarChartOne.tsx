@@ -24,7 +24,7 @@ export default function BarChartOne() {
       bar: {
         horizontal: false,
         columnWidth: '39%',
-        borderRadius: 5,
+        borderRadius: 0,
         borderRadiusApplication: 'end',
       },
     },

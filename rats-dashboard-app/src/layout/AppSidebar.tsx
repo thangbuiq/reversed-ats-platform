@@ -322,7 +322,7 @@ const AppSidebar: React.FC = () => {
                   animate={{ opacity: 1, scale: 1, y: '-50%', x: '-50%' }}
                   exit={{ opacity: 0, scale: 0.95, y: '-50%', x: '-50%' }}
                   transition={{ duration: 0.2 }}
-                  className="fixed top-[50%] left-[50%] z-[100002] grid w-full max-w-md gap-4 border border-gray-200 bg-white p-6 shadow-lg sm:rounded-xl dark:border-gray-400/20 dark:bg-gray-900"
+                  className="fixed top-[50%] left-[50%] z-[100002] grid w-full max-w-md gap-4 border border-gray-200 bg-white p-6 shadow-lg dark:border-gray-400/20 dark:bg-gray-900"
                 >
                   <button
                     onClick={() => setIsHelpDialogOpen(false)}

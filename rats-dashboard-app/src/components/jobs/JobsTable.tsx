@@ -7,7 +7,7 @@ import { fetchJobDetail } from '@/lib/api';
 import { countLevels, levelOf } from '@/lib/jobStats';
 import { freshnessInfo } from '@/lib/freshness';
 import { LevelLabel, LevelLegend } from '@/components/jobs/LevelLabel';
-import { ExternalLink } from 'lucide-react';
+import { ExternalLink, Loader2 } from 'lucide-react';
 import JobDetailsModal from '@/components/jobs/JobDetailsModal';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
@@ -95,7 +95,7 @@ export default function JobsTable({
   const closeModal = React.useCallback(() => setSelectedJob(null), []);
 
   return (
-    <div className="overflow-hidden rounded-[9px] border border-gray-200 bg-white">
+    <div className="overflow-hidden border border-gray-200 bg-white">
       <div className="flex flex-col gap-4 border-b border-gray-100 p-4 sm:p-5 md:p-6">
         <div>
           <p className="label-md text-gray-500">MARKET</p>
@@ -108,24 +108,7 @@ export default function JobsTable({
       {isLoading ? (
         <div className="px-5 py-20 text-center">
           <div className="flex flex-col items-center justify-center gap-6">
-            <div className="relative flex items-center justify-center">
-              <div className="border-brand-500 absolute inset-0 animate-[spin_1s_linear_infinite] rounded-full border-t-2" />
-              <div className="border-brand-400 absolute inset-2 animate-[spin_1.5s_linear_infinite] rounded-full border-r-2" />
-              <div className="border-brand-300 absolute inset-4 animate-[spin_2s_linear_infinite] rounded-full border-b-2" />
-              <svg
-                className="text-brand-100 dark:text-brand-900/50 h-12 w-12"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={1}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                />
-              </svg>
-            </div>
+            <Loader2 className="text-brand-500 animate-spin" size={40} strokeWidth={1.5} />
             <div className="flex flex-col items-center gap-2">
               <p className="min-h-[28px] animate-pulse text-lg font-medium text-gray-800 dark:text-white/90">
                 {loadingMessages[loadingMsgIdx]}
@@ -162,7 +145,7 @@ export default function JobsTable({
                     <div className="min-w-0 flex-1">
                       <p className="line-clamp-2 text-sm font-semibold text-gray-900">
                         {fresh.isEarlyBird && (
-                          <span className="bg-success-500 mr-2 inline-block h-1.5 w-1.5 animate-pulse rounded-full align-middle" />
+                          <span className="bg-success-500 mr-2 inline-block h-1.5 w-1.5 animate-pulse align-middle" />
                         )}
                         {job.job_title ?? '—'}
                       </p>
@@ -230,7 +213,7 @@ export default function JobsTable({
                             {fresh.isEarlyBird && (
                               <Tooltip>
                                 <TooltipTrigger asChild>
-                                  <span className="bg-success-500 h-1.5 w-1.5 shrink-0 animate-pulse rounded-full" />
+                                  <span className="bg-success-500 h-1.5 w-1.5 shrink-0 animate-pulse" />
                                 </TooltipTrigger>
                                 <TooltipContent>
                                   <p className="text-sm">Apply fast for early birds</p>

@@ -91,9 +91,9 @@ export default function JobDetailsModal({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 48 }}
             transition={{ duration: 0.4, ease: EASE_OUT }}
-            className="relative flex max-h-[88dvh] w-full max-w-2xl flex-col rounded-t-[16px] border border-gray-200 bg-white shadow-2xl sm:max-h-[85vh] sm:rounded-[9px]"
+            className="relative flex max-h-[88dvh] w-full max-w-2xl flex-col border border-gray-200 bg-white shadow-2xl sm:max-h-[85vh]"
           >
-            <div className="mx-auto mt-2.5 h-1 w-10 rounded-full bg-gray-200 sm:hidden" />
+            <div className="mx-auto mt-2.5 h-1 w-10 bg-gray-200 sm:hidden" />
             <div className="flex items-start gap-4 p-5 pb-4 sm:p-6 sm:pb-4">
               <div className="min-w-0 flex-1">
                 <h2
@@ -129,7 +129,7 @@ export default function JobDetailsModal({
               {isLoadingDescription ? (
                 <div className="space-y-3">
                   {['w-full', 'w-11/12', 'w-4/5', 'w-full', 'w-2/3'].map((width, i) => (
-                    <div key={i} className={`skeleton h-3.5 rounded ${width}`} />
+                    <div key={i} className={`skeleton h-3.5 ${width}`} />
                   ))}
                 </div>
               ) : (

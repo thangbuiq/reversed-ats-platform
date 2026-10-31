@@ -67,7 +67,7 @@ export default function DashboardPage() {
         <h1 className="sr-only">Dashboard</h1>
 
         {error && (
-          <div className="border-brand-200 bg-brand-50 text-brand-700 rounded-[9px] border p-4">
+          <div className="border-brand-200 bg-brand-50 text-brand-700 border p-4">
             <p className="font-medium">Error loading jobs</p>
             <p className="mt-1 text-sm">{error}</p>
           </div>
@@ -99,7 +99,7 @@ export default function DashboardPage() {
             {stats.daily.length > 0 ? (
               <JobPostingChart data={stats.daily} levels={stats.levels} />
             ) : (
-              <div className="flex h-full min-h-60 items-center justify-center rounded-[9px] border border-gray-200 bg-white p-10 text-center">
+              <div className="flex h-full min-h-60 items-center justify-center border border-gray-200 bg-white p-10 text-center">
                 <p className="text-gray-400">
                   {isLoading ? 'Loading chart…' : 'No chart data available'}
                 </p>

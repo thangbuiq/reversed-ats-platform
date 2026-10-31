@@ -127,7 +127,7 @@ export default function JobPostingChart({ data, levels }: JobPostingChartProps) 
   };
 
   return (
-    <div className="h-full min-w-0 overflow-hidden rounded-2xl border border-gray-200 bg-white p-4 sm:p-5 md:p-6 dark:border-gray-400/20 dark:bg-gray-800">
+    <div className="h-full min-w-0 overflow-hidden border border-gray-200 bg-white p-4 sm:p-5 md:p-6 dark:border-gray-400/20 dark:bg-gray-800">
       <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
         <div>
           <h3 className="font-display text-xl font-medium text-gray-900">Jobs Posted by Day</h3>

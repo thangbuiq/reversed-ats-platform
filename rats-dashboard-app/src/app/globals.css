@@ -196,11 +196,11 @@
 
 /* Buttons: solid black with white content; red is reserved for the one accent action. */
 @utility btn {
-  @apply inline-flex items-center justify-center gap-1.5 rounded-lg bg-black text-white transition-[color,background-color,transform,opacity] duration-200 ease-out hover:bg-gray-800 active:scale-[0.98] disabled:opacity-50;
+  @apply inline-flex items-center justify-center gap-1.5 bg-black text-white transition-[color,background-color,transform,opacity] duration-200 ease-out hover:bg-gray-800 active:scale-[0.98] disabled:opacity-50;
 }
 
 @utility btn-accent {
-  @apply bg-brand-500 hover:bg-brand-600 inline-flex items-center justify-center gap-1.5 rounded-lg text-white transition-[color,background-color,transform,opacity] duration-200 ease-out active:scale-[0.98] disabled:opacity-50;
+  @apply bg-brand-500 hover:bg-brand-600 inline-flex items-center justify-center gap-1.5 text-white transition-[color,background-color,transform,opacity] duration-200 ease-out active:scale-[0.98] disabled:opacity-50;
 }
 
 @utility btn-md {
@@ -220,7 +220,7 @@
 }
 
 @utility menu-item {
-  @apply text-theme-sm relative flex w-full items-center gap-3 rounded-lg px-3 py-2 font-medium;
+  @apply text-theme-sm relative flex w-full items-center gap-3 px-3 py-2 font-medium;
 }
 
 @utility menu-item-active {
@@ -256,7 +256,7 @@
 }
 
 @utility menu-dropdown-item {
-  @apply text-theme-sm relative flex items-center gap-3 rounded-lg px-3 py-2.5 font-medium;
+  @apply text-theme-sm relative flex items-center gap-3 px-3 py-2.5 font-medium;
 }
 
 @utility menu-dropdown-item-active {
@@ -268,7 +268,7 @@
 }
 
 @utility menu-dropdown-badge {
-  @apply text-brand-500 dark:text-brand-400 block rounded-full px-2.5 py-0.5 text-xs font-medium uppercase;
+  @apply text-brand-500 dark:text-brand-400 block px-2.5 py-0.5 text-xs font-medium uppercase;
 }
 
 @utility menu-dropdown-badge-active {
@@ -293,12 +293,8 @@
     @apply size-1.5;
   }
 
-  &::-webkit-scrollbar-track {
-    @apply rounded-full;
-  }
-
   &::-webkit-scrollbar-thumb {
-    @apply rounded-full bg-gray-200 dark:bg-gray-700;
+    @apply bg-gray-200 dark:bg-gray-700;
   }
 }
 
@@ -352,7 +348,7 @@
   @apply w-full;
 }
 .flatpickr-calendar {
-  @apply dark:!bg-gray-dark dark:!shadow-theme-xl 2xsm:!w-auto mt-2 !rounded-xl !border !border-gray-200 !bg-white !p-5 !text-gray-500 dark:!border-gray-800 dark:!text-gray-400;
+  @apply dark:!bg-gray-dark dark:!shadow-theme-xl 2xsm:!w-auto mt-2 !border !border-gray-200 !bg-white !p-5 !text-gray-500 dark:!border-gray-800 dark:!text-gray-400;
 }
 
 .flatpickr-months .flatpickr-prev-month:hover svg,
@@ -382,7 +378,7 @@
 }
 
 .flatpickr-calendar {
-  @apply dark:!bg-gray-dark dark:!shadow-theme-xl 2xsm:!w-auto mt-2 !rounded-xl !border !border-gray-200 !bg-white !p-5 !text-gray-500 !shadow-none dark:!border-white/5 dark:!text-gray-400;
+  @apply dark:!bg-gray-dark dark:!shadow-theme-xl 2xsm:!w-auto mt-2 !border !border-gray-200 !bg-white !p-5 !text-gray-500 !shadow-none dark:!border-white/5 dark:!text-gray-400;
 }
 
 @media (max-width: 525px) {
@@ -531,7 +527,7 @@ span.flatpickr-weekday,
   @apply gap-2;
 }
 .fc-button-group .fc-button {
-  @apply flex h-10 w-10 items-center justify-center !rounded-lg border border-gray-200 bg-transparent hover:border-gray-200 hover:bg-gray-50 focus:shadow-none active:!border-gray-200 active:!bg-transparent active:!shadow-none dark:border-gray-800 dark:hover:border-gray-800 dark:hover:bg-gray-900 dark:active:border-gray-800!;
+  @apply flex h-10 w-10 items-center justify-center border border-gray-200 bg-transparent hover:border-gray-200 hover:bg-gray-50 focus:shadow-none active:!border-gray-200 active:!bg-transparent active:!shadow-none dark:border-gray-800 dark:hover:border-gray-800 dark:hover:bg-gray-900 dark:active:border-gray-800!;
 }
 
 .fc-button-group .fc-button.fc-prev-button:before {
@@ -552,16 +548,16 @@ span.flatpickr-weekday,
   @apply hidden;
 }
 .fc-addEventButton-button {
-  @apply !bg-brand-500 hover:!bg-brand-600 !rounded-lg !border-0 !px-4 !py-2.5 !text-sm !font-medium focus:!shadow-none;
+  @apply !bg-brand-500 hover:!bg-brand-600 !border-0 !px-4 !py-2.5 !text-sm !font-medium focus:!shadow-none;
 }
 .fc-toolbar-title {
   @apply !text-lg !font-medium text-gray-800 dark:text-white/90;
 }
 .fc-header-toolbar.fc-toolbar .fc-toolbar-chunk:last-child {
-  @apply rounded-lg bg-gray-100 p-0.5 dark:bg-gray-900;
+  @apply bg-gray-100 p-0.5 dark:bg-gray-900;
 }
 .fc-header-toolbar.fc-toolbar .fc-toolbar-chunk:last-child .fc-button {
-  @apply !h-auto !w-auto rounded-md !border-0 bg-transparent !px-5 !py-2 text-sm font-medium text-gray-500 hover:text-gray-700 focus:shadow-none! dark:text-gray-400;
+  @apply !h-auto !w-auto !border-0 bg-transparent !px-5 !py-2 text-sm font-medium text-gray-500 hover:text-gray-700 focus:shadow-none! dark:text-gray-400;
 }
 .fc-header-toolbar.fc-toolbar .fc-toolbar-chunk:last-child .fc-button.fc-button-active {
   @apply bg-white text-gray-900 dark:bg-gray-800 dark:text-white;
@@ -583,7 +579,7 @@ span.flatpickr-weekday,
   @apply p-2;
 }
 .fc .fc-daygrid-day.fc-day-today .fc-scrollgrid-sync-inner {
-  @apply rounded-sm bg-gray-100 dark:bg-white/[0.03];
+  @apply bg-gray-100 dark:bg-white/[0.03];
 }
 .fc .fc-daygrid-day-number {
   @apply !p-3 text-sm font-medium text-gray-700 dark:text-gray-400;
@@ -598,13 +594,13 @@ span.flatpickr-weekday,
   @apply text-gray-400 dark:text-white/30;
 }
 .event-fc-color {
-  @apply rounded-lg py-2.5 pr-3 pl-4;
+  @apply py-2.5 pr-3 pl-4;
 }
 .event-fc-color .fc-event-title {
   @apply p-0 text-sm font-normal text-gray-700;
 }
 .fc-daygrid-event-dot {
-  @apply mr-3 ml-0 h-5 w-1 rounded-sm border-none;
+  @apply mr-3 ml-0 h-5 w-1 border-none;
 }
 .fc-event {
   @apply focus:shadow-none;
@@ -664,7 +660,7 @@ span.flatpickr-weekday,
 
 .stocks-slider-outer .swiper-button-next,
 .stocks-slider-outer .swiper-button-prev {
-  @apply !static mt-0 h-8 w-9 rounded-full border border-gray-200 !text-gray-700 transition hover:bg-gray-100 dark:border-white/[0.03] dark:bg-gray-800 dark:!text-gray-400 dark:hover:bg-white/[0.05] dark:hover:!text-white/90;
+  @apply !static mt-0 h-8 w-9 border border-gray-200 !text-gray-700 transition hover:bg-gray-100 dark:border-white/[0.03] dark:bg-gray-800 dark:!text-gray-400 dark:hover:bg-white/[0.05] dark:hover:!text-white/90;
 }
 
 .stocks-slider-outer .swiper-button-next.swiper-button-disabled,
@@ -698,7 +694,7 @@ span.flatpickr-weekday,
 .carouselTwo .swiper-button-prev,
 .carouselFour .swiper-button-next,
 .carouselFour .swiper-button-prev {
-  @apply shadow-slider-navigation h-10 w-10 rounded-full border-[0.5px] border-white/10 bg-white/90 !text-gray-700 backdrop-blur-[10px];
+  @apply shadow-slider-navigation h-10 w-10 border-[0.5px] border-white/10 bg-white/90 !text-gray-700 backdrop-blur-[10px];
 }
 
 .carouselTwo .swiper-button-prev,
@@ -713,7 +709,7 @@ span.flatpickr-weekday,
 
 .carouselThree .swiper-pagination,
 .carouselFour .swiper-pagination {
-  @apply shadow-slider-navigation !bottom-3 !left-1/2 inline-flex !w-auto -translate-x-1/2 items-center gap-1.5 rounded-[40px] border-[0.5px] border-white/10 bg-white/60 px-2 py-1.5 backdrop-blur-[10px] sm:!bottom-5;
+  @apply shadow-slider-navigation !bottom-3 !left-1/2 inline-flex !w-auto -translate-x-1/2 items-center gap-1.5 border-[0.5px] border-white/10 bg-white/60 px-2 py-1.5 backdrop-blur-[10px] sm:!bottom-5;
 }
 
 .carouselThree .swiper-pagination-bullet,
@@ -723,7 +719,7 @@ span.flatpickr-weekday,
 
 .carouselThree .swiper-pagination-bullet-active,
 .carouselFour .swiper-pagination-bullet-active {
-  @apply w-6.5 rounded-xl;
+  @apply w-6.5;
 }
 
 .jvectormap-container {
@@ -762,7 +758,7 @@ span.flatpickr-weekday,
 }
 
 .task {
-  border-radius: 0.75rem;
+  border-radius: 0;
   box-shadow:
     0 1px 3px 0 rgba(16, 24, 40, 0.1),
     0 1px 2px 0 rgba(16, 24, 40, 0.06);
@@ -775,13 +771,13 @@ span.flatpickr-weekday,
 */
 
 @theme inline {
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: 9px;
-  --radius-2xl: 9px;
-  --radius-3xl: calc(var(--radius) + 12px);
-  --radius-4xl: calc(var(--radius) + 16px);
+  --radius-sm: 0px;
+  --radius-md: 0px;
+  --radius-lg: 0px;
+  --radius-xl: 0px;
+  --radius-2xl: 0px;
+  --radius-3xl: 0px;
+  --radius-4xl: 0px;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -820,7 +816,7 @@ span.flatpickr-weekday,
 */
 
 :root {
-  --radius: 10px;
+  --radius: 0px;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
@@ -959,4 +955,14 @@ span.flatpickr-weekday,
     animation-delay: 0ms !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+/* ApexCharts injects its own radii; the design has none. */
+.apexcharts-tooltip,
+.apexcharts-xaxistooltip,
+.apexcharts-yaxistooltip,
+.apexcharts-legend-marker,
+.apexcharts-menu,
+.apexcharts-toolbar * {
+  border-radius: 0 !important;
 }

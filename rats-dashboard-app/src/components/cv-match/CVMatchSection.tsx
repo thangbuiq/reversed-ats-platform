@@ -18,15 +18,15 @@ interface CVMatchSectionProps {
 
 function ResultsSkeleton() {
   return (
-    <div className="space-y-4 rounded-[9px] border border-gray-200 bg-white p-5 md:p-6">
-      <div className="skeleton h-5 w-40 rounded" />
+    <div className="space-y-4 border border-gray-200 bg-white p-5 md:p-6">
+      <div className="skeleton h-5 w-40" />
       {Array.from({ length: SKELETON_ROWS }, (_, i) => (
         <div key={i} className="flex items-center gap-4 border-t border-gray-100 pt-4">
           <div className="flex-1 space-y-2">
-            <div className="skeleton h-4 w-3/4 rounded" />
-            <div className="skeleton h-3 w-1/2 rounded" />
+            <div className="skeleton h-4 w-3/4" />
+            <div className="skeleton h-3 w-1/2" />
           </div>
-          <div className="skeleton h-8 w-14 rounded" />
+          <div className="skeleton h-8 w-14" />
         </div>
       ))}
     </div>
@@ -67,17 +67,17 @@ export default function CVMatchSection({ totalListings, totalCompanies }: CVMatc
 
   return (
     <section aria-labelledby="cv-match-title" className="space-y-4">
-      <div className="relative overflow-hidden rounded-[9px] border border-gray-200 bg-white p-5 sm:p-6 lg:p-8">
+      <div className="relative overflow-hidden border border-gray-200 bg-white p-5 sm:p-6 lg:p-8">
         <div aria-hidden="true" className="ambient-dither pointer-events-none absolute inset-0" />
         <div
           aria-hidden="true"
-          className="ambient-glow bg-brand-500/10 pointer-events-none absolute -top-28 -right-20 h-72 w-72 rounded-full blur-3xl"
+          className="ambient-glow bg-brand-500/10 pointer-events-none absolute -top-28 -right-20 h-72 w-72 blur-3xl"
         />
 
         <div className="relative grid gap-6 lg:grid-cols-[1.15fr_1fr] lg:items-end lg:gap-10">
           <div>
             <p className="label-md flex flex-wrap items-center gap-2 text-gray-500">
-              <span className="bg-success-500 h-2 w-2 animate-pulse rounded-full" />
+              <span className="bg-success-500 h-2 w-2 animate-pulse" />
               CV MATCH
               <span className="text-gray-300">/</span>
               {totalListings.toLocaleString()} LISTINGS
@@ -104,7 +104,7 @@ export default function CVMatchSection({ totalListings, totalCompanies }: CVMatc
                   initial={{ opacity: 0, y: -6 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -6 }}
-                  className="border-brand-200 bg-brand-50 text-brand-700 flex items-start justify-between gap-3 rounded-[10px] border p-3 text-sm"
+                  className="border-brand-200 bg-brand-50 text-brand-700 flex items-start justify-between gap-3 border p-3 text-sm"
                 >
                   <span>{error}</span>
                   {lastFile && (
@@ -142,7 +142,7 @@ export default function CVMatchSection({ totalListings, totalCompanies }: CVMatc
               key="empty"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="rounded-[9px] border border-dashed border-gray-300 p-6 text-center text-sm text-gray-500"
+              className="border border-dashed border-gray-300 p-6 text-center text-sm text-gray-500"
             >
               No close matches yet. Try a more detailed CV or check back after the next crawl.
             </motion.p>

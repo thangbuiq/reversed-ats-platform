@@ -26,7 +26,7 @@ const AppHeader: React.FC = () => {
       <div className="flex grow flex-col items-center justify-between lg:flex-row lg:px-6">
         <div className="flex w-full items-center justify-between gap-2 border-b border-gray-200 px-3 py-3 sm:gap-4 lg:justify-normal lg:border-b-0 lg:px-0 lg:py-4 dark:border-gray-400/20">
           <button
-            className="btn z-99999 size-8 shrink-0 rounded-lg p-0"
+            className="btn z-99999 size-8 shrink-0 p-0"
             onClick={handleToggle}
             aria-label={isSidebarOpen ? 'Hide sidebar' : 'Show sidebar'}
             aria-expanded={isSidebarOpen}
@@ -46,7 +46,7 @@ const AppHeader: React.FC = () => {
 
           <button
             onClick={toggleApplicationMenu}
-            className="btn z-99999 size-8 shrink-0 rounded-lg p-0 lg:hidden"
+            className="btn z-99999 size-8 shrink-0 p-0 lg:hidden"
             aria-label="Open menu"
           >
             <svg

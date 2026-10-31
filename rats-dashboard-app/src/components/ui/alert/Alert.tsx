@@ -112,7 +112,7 @@ const Alert: React.FC<AlertProps> = ({
   };
 
   return (
-    <div className={`rounded-xl border p-4 ${variantClasses[variant].container}`}>
+    <div className={`border p-4 ${variantClasses[variant].container}`}>
       <div className="flex items-start gap-3">
         <div className={`-mt-0.5 ${variantClasses[variant].icon}`}>{icons[variant]}</div>
 

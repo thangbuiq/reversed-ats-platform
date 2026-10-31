@@ -25,14 +25,14 @@ export default function MatchResults({ matches, totalMatches }: MatchResultsProp
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 12 }}
       transition={{ duration: 0.5, ease: EASE_OUT }}
-      className="overflow-hidden rounded-[9px] border border-gray-200 bg-white"
+      className="overflow-hidden border border-gray-200 bg-white"
     >
       <div className="flex items-end justify-between gap-3 border-b border-gray-100 p-5 md:p-6">
         <div>
           <p className="label-md text-gray-500">RESULTS</p>
           <h3 className="font-display mt-1 text-xl font-medium text-gray-900">Your best matches</h3>
         </div>
-        <span className="label-md rounded-full bg-gray-100 px-3 py-1.5 text-gray-900">
+        <span className="label-md bg-gray-100 px-3 py-1.5 text-gray-900">
           {totalMatches} {totalMatches === 1 ? 'JOB' : 'JOBS'}
         </span>
       </div>
@@ -73,7 +73,7 @@ export default function MatchResults({ matches, totalMatches }: MatchResultsProp
                     <h4 className="group-hover:text-brand-600 line-clamp-2 font-semibold text-gray-900 transition-colors">
                       {fresh.isEarlyBird && (
                         <span
-                          className="bg-success-500 mr-2 inline-block h-2 w-2 animate-pulse rounded-full align-middle"
+                          className="bg-success-500 mr-2 inline-block h-2 w-2 animate-pulse align-middle"
                           title="Posted in the last few days"
                         />
                       )}
@@ -106,9 +106,9 @@ export default function MatchResults({ matches, totalMatches }: MatchResultsProp
                   </div>
 
                   <div className="mt-3 flex items-center gap-3">
-                    <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-gray-100">
+                    <div className="h-1.5 flex-1 overflow-hidden bg-gray-100">
                       <motion.div
-                        className={`h-full rounded-full ${strong ? 'bg-success-500' : 'bg-gray-900'}`}
+                        className={`h-full ${strong ? 'bg-success-500' : 'bg-gray-900'}`}
                         initial={{ width: 0 }}
                         animate={{ width: `${percent}%` }}
                         transition={{ delay: 0.2 + index * 0.06, duration: 0.9, ease: EASE_OUT }}
