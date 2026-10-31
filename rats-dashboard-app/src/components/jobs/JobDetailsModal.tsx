@@ -6,6 +6,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { ExternalLink, X } from 'lucide-react';
 import Badge from '@/components/ui/badge/Badge';
 import { freshnessInfo } from '@/lib/freshness';
+import EarlyBirdMark from '@/components/jobs/EarlyBirdMark';
 import { LevelLabel } from '@/components/jobs/LevelLabel';
 
 const EASE_OUT = [0.22, 1, 0.36, 1] as const;
@@ -112,7 +113,8 @@ export default function JobDetailsModal({
                   )}
                   {fresh && (
                     <Badge size="sm" color={fresh.isEarlyBird ? 'success' : 'light'}>
-                      {fresh.isEarlyBird ? `🐣 ${fresh.label}` : fresh.label}
+                      {fresh.isEarlyBird && <EarlyBirdMark className="mr-1.5" />}
+                      {fresh.label}
                     </Badge>
                   )}
                 </div>

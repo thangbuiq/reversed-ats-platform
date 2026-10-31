@@ -5,9 +5,10 @@ import Badge from '@/components/ui/badge/Badge';
 import type { JobRecord } from '@/types/api';
 import { fetchJobDetail } from '@/lib/api';
 import { countLevels, levelOf } from '@/lib/jobStats';
-import { freshnessInfo } from '@/lib/freshness';
+import { EARLY_BIRD_DAYS, STALE_DAYS, freshnessInfo } from '@/lib/freshness';
+import EarlyBirdMark from '@/components/jobs/EarlyBirdMark';
 import { LevelLabel, LevelLegend } from '@/components/jobs/LevelLabel';
-import { ExternalLink, Loader2 } from 'lucide-react';
+import { ExternalLink, Hourglass, Loader2 } from 'lucide-react';
 import JobDetailsModal from '@/components/jobs/JobDetailsModal';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
@@ -102,6 +103,24 @@ export default function JobsTable({
           <h3 className="font-display mt-1 text-xl font-medium text-gray-900">Job listings</h3>
           <p className="text-sm text-gray-500">{jobs.length.toLocaleString()} matching jobs</p>
         </div>
+        <div className="grid gap-3 border border-gray-200 bg-gray-50 p-3 text-sm text-gray-600 sm:p-4 lg:grid-cols-2 lg:gap-6">
+          <p className="flex items-start gap-2.5">
+            <EarlyBirdMark className="mt-0.5" />
+            <span>
+              <strong className="text-gray-900">Pick the early birds.</strong> Posted in the last{' '}
+              {EARLY_BIRD_DAYS} days, the pile is still small, so your CV gets a real look. Apply
+              first.
+            </span>
+          </p>
+          <p className="flex items-start gap-2.5">
+            <Hourglass size={16} className="text-brand-500 mt-0.5 shrink-0" />
+            <span>
+              <strong className="text-gray-900">Be wary of {STALE_DAYS}+ days open.</strong> The
+              role may not fit the market, be too niche, or have recruiters who are too picky or in
+              no hurry.
+            </span>
+          </p>
+        </div>
         <LevelLegend levels={levels} counts={levelCounts} />
       </div>
 
@@ -144,9 +163,7 @@ export default function JobsTable({
                   >
                     <div className="min-w-0 flex-1">
                       <p className="line-clamp-2 text-sm font-semibold text-gray-900">
-                        {fresh.isEarlyBird && (
-                          <span className="bg-success-500 mr-2 inline-block h-1.5 w-1.5 animate-pulse align-middle" />
-                        )}
+                        {fresh.isEarlyBird && <EarlyBirdMark className="mr-2 align-middle" />}
                         {job.job_title ?? '—'}
                       </p>
                       <p className="mt-0.5 truncate text-sm text-gray-500">
@@ -168,7 +185,7 @@ export default function JobsTable({
                         target="_blank"
                         rel="noopener noreferrer"
                         onClick={(e) => e.stopPropagation()}
-                        className="btn btn-icon"
+                        className="btn-accent btn-icon"
                         aria-label={`Apply to ${job.job_title ?? 'this job'}`}
                       >
                         <ExternalLink size={16} />
@@ -213,7 +230,9 @@ export default function JobsTable({
                             {fresh.isEarlyBird && (
                               <Tooltip>
                                 <TooltipTrigger asChild>
-                                  <span className="bg-success-500 h-1.5 w-1.5 shrink-0 animate-pulse" />
+                                  <span className="inline-flex">
+                                    <EarlyBirdMark />
+                                  </span>
                                 </TooltipTrigger>
                                 <TooltipContent>
                                   <p className="text-sm">Apply fast for early birds</p>
@@ -242,7 +261,8 @@ export default function JobsTable({
                               <TooltipTrigger asChild>
                                 <div className="inline-block">
                                   <Badge size="sm" color={fresh.color}>
-                                    🐣 {fresh.label}
+                                    <EarlyBirdMark className="mr-1.5" />
+                                    {fresh.label}
                                   </Badge>
                                 </div>
                               </TooltipTrigger>
@@ -268,22 +288,10 @@ export default function JobsTable({
                               href={job.job_url}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="text-brand-500 hover:text-brand-600 text-theme-xs inline-flex items-center gap-1 font-medium transition-colors"
+                              className="btn-accent label-md h-10 min-w-24 shrink-0 px-4"
                             >
                               Apply
-                              <svg
-                                className="h-3 w-3"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                                strokeWidth={2}
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-                                />
-                              </svg>
+                              <ExternalLink size={14} />
                             </a>
                           ) : (
                             <span className="text-theme-xs text-gray-400">—</span>

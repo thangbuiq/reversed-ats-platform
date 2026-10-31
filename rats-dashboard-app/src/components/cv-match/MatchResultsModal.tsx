@@ -5,6 +5,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { Building2, ExternalLink, MapPin, X } from 'lucide-react';
 import type { JobMatch } from '@/types/api';
 import { freshnessInfo } from '@/lib/freshness';
+import EarlyBirdMark from '@/components/jobs/EarlyBirdMark';
 
 const EASE_OUT = [0.22, 1, 0.36, 1] as const;
 /** Display scores at or above this read as a strong (green) match. */
@@ -112,10 +113,7 @@ export default function MatchResultsModal({
                       <div className="flex items-start justify-between gap-3">
                         <h3 className="line-clamp-2 font-semibold text-gray-900">
                           {fresh.isEarlyBird && (
-                            <span
-                              className="bg-success-500 mr-2 inline-block h-2 w-2 animate-pulse align-middle"
-                              title="Posted in the last few days"
-                            />
+                            <EarlyBirdMark className="mr-2 align-middle" title="Posted in the last few days" />
                           )}
                           {match.job_title ?? 'Untitled position'}
                         </h3>

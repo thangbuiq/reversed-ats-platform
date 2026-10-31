@@ -14,7 +14,6 @@ export const RANGE_OPTIONS = [
   { value: '7d', label: '7D', days: 7 },
   { value: '14d', label: '14D', days: 14 },
   { value: '30d', label: '30D', days: 30 },
-  { value: '90d', label: '90D', days: 90 },
   { value: 'all', label: 'All', days: null },
 ] as const;
 

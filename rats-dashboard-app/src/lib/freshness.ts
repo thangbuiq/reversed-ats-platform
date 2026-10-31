@@ -3,6 +3,8 @@ import type { JobMatch } from '@/types/api';
 /** Days threshold to consider a job "early bird" / fresh */
 export const EARLY_BIRD_DAYS = 3;
 export const FRESH_DAYS = 7;
+/** Listings open longer than this often signal a recruiting problem. */
+export const STALE_DAYS = 30;
 
 /**
  * Compute days since a job was posted.
