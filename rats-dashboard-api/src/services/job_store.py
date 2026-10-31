@@ -4,11 +4,13 @@ from __future__ import annotations
 
 from typing import Any
 
-import psycopg
 from psycopg.rows import dict_row
+from psycopg_pool import ConnectionPool
 
 from ..config import DETAIL_COLUMNS, LIST_COLUMNS, require_env
 from ..schemas import JobRecord
+
+POOL_MAX_SIZE = 3
 
 LIST_SELECT = ", ".join(LIST_COLUMNS)
 DETAIL_SELECT = ", ".join(DETAIL_COLUMNS)
@@ -31,21 +33,30 @@ class JobStore:
     """
     Reads job rows from Neon.
 
-    Use the pooled connection string; each query opens a short-lived connection.
+    Use Neon's pooled (-pooler) connection string. A small client-side pool keeps warm connections so requests skip the
+    TCP/TLS/auth handshake.
     """
 
     def __init__(self) -> None:
-        self._url = require_env("DATABASE_URL")
+        self._pool = ConnectionPool(
+            require_env("DATABASE_URL"),
+            min_size=1,
+            max_size=POOL_MAX_SIZE,
+            kwargs={"row_factory": dict_row, "autocommit": True, "connect_timeout": 15},
+            check=ConnectionPool.check_connection,
+            open=True,
+        )
 
     def _query(self, sql: str, params: tuple[Any, ...] = ()) -> list[dict[str, Any]]:
-        with psycopg.connect(self._url, row_factory=dict_row, autocommit=True, connect_timeout=15) as connection:
+        with self._pool.connection() as connection:
             return connection.execute(sql, params).fetchall()
 
-    def list_jobs(self, limit: int, offset: int) -> tuple[list[JobRecord], int]:
-        """Return a newest-first page of jobs (without descriptions) and the total row count."""
+    def list_jobs(self, limit: int, offset: int, include_description: bool = False) -> tuple[list[JobRecord], int]:
+        """Return a newest-first page of jobs and the total row count, optionally with descriptions."""
+        columns = DETAIL_SELECT if include_description else LIST_SELECT
         rows = self._query(
             f"""
-            select {LIST_SELECT} from rats.linkedin_jobs
+            select {columns} from rats.linkedin_jobs
             order by date_posted desc nulls last, inserted_at desc, job_hash_id
             limit %s offset %s
             """,
