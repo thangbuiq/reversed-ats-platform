@@ -6,7 +6,8 @@ import os
 
 APP_TITLE = "RATS Dashboard API"
 COLLECTION_NAME = "linkedin_jobs"
-EMBEDDING_MODEL_NAME = "BAAI/bge-small-en-v1.5"
+EMBEDDING_MODEL_NAME = "@cf/baai/bge-small-en-v1.5"
+EMBEDDING_TIMEOUT_SECONDS = 30.0
 VECTOR_SIZE = 384
 QUERY_EMBED_PREFIX = "Represent this sentence for searching relevant passages: "
 
