@@ -9,6 +9,8 @@ import CVUploadBar from '@/components/cv-match/CVUploadBar';
 import MatchResultsModal from '@/components/cv-match/MatchResultsModal';
 
 const TOP_K = 10;
+/** A level filter is applied after the search, so it starts from a wider pool. */
+const LEVEL_TOP_K = 25;
 
 /** Levels that say nothing about seniority, so they are not offered as a match target. */
 const UNSELECTABLE_LEVELS = new Set(['unknown', 'not applicable']);
@@ -33,16 +35,21 @@ export default function CVMatchSection({
   const [error, setError] = useState<string | null>(null);
   const [lastFile, setLastFile] = useState<File | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedLevels, setSelectedLevels] = useState<string[]>([]);
+  const [selectedLevel, setSelectedLevel] = useState<string | null>(null);
   const selectableLevels = levels.filter((level) => !UNSELECTABLE_LEVELS.has(level.toLowerCase()));
 
   const handleUpload = useCallback(
-    async (file: File, levelsToMatch: string[] = selectedLevels) => {
+    async (file: File, levelToMatch: string | null = selectedLevel) => {
       setLastFile(file);
       setIsUploading(true);
       setError(null);
       try {
-        const result = await predictBestMatchJob(file, TOP_K, undefined, levelsToMatch);
+        const result = await predictBestMatchJob(
+          file,
+          levelToMatch ? LEVEL_TOP_K : TOP_K,
+          undefined,
+          levelToMatch ? [levelToMatch] : []
+        );
         setMatches(spreadScores(result.matches));
         setTotalMatches(result.total_matches);
         setHasSearched(true);
@@ -52,18 +59,13 @@ export default function CVMatchSection({
         setIsUploading(false);
       }
     },
-    [selectedLevels]
+    [selectedLevel]
   );
 
-  const toggleLevel = (level: string | null) => {
-    const next =
-      level === null
-        ? []
-        : selectedLevels.includes(level)
-          ? selectedLevels.filter((l) => l !== level)
-          : [...selectedLevels, level];
-    setSelectedLevels(next);
-    if (lastFile && !isUploading) handleUpload(lastFile, next);
+  const chooseLevel = (level: string | null) => {
+    if (level === selectedLevel) return;
+    setSelectedLevel(level);
+    if (lastFile && !isUploading) handleUpload(lastFile, level);
   };
 
   const closeModal = useCallback(() => setIsModalOpen(false), []);
@@ -101,21 +103,21 @@ export default function CVMatchSection({
 
           <div className="space-y-3">
             <div
-              role="group"
-              aria-label="Job levels to match"
+              role="radiogroup"
+              aria-label="Job level to match"
               className="flex flex-wrap items-center gap-1.5"
             >
               <span className="label-md mr-1 text-gray-500">MATCH LEVEL</span>
               {[null, ...selectableLevels].map((level) => {
-                const active =
-                  level === null ? selectedLevels.length === 0 : selectedLevels.includes(level);
+                const active = level === selectedLevel;
                 return (
                   <button
                     key={level ?? 'all'}
                     type="button"
-                    aria-pressed={active}
+                    role="radio"
+                    aria-checked={active}
                     disabled={isUploading}
-                    onClick={() => toggleLevel(level)}
+                    onClick={() => chooseLevel(level)}
                     className={`label-md h-7 border px-2 transition-colors duration-200 disabled:opacity-50 ${
                       active
                         ? 'bg-brand-500 border-brand-500 text-white'

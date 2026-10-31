@@ -12,9 +12,6 @@ from ..utils import extract_cv_text
 logger = logging.getLogger(__name__)
 router = APIRouter()
 
-LEVEL_OVERFETCH = 5
-MAX_CANDIDATES = 100
-
 
 def _has_level(payload: dict, wanted_levels: set[str]) -> bool:
     """Return True when no level is requested or the job's level is one of them."""
@@ -31,7 +28,7 @@ async def predict_best_match_job(
     """
     Upload CV, find nearest vectors in Qdrant, then load the job rows from Neon.
 
-    When ``levels`` is given, only jobs at those job levels are returned.
+    When ``levels`` is given, the ``top_k`` nearest jobs are filtered down to those job levels.
     """
     try:
         vector_store = get_vector_store()
@@ -47,8 +44,7 @@ async def predict_best_match_job(
                 detail="Job vectors are not ready yet. Run the rats-neon-backend pipeline first.",
             )
         wanted_levels = {level.strip().lower() for level in levels if level.strip()}
-        candidates = min(top_k * LEVEL_OVERFETCH, MAX_CANDIDATES) if wanted_levels else top_k
-        hits = vector_store.query_jobs(cv_text, top_k=candidates, score_threshold=score_threshold)
+        hits = vector_store.query_jobs(cv_text, top_k=top_k, score_threshold=score_threshold)
         jobs = job_store.get_jobs([job_hash_id for job_hash_id, _ in hits])
     except HTTPException:
         raise
@@ -69,5 +65,5 @@ async def predict_best_match_job(
         )
         for job_hash_id, score in hits
         if (job := jobs.get(job_hash_id)) is not None and _has_level(job.payload, wanted_levels)
-    ][:top_k]
+    ]
     return PredictResponse(collection_name=COLLECTION_NAME, total_matches=len(matches), matches=matches)
