@@ -10,13 +10,22 @@ import MatchResultsModal from '@/components/cv-match/MatchResultsModal';
 
 const TOP_K = 10;
 
+/** Levels that say nothing about seniority, so they are not offered as a match target. */
+const UNSELECTABLE_LEVELS = new Set(['unknown', 'not applicable']);
+
 interface CVMatchSectionProps {
   totalListings: number;
   totalCompanies: number;
+  /** Every job level in the data; the user picks which ones to match against. */
+  levels: string[];
 }
 
 /** Hero for the CV matcher: upload a CV, then rank the closest live listings. */
-export default function CVMatchSection({ totalListings, totalCompanies }: CVMatchSectionProps) {
+export default function CVMatchSection({
+  totalListings,
+  totalCompanies,
+  levels,
+}: CVMatchSectionProps) {
   const [matches, setMatches] = useState<JobMatch[]>([]);
   const [totalMatches, setTotalMatches] = useState(0);
   const [isUploading, setIsUploading] = useState(false);
@@ -24,22 +33,38 @@ export default function CVMatchSection({ totalListings, totalCompanies }: CVMatc
   const [error, setError] = useState<string | null>(null);
   const [lastFile, setLastFile] = useState<File | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedLevels, setSelectedLevels] = useState<string[]>([]);
+  const selectableLevels = levels.filter((level) => !UNSELECTABLE_LEVELS.has(level.toLowerCase()));
 
-  const handleUpload = useCallback(async (file: File) => {
-    setLastFile(file);
-    setIsUploading(true);
-    setError(null);
-    try {
-      const result = await predictBestMatchJob(file, TOP_K);
-      setMatches(spreadScores(result.matches));
-      setTotalMatches(result.total_matches);
-      setHasSearched(true);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to match CV');
-    } finally {
-      setIsUploading(false);
-    }
-  }, []);
+  const handleUpload = useCallback(
+    async (file: File, levelsToMatch: string[] = selectedLevels) => {
+      setLastFile(file);
+      setIsUploading(true);
+      setError(null);
+      try {
+        const result = await predictBestMatchJob(file, TOP_K, undefined, levelsToMatch);
+        setMatches(spreadScores(result.matches));
+        setTotalMatches(result.total_matches);
+        setHasSearched(true);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to match CV');
+      } finally {
+        setIsUploading(false);
+      }
+    },
+    [selectedLevels]
+  );
+
+  const toggleLevel = (level: string | null) => {
+    const next =
+      level === null
+        ? []
+        : selectedLevels.includes(level)
+          ? selectedLevels.filter((l) => l !== level)
+          : [...selectedLevels, level];
+    setSelectedLevels(next);
+    if (lastFile && !isUploading) handleUpload(lastFile, next);
+  };
 
   const closeModal = useCallback(() => setIsModalOpen(false), []);
 
@@ -52,7 +77,7 @@ export default function CVMatchSection({ totalListings, totalCompanies }: CVMatc
           className="ambient-glow bg-brand-500/10 pointer-events-none absolute -top-28 -right-20 h-72 w-72 blur-3xl"
         />
 
-        <div className="relative grid gap-6 lg:grid-cols-[1.15fr_1fr] lg:items-end lg:gap-10">
+        <div className="relative grid gap-6 lg:grid-cols-[1.15fr_1fr] lg:items-start lg:gap-10">
           <div>
             <p className="label-md flex flex-wrap items-center gap-2 text-gray-500">
               <span className="bg-success-500 h-2 w-2 animate-pulse" />
@@ -69,11 +94,39 @@ export default function CVMatchSection({ totalListings, totalCompanies }: CVMatc
               Find the jobs your CV <span className="text-brand-500">already fits</span>.
             </h2>
             <p className="mt-3 max-w-md text-sm leading-relaxed text-gray-500">
-              Upload your CV and we rank the closest live listings by meaning, not keywords.
+              We help you find the right jobs for you and apply as an early bird (within 7 days of
+              the job post).
             </p>
           </div>
 
           <div className="space-y-3">
+            <div
+              role="group"
+              aria-label="Job levels to match"
+              className="flex flex-wrap items-center gap-1.5"
+            >
+              <span className="label-md mr-1 text-gray-500">MATCH LEVEL</span>
+              {[null, ...selectableLevels].map((level) => {
+                const active =
+                  level === null ? selectedLevels.length === 0 : selectedLevels.includes(level);
+                return (
+                  <button
+                    key={level ?? 'all'}
+                    type="button"
+                    aria-pressed={active}
+                    disabled={isUploading}
+                    onClick={() => toggleLevel(level)}
+                    className={`label-md h-7 border px-2 transition-colors duration-200 disabled:opacity-50 ${
+                      active
+                        ? 'bg-brand-500 border-brand-500 text-white'
+                        : 'border-gray-200 bg-white text-gray-900 hover:border-gray-900'
+                    }`}
+                  >
+                    {level ?? 'All'}
+                  </button>
+                );
+              })}
+            </div>
             <CVUploadBar onUpload={handleUpload} isUploading={isUploading} />
             <div className="flex h-12 gap-2">
               {isUploading ? (

@@ -34,6 +34,7 @@ export default function DashboardPage() {
           <CVMatchSection
             totalListings={allStats.total}
             totalCompanies={allStats.uniqueCompanies}
+            levels={allStats.levels}
           />
         </Reveal>
 

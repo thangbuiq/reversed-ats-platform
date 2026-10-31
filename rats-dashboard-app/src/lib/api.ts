@@ -37,7 +37,8 @@ export async function fetchJobDetail(jobHashId: string): Promise<JobRecord> {
 export async function predictBestMatchJob(
   file: File,
   topK = 10,
-  scoreThreshold?: number
+  scoreThreshold?: number,
+  levels: string[] = []
 ): Promise<PredictResponse> {
   const form = new FormData();
   form.append('cv_file', file);
@@ -45,6 +46,8 @@ export async function predictBestMatchJob(
   if (scoreThreshold !== undefined) {
     form.append('score_threshold', String(scoreThreshold));
   }
+
+  for (const level of levels) form.append('levels', level);
 
   const res = await fetch(`${API_BASE}/predict-best-match-job`, {
     method: 'POST',
