@@ -260,7 +260,7 @@ const AppSidebar: React.FC = () => {
                 height={32}
               />
               <div className="flex items-center gap-1.5">
-                <span className="text-sm font-semibold whitespace-nowrap text-gray-800 dark:text-white/90">
+                <span className="font-display text-sm font-semibold whitespace-nowrap text-gray-800 dark:text-white/90">
                   Reversed ATS Platform
                 </span>
                 <button
@@ -293,7 +293,7 @@ const AppSidebar: React.FC = () => {
           <div className="flex flex-col gap-4">
             <div>
               <h2
-                className={`mb-4 flex text-xs leading-[20px] text-gray-400 uppercase ${
+                className={`font-display mb-4 flex text-xs leading-[20px] text-gray-400 uppercase ${
                   !isExpanded && !isHovered ? 'lg:justify-center' : 'justify-start'
                 }`}
               >
@@ -342,7 +342,7 @@ const AppSidebar: React.FC = () => {
                     </svg>
                   </button>
                   <div className="flex flex-col space-y-2">
-                    <h2 className="text-lg leading-none font-semibold tracking-tight text-gray-900 dark:text-white">
+                    <h2 className="font-display text-lg leading-none font-semibold tracking-tight text-gray-900 dark:text-white">
                       What is Reversed ATS?
                     </h2>
                     <div className="space-y-3">

@@ -2,8 +2,11 @@
 import React from 'react';
 import dynamic from 'next/dynamic';
 import type { ApexOptions } from 'apexcharts';
-import { levelColor, type DailyStat } from '@/lib/jobStats';
+import { formatLevel, levelColor, type DailyStat } from '@/lib/jobStats';
 import { renderTooltip, type Trend } from '@/lib/chartTooltip';
+import { findHotDays, typicalDailyCount } from '@/lib/hotDays';
+import { daysSincePosted } from '@/lib/freshness';
+import { Flame } from 'lucide-react';
 
 const ReactApexChart = dynamic(() => import('react-apexcharts'), {
   ssr: false,
@@ -14,6 +17,9 @@ interface JobPostingChartProps {
   data: DailyStat[];
 }
 
+const HOT_COLOR = '#f79009';
+const HOT_HALO_COLOR = 'rgba(247, 144, 9, 0.22)';
+const RECENT_HOT_DAYS = 7;
 const TREND_WINDOW = 7;
 const MAX_X_LABELS = 6;
 const CHART_HEIGHT = 300;
@@ -40,6 +46,11 @@ function describeChange(
 export default function JobPostingChart({ data }: JobPostingChartProps) {
   const total = data.reduce((sum, d) => sum + d.count, 0);
   const categories = data.map((d) => d.date);
+  const hotDays = findHotDays(data);
+  const typical = typicalDailyCount(data);
+  const hotByDate = new Map(hotDays.map((day) => [day.date, day]));
+  const latestHot = hotDays.at(-1);
+  const isRecentHot = latestHot ? daysSincePosted(latestHot.date) <= RECENT_HOT_DAYS : false;
 
   const options: ApexOptions = {
     chart: {
@@ -56,7 +67,32 @@ export default function JobPostingChart({ data }: JobPostingChartProps) {
       type: 'gradient',
       gradient: { shadeIntensity: 1, opacityFrom: 0.45, opacityTo: 0.05, stops: [0, 100] },
     },
-    markers: { size: 0, strokeColors: '#fff', strokeWidth: 2, hover: { size: 6 } },
+    markers: {
+      size: 0,
+      strokeColors: '#fff',
+      strokeWidth: 2,
+      hover: { size: 6 },
+      discrete: data.flatMap((d, dataPointIndex) =>
+        hotByDate.has(d.date)
+          ? [
+              {
+                seriesIndex: 0,
+                dataPointIndex,
+                fillColor: HOT_HALO_COLOR,
+                strokeColor: 'transparent',
+                size: 11,
+              },
+              {
+                seriesIndex: 0,
+                dataPointIndex,
+                fillColor: '#ffffff',
+                strokeColor: HOT_COLOR,
+                size: 4,
+              },
+            ]
+          : []
+      ),
+    },
     grid: {
       xaxis: { lines: { show: false } },
       yaxis: { lines: { show: true } },
@@ -71,6 +107,7 @@ export default function JobPostingChart({ data }: JobPostingChartProps) {
         );
         const average = window.reduce((sum, d) => sum + d.count, 0) / window.length;
         const change = describeChange(day.count, data[dataPointIndex - 1]?.count);
+        const hot = hotByDate.get(day.date);
         return renderTooltip(
           day.date,
           { label: 'new jobs', value: day.count.toLocaleString() },
@@ -79,12 +116,25 @@ export default function JobPostingChart({ data }: JobPostingChartProps) {
             [`${window.length}-day average`, average.toFixed(1)],
             ['Share of range', `${((day.count / total) * 100).toFixed(1)}%`],
             ['Most active company', day.topCompany ?? 'N/A'],
+            ...(hot
+              ? [
+                  ['Hot day', `${hot.ratio.toFixed(1)}x a typical day`, 'up'] as [
+                    string,
+                    string,
+                    Trend,
+                  ],
+                ]
+              : []),
           ],
           {
             title: 'By level',
             items: Object.entries(day.levelCounts)
               .sort((a, b) => b[1] - a[1])
-              .map(([label, value]) => ({ label, value, color: levelColor(label) })),
+              .map(([label, value]) => ({
+                label: formatLevel(label),
+                value,
+                color: levelColor(label),
+              })),
           }
         );
       },
@@ -133,6 +183,19 @@ export default function JobPostingChart({ data }: JobPostingChartProps) {
             {total.toLocaleString()} new postings in {data.length} day{data.length === 1 ? '' : 's'}
           </p>
         </div>
+        {latestHot && (
+          <p
+            role="note"
+            title={`${latestHot.ratio.toFixed(1)}x the usual ${Math.round(typical)} jobs a day`}
+            className="border-warning-200 bg-warning-50 flex items-center gap-1.5 border px-2 py-1 text-xs text-gray-900"
+          >
+            <Flame size={12} className="text-warning-600 shrink-0" />
+            <span>
+              Hot day {shortDate(latestHot.date)}: {latestHot.count.toLocaleString()} jobs.{' '}
+              {isRecentHot ? 'Update CV, apply fast.' : 'Update CV, apply early.'}
+            </span>
+          </p>
+        )}
       </div>
       <ReactApexChart
         options={options}

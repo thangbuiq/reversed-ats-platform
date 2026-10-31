@@ -5,10 +5,13 @@ import { useJobs } from '@/context/JobsContext';
 import {
   DEFAULT_FILTERS,
   RANGE_OPTIONS,
+  ROLE_KEYWORDS,
   facetOptions,
+  keywordCounts,
   sameFilters,
   toggleValue,
 } from '@/lib/jobFilters';
+import { formatLevel } from '@/lib/jobStats';
 
 type BoxState = 'checked' | 'mixed' | 'unchecked';
 
@@ -34,10 +37,12 @@ interface FacetListProps {
   selected: string[];
   onToggle: (value: string) => void;
   onClear: () => void;
+  /** Display text for an option; the raw value is still what gets filtered on. */
+  formatOption?: (option: string) => string;
 }
 
 /** Multi-select checkbox list; selected values stay listed even if other filters hide them. */
-function FacetList({ label, options, selected, onToggle, onClear }: FacetListProps) {
+function FacetList({ label, options, selected, onToggle, onClear, formatOption }: FacetListProps) {
   const shown = [...new Set([...options, ...selected])].sort();
   return (
     <fieldset className="min-w-0">
@@ -70,7 +75,7 @@ function FacetList({ label, options, selected, onToggle, onClear }: FacetListPro
               >
                 <Box state={checked ? 'checked' : 'unchecked'} />
                 <span className="min-w-0 truncate" title={option}>
-                  {option}
+                  {formatOption ? formatOption(option) : option}
                 </span>
               </button>
             </li>
@@ -190,12 +195,13 @@ export default function JobFilters() {
   const { jobs, filteredJobs, filters, setFilters } = useJobs();
   const [companiesCleared, setCompaniesCleared] = useState(false);
   const isFiltered = !sameFilters(filters, DEFAULT_FILTERS);
+  const counts = keywordCounts(jobs, filters);
 
   return (
     <section aria-label="Filters" className="space-y-5 border-t border-gray-200 pt-5 pb-6">
       <div className="flex items-center justify-between gap-2">
         <div className="min-w-0">
-          <h2 className="text-xs leading-[20px] text-gray-400 uppercase">Filters</h2>
+          <h2 className="font-display text-xs leading-[20px] text-gray-400 uppercase">Filters</h2>
           <p className="label-md truncate text-gray-500">
             {filteredJobs.length.toLocaleString()} of {jobs.length.toLocaleString()} jobs
           </p>
@@ -248,12 +254,44 @@ export default function JobFilters() {
           onChange={(e) => setFilters({ ...filters, search: e.target.value })}
           placeholder="Filter keywords…"
           aria-label="Filter keywords"
-          className="focus:border-brand-300 focus:ring-brand-500/10 h-10 w-full border border-gray-200 bg-transparent py-2 pr-3 pl-9 text-sm text-gray-800 placeholder:text-gray-400 focus:ring-3 focus:outline-hidden"
+          className="focus:border-brand-400 focus:ring-brand-500/20 h-10 w-full border border-gray-200 bg-transparent py-2 pr-3 pl-9 text-sm text-gray-800 placeholder:text-gray-400 focus:ring-2 focus:outline-hidden focus:ring-inset"
         />
       </div>
 
+      <fieldset className="min-w-0">
+        <legend className="label-md mb-2 text-gray-500">
+          AI &amp; Data roles{filters.keywords.length > 0 && ` (${filters.keywords.length})`}
+        </legend>
+        <div className="flex flex-wrap gap-1.5">
+          {ROLE_KEYWORDS.map((keyword) => {
+            const active = filters.keywords.includes(keyword);
+            return (
+              <button
+                key={keyword}
+                type="button"
+                aria-pressed={active}
+                onClick={() =>
+                  setFilters({ ...filters, keywords: toggleValue(filters.keywords, keyword) })
+                }
+                className={`label-md inline-flex h-8 items-center gap-1.5 border px-2.5 transition-colors duration-200 ${
+                  active
+                    ? 'border-brand-500 bg-brand-500 text-white'
+                    : 'border-gray-200 bg-white text-gray-900 hover:border-gray-900'
+                }`}
+              >
+                {keyword}
+                <span className={active ? 'text-white/80' : 'text-gray-400'}>
+                  {counts[keyword]}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </fieldset>
+
       <FacetList
         label="Levels"
+        formatOption={formatLevel}
         options={facetOptions(jobs, filters, 'level')}
         selected={filters.level}
         onToggle={(value) => setFilters({ ...filters, level: toggleValue(filters.level, value) })}

@@ -2,7 +2,7 @@
 import React from 'react';
 import dynamic from 'next/dynamic';
 import type { ApexOptions } from 'apexcharts';
-import { levelColor, type CompanyStat } from '@/lib/jobStats';
+import { formatLevel, levelColor, type CompanyStat } from '@/lib/jobStats';
 import { renderTooltip } from '@/lib/chartTooltip';
 
 const ReactApexChart = dynamic(() => import('react-apexcharts'), {
@@ -38,6 +38,7 @@ export default function TopCompaniesChart({ companies, levels }: TopCompaniesCha
       position: 'top',
       horizontalAlign: 'left',
       fontSize: '12px',
+      formatter: formatLevel,
       markers: { size: 5, shape: 'square', strokeWidth: 0 },
       itemMargin: { horizontal: 8, vertical: 2 },
     },
@@ -75,7 +76,11 @@ export default function TopCompaniesChart({ companies, levels }: TopCompaniesCha
             title: 'By level',
             items: Object.entries(company.levelCounts)
               .sort((a, b) => b[1] - a[1])
-              .map(([label, value]) => ({ label, value, color: levelColor(label) })),
+              .map(([label, value]) => ({
+                label: formatLevel(label),
+                value,
+                color: levelColor(label),
+              })),
           }
         );
       },

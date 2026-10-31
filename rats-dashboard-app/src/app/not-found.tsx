@@ -15,7 +15,7 @@ export default function NotFound() {
         transition={{ duration: 0.5 }}
         className="mx-auto w-full max-w-[242px] text-center sm:max-w-[472px]"
       >
-        <h1 className="text-title-md xl:text-title-2xl mb-8 font-bold text-gray-800 dark:text-white/90">
+        <h1 className="font-display text-title-md xl:text-title-2xl mb-8 font-bold text-gray-800 dark:text-white/90">
           ERROR
         </h1>
 

@@ -15,7 +15,11 @@ export async function GET(_req: Request, { params }: { params: Promise<{ jobHash
     }
 
     const data = await res.json();
-    return NextResponse.json(data, { status: 200 });
+    const cacheControl = res.headers.get('cache-control');
+    return NextResponse.json(data, {
+      status: 200,
+      headers: cacheControl ? { 'Cache-Control': cacheControl } : undefined,
+    });
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }

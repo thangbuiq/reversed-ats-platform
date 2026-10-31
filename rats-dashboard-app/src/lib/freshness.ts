@@ -20,14 +20,17 @@ export function freshnessInfo(dateStr: string | null | undefined): {
   label: string;
   color: 'success' | 'error' | 'warning' | 'info' | 'light';
   isEarlyBird: boolean;
+  /** Posted today; flagged with a yellow lightning mark. */
+  isToday: boolean;
 } {
   const days = daysSincePosted(dateStr);
-  if (isNaN(days)) return { label: 'Reposted', color: 'info', isEarlyBird: false };
-  if (days <= 0) return { label: 'Just today', color: 'success', isEarlyBird: true };
+  if (isNaN(days)) return { label: 'Reposted', color: 'info', isEarlyBird: false, isToday: false };
+  if (days <= 0) return { label: 'Just today', color: 'success', isEarlyBird: true, isToday: true };
   if (days <= EARLY_BIRD_DAYS)
-    return { label: `${days}d ago`, color: 'success', isEarlyBird: true };
-  if (days <= FRESH_DAYS) return { label: `${days}d ago`, color: 'success', isEarlyBird: false };
-  return { label: `${days}d ago`, color: 'error', isEarlyBird: false };
+    return { label: `${days}d ago`, color: 'success', isEarlyBird: true, isToday: false };
+  if (days <= FRESH_DAYS)
+    return { label: `${days}d ago`, color: 'success', isEarlyBird: false, isToday: false };
+  return { label: `${days}d ago`, color: 'error', isEarlyBird: false, isToday: false };
 }
 
 /**

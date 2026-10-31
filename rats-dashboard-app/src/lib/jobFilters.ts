@@ -6,9 +6,22 @@ export interface JobFilters {
   company: string[];
   /** Selected job levels; empty means all. */
   level: string[];
+  /** Selected role keywords matched against the job title (any of them); empty means all. */
+  keywords: string[];
   /** A RANGE_OPTIONS value: how far back from the newest posting to look. */
   range: string;
 }
+
+/** AI and Data role keywords offered as one-click filters, with the title phrases each one matches. */
+const ROLE_TITLE_PHRASES: Record<string, string[]> = {
+  'Data Analyst': ['data analyst'],
+  'Data Engineer': ['data engineer'],
+  'Data Scientist': ['data scientist'],
+  'AI Engineer': ['ai engineer', 'artificial intelligence'],
+  'ML Engineer': ['ml engineer', 'machine learning'],
+};
+
+export const ROLE_KEYWORDS = Object.keys(ROLE_TITLE_PHRASES);
 
 export const RANGE_OPTIONS = [
   { value: '7d', label: '7D', days: 7 },
@@ -18,7 +31,13 @@ export const RANGE_OPTIONS = [
 ] as const;
 
 /** Opens on the last 30 days so the dashboard never starts unbounded. */
-export const DEFAULT_FILTERS: JobFilters = { search: '', company: [], level: [], range: '30d' };
+export const DEFAULT_FILTERS: JobFilters = {
+  search: '',
+  company: [],
+  level: [],
+  keywords: [],
+  range: '30d',
+};
 
 const DAY_MS = 86_400_000;
 
@@ -45,6 +64,7 @@ export function sameFilters(a: JobFilters, b: JobFilters): boolean {
     a.search.trim() === b.search.trim() &&
     a.range === b.range &&
     sameValues(a.company, b.company) &&
+    sameValues(a.keywords, b.keywords) &&
     sameValues(a.level, b.level)
   );
 }
@@ -53,10 +73,34 @@ export function toggleValue(values: string[], value: string): string[] {
   return values.includes(value) ? values.filter((v) => v !== value) : [...values, value];
 }
 
+function titleMatchesAny(job: JobRecord, keywords: readonly string[]): boolean {
+  const title = job.job_title?.toLowerCase() ?? '';
+  return keywords.some((keyword) =>
+    (ROLE_TITLE_PHRASES[keyword] ?? [keyword.toLowerCase()]).some((phrase) =>
+      title.includes(phrase)
+    )
+  );
+}
+
+/** How many jobs each role keyword matches given all the other active filters. */
+export function keywordCounts(jobs: JobRecord[], filters: JobFilters): Record<string, number> {
+  const cutoff = rangeCutoff(jobs, filters.range);
+  const reachable = jobs.filter((job) => matches(job, filters, cutoff, 'keywords'));
+  return Object.fromEntries(
+    ROLE_KEYWORDS.map((keyword) => [
+      keyword,
+      reachable.filter((job) => titleMatchesAny(job, [keyword])).length,
+    ])
+  );
+}
+
 function matches(job: JobRecord, filters: JobFilters, cutoff: number, skip?: keyof JobFilters) {
   if (cutoff && postedAt(job) < cutoff) return false;
   if (skip !== 'company' && filters.company.length > 0) {
     if (!filters.company.includes(job.company_name ?? '')) return false;
+  }
+  if (skip !== 'keywords' && filters.keywords.length > 0) {
+    if (!titleMatchesAny(job, filters.keywords)) return false;
   }
   if (skip !== 'level' && filters.level.length > 0) {
     if (!filters.level.includes(String(job.payload?.job_level))) return false;

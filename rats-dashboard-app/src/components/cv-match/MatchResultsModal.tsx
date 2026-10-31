@@ -111,9 +111,13 @@ export default function MatchResultsModal({
                     </span>
                     <div className="min-w-0 flex-1">
                       <div className="flex items-start justify-between gap-3">
-                        <h3 className="line-clamp-2 font-semibold text-gray-900">
+                        <h3 className="font-display line-clamp-2 font-semibold text-gray-900">
                           {fresh.isEarlyBird && (
-                            <EarlyBirdMark className="mr-2 align-middle" title="Posted in the last few days" />
+                            <EarlyBirdMark
+                              className="mr-2 align-middle"
+                              title="Posted in the last few days"
+                              today={fresh.isToday}
+                            />
                           )}
                           {match.job_title ?? 'Untitled position'}
                         </h3>

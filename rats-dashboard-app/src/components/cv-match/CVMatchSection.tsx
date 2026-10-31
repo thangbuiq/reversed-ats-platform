@@ -4,9 +4,11 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { ArrowRight, RotateCcw, Sparkles } from 'lucide-react';
 import { predictBestMatchJob } from '@/lib/api';
 import { spreadScores } from '@/lib/freshness';
+import { formatLevel } from '@/lib/jobStats';
 import type { JobMatch } from '@/types/api';
 import CVUploadBar from '@/components/cv-match/CVUploadBar';
 import MatchResultsModal from '@/components/cv-match/MatchResultsModal';
+import LinkedInSource from '@/components/jobs/LinkedInSource';
 
 const TOP_K = 10;
 /** A level filter is applied after the search, so it starts from a wider pool. */
@@ -21,6 +23,9 @@ interface CVMatchSectionProps {
   /** Every job level in the data; the user picks which ones to match against. */
   levels: string[];
 }
+
+/** Scales the level row text with its own width so every option fits on one line. */
+const LEVEL_TEXT_STYLE = { fontSize: 'clamp(8px, 2.7cqw, 12px)' } as const;
 
 /** Hero for the CV matcher: upload a CV, then rank the closest live listings. */
 export default function CVMatchSection({
@@ -93,41 +98,48 @@ export default function CVMatchSection({
               id="cv-match-title"
               className="font-display mask-reveal mt-3 text-[34px] leading-[1.04] font-medium tracking-tight text-gray-900 sm:text-5xl"
             >
-              Find the jobs your CV <span className="text-brand-500">already fits</span>.
+              Data jobs your CV <span className="text-brand-500">already fits</span>.
             </h2>
             <p className="mt-3 max-w-md text-sm leading-relaxed text-gray-500">
               We help you find the right jobs for you and apply as an early bird (within 7 days of
               the job post).
             </p>
+            <LinkedInSource compact className="mt-4" />
           </div>
 
           <div className="space-y-3">
-            <div
-              role="radiogroup"
-              aria-label="Job level to match"
-              className="flex flex-wrap items-center gap-1.5"
-            >
-              <span className="label-md mr-1 text-gray-500">MATCH LEVEL</span>
-              {[null, ...selectableLevels].map((level) => {
-                const active = level === selectedLevel;
-                return (
-                  <button
-                    key={level ?? 'all'}
-                    type="button"
-                    role="radio"
-                    aria-checked={active}
-                    disabled={isUploading}
-                    onClick={() => chooseLevel(level)}
-                    className={`label-md h-7 border px-2 transition-colors duration-200 disabled:opacity-50 ${
-                      active
-                        ? 'bg-brand-500 border-brand-500 text-white'
-                        : 'border-gray-200 bg-white text-gray-900 hover:border-gray-900'
-                    }`}
-                  >
-                    {level ?? 'All'}
-                  </button>
-                );
-              })}
+            <div className="@container">
+              <span aria-hidden="true" className="label-md mb-1 block text-[10px] text-gray-400">
+                MATCH LEVEL
+              </span>
+              <div
+                role="radiogroup"
+                aria-label="Job level to match"
+                className="flex flex-nowrap items-center gap-1"
+              >
+                {[null, ...selectableLevels].map((level) => {
+                  const active = level === selectedLevel;
+                  return (
+                    <button
+                      key={level ?? 'all'}
+                      type="button"
+                      role="radio"
+                      aria-checked={active}
+                      disabled={isUploading}
+                      onClick={() => chooseLevel(level)}
+                      title={level ?? 'All'}
+                      style={LEVEL_TEXT_STYLE}
+                      className={`label-md h-7 min-w-0 flex-auto truncate border px-1.5 whitespace-nowrap transition-colors duration-200 disabled:opacity-50 ${
+                        active
+                          ? 'bg-brand-500 border-brand-500 text-white'
+                          : 'border-gray-200 bg-white text-gray-900 hover:border-gray-900'
+                      }`}
+                    >
+                      {level ? formatLevel(level) : 'All'}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
             <CVUploadBar onUpload={handleUpload} isUploading={isUploading} />
             <div className="flex h-12 gap-2">

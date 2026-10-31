@@ -1,5 +1,5 @@
 import React from 'react';
-import { levelColor } from '@/lib/jobStats';
+import { formatLevel, levelColor } from '@/lib/jobStats';
 
 interface LevelLabelProps {
   level: string;
@@ -15,7 +15,7 @@ export function LevelLabel({ level, count }: LevelLabelProps) {
         style={{ backgroundColor: levelColor(level) }}
         aria-hidden="true"
       />
-      {level}
+      {formatLevel(level)}
       {count !== undefined && <span className="font-mono text-gray-400">{count}</span>}
     </span>
   );

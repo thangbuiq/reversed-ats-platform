@@ -1,22 +1,25 @@
 """List / browse jobs endpoints, backed by Neon."""
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Response
 
 from ..dependencies import get_job_store
 from ..schemas import JobRecord, ShowAllJobsResponse
 
 router = APIRouter()
 
+JOB_DETAIL_CACHE_CONTROL = "public, s-maxage=300, stale-while-revalidate=3600"
+
 
 @router.get("/show-all-jobs", response_model=ShowAllJobsResponse)
 def show_all_jobs(
     limit: int = 100,
     offset: str | None = None,
+    include_description: bool = False,
 ) -> ShowAllJobsResponse:
     """
     List jobs newest first.
 
-    Descriptions are omitted; fetch them with /jobs/{job_hash_id}.
+    Descriptions are omitted unless include_description is true; /jobs/{job_hash_id} also returns one.
     """
     if limit < 1 or limit > 1000:
         raise HTTPException(status_code=400, detail="limit must be between 1 and 1000.")
@@ -25,7 +28,7 @@ def show_all_jobs(
     start = int(offset) if offset else 0
 
     try:
-        jobs, total = get_job_store().list_jobs(limit=limit, offset=start)
+        jobs, total = get_job_store().list_jobs(limit=limit, offset=start, include_description=include_description)
     except RuntimeError as error:
         raise HTTPException(status_code=500, detail=str(error)) from error
 
@@ -39,12 +42,13 @@ def show_all_jobs(
 
 
 @router.get("/jobs/{job_hash_id}", response_model=JobRecord)
-def get_job(job_hash_id: str) -> JobRecord:
-    """Return one job including its full description."""
+def get_job(job_hash_id: str, response: Response) -> JobRecord:
+    """Return one job including its full description, cacheable at the CDN."""
     try:
         job = get_job_store().get_job(job_hash_id)
     except RuntimeError as error:
         raise HTTPException(status_code=500, detail=str(error)) from error
     if job is None:
         raise HTTPException(status_code=404, detail="Job not found.")
+    response.headers["Cache-Control"] = JOB_DETAIL_CACHE_CONTROL
     return job
