@@ -12,10 +12,10 @@ const jetbrainsMono = JetBrains_Mono({
 
 export const metadata = {
   title: 'Reversed ATS Platform',
-  description: 'Reversed ATS Platform - Find the best job match for your CV',
+  description: 'Reversed ATS Platform - Find AI and Data jobs that match your CV',
   openGraph: {
     title: 'Reversed ATS Platform',
-    description: 'Reversed ATS Platform - Find the best job match for your CV',
+    description: 'Reversed ATS Platform - Find AI and Data jobs that match your CV',
   },
 };
 

@@ -3,10 +3,10 @@ import React from 'react';
 import { Table, TableBody, TableCell, TableHeader, TableRow } from '@/components/ui/table';
 import Badge from '@/components/ui/badge/Badge';
 import type { JobRecord } from '@/types/api';
-import { fetchJobDetail } from '@/lib/api';
 import { countLevels, levelOf } from '@/lib/jobStats';
 import { EARLY_BIRD_DAYS, STALE_DAYS, freshnessInfo } from '@/lib/freshness';
 import EarlyBirdMark from '@/components/jobs/EarlyBirdMark';
+import LinkedInSource from '@/components/jobs/LinkedInSource';
 import { LevelLabel, LevelLegend } from '@/components/jobs/LevelLabel';
 import { ExternalLink, Hourglass, Loader2 } from 'lucide-react';
 import JobDetailsModal from '@/components/jobs/JobDetailsModal';
@@ -28,23 +28,6 @@ export default function JobsTable({
   hasActiveFilters = false,
 }: JobsTableProps) {
   const [selectedJob, setSelectedJob] = React.useState<JobRecord | null>(null);
-  const [jobDetail, setJobDetail] = React.useState<JobRecord | null>(null);
-
-  React.useEffect(() => {
-    setJobDetail(null);
-    if (!selectedJob) return;
-    let cancelled = false;
-    fetchJobDetail(selectedJob.point_id)
-      .then((detail) => {
-        if (!cancelled) setJobDetail(detail);
-      })
-      .catch(() => {
-        if (!cancelled) setJobDetail(selectedJob);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [selectedJob]);
 
   const [renderLimit, setRenderLimit] = React.useState(50);
 
@@ -98,10 +81,13 @@ export default function JobsTable({
   return (
     <div className="overflow-hidden border border-gray-200 bg-white">
       <div className="flex flex-col gap-4 border-b border-gray-100 p-4 sm:p-5 md:p-6">
-        <div>
-          <p className="label-md text-gray-500">MARKET</p>
-          <h3 className="font-display mt-1 text-xl font-medium text-gray-900">Job listings</h3>
-          <p className="text-sm text-gray-500">{jobs.length.toLocaleString()} matching jobs</p>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-6">
+          <div>
+            <p className="label-md text-gray-500">MARKET</p>
+            <h3 className="font-display mt-1 text-xl font-medium text-gray-900">Job listings</h3>
+            <p className="text-sm text-gray-500">{jobs.length.toLocaleString()} matching jobs</p>
+          </div>
+          <LinkedInSource className="sm:max-w-md sm:shrink-0 lg:max-w-xl" />
         </div>
         <div className="grid gap-3 border border-gray-200 bg-gray-50 p-3 text-sm text-gray-600 sm:p-4 lg:grid-cols-2 lg:gap-6">
           <p className="flex items-start gap-2.5">
@@ -163,7 +149,9 @@ export default function JobsTable({
                   >
                     <div className="min-w-0 flex-1">
                       <p className="line-clamp-2 text-sm font-semibold text-gray-900">
-                        {fresh.isEarlyBird && <EarlyBirdMark className="mr-2 align-middle" />}
+                        {fresh.isEarlyBird && (
+                          <EarlyBirdMark className="mr-2 align-middle" today={fresh.isToday} />
+                        )}
                         {job.job_title ?? '—'}
                       </p>
                       <p className="mt-0.5 truncate text-sm text-gray-500">
@@ -222,7 +210,7 @@ export default function JobsTable({
                     return (
                       <TableRow
                         key={job.point_id}
-                        className={`group hover:bg-brand-50/40 dark:hover:bg-brand-500/5 cursor-pointer transition-all duration-200`}
+                        className={`group hover:bg-brand-50/40 dark:hover:bg-brand-500/5 cursor-pointer transition-colors duration-150`}
                         onClick={() => setSelectedJob(job)}
                       >
                         <TableCell className="px-4 py-3 text-start">
@@ -231,10 +219,10 @@ export default function JobsTable({
                               <Tooltip>
                                 <TooltipTrigger asChild>
                                   <span className="inline-flex">
-                                    <EarlyBirdMark />
+                                    <EarlyBirdMark today={fresh.isToday} />
                                   </span>
                                 </TooltipTrigger>
-                                <TooltipContent>
+                                <TooltipContent side="right">
                                   <p className="text-sm">Apply fast for early birds</p>
                                 </TooltipContent>
                               </Tooltip>
@@ -261,7 +249,7 @@ export default function JobsTable({
                               <TooltipTrigger asChild>
                                 <div className="inline-block">
                                   <Badge size="sm" color={fresh.color}>
-                                    <EarlyBirdMark className="mr-1.5" />
+                                    <EarlyBirdMark className="mr-1.5" today={fresh.isToday} />
                                     {fresh.label}
                                   </Badge>
                                 </div>
@@ -318,11 +306,7 @@ export default function JobsTable({
         </div>
       )}
 
-      <JobDetailsModal
-        job={jobDetail ?? selectedJob}
-        onClose={closeModal}
-        isLoadingDescription={selectedJob !== null && jobDetail === null}
-      />
+      <JobDetailsModal job={selectedJob} onClose={closeModal} />
     </div>
   );
 }

@@ -5,10 +5,11 @@ import type { JobRecord, ShowAllJobsResponse, PredictResponse } from '@/types/ap
 const API_BASE = '/api';
 
 /**
- * Fetch a page of jobs (newest first, without descriptions) from Neon via the API.
+ * Fetch a page of jobs (newest first) from Neon via the API, with full descriptions so row
+ * clicks can render without another request.
  */
 export async function fetchJobs(limit = 100, offset?: string | null): Promise<ShowAllJobsResponse> {
-  const params = new URLSearchParams({ limit: String(limit) });
+  const params = new URLSearchParams({ limit: String(limit), include_description: 'true' });
   if (offset) params.set('offset', offset);
 
   const res = await fetch(`${API_BASE}/show-all-jobs?${params.toString()}`);

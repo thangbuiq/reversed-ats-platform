@@ -1,4 +1,5 @@
 import type { JobRecord } from '@/types/api';
+import { EARLY_BIRD_DAYS, daysSincePosted } from '@/lib/freshness';
 
 export type LevelCounts = Record<string, number>;
 
@@ -21,6 +22,8 @@ export interface JobStats {
   total: number;
   uniqueCompanies: number;
   avgPerCompany: number;
+  /** Jobs posted within the early bird window. */
+  earlyBirds: number;
   latestDate: string | null;
   latestCount: number;
   daily: DailyStat[];
@@ -50,6 +53,16 @@ export function levelColor(level: string): string {
   if (name in LEVEL_COLORS) return LEVEL_COLORS[name];
   const hash = [...name].reduce((sum, char) => (sum * 31 + char.charCodeAt(0)) >>> 0, 0);
   return FALLBACK_LEVEL_COLORS[hash % FALLBACK_LEVEL_COLORS.length];
+}
+
+/** Display name for a level: no "level" suffix, each word capitalized ("mid-senior level" -> "Mid-Senior"). */
+export function formatLevel(level: string): string {
+  return level
+    .replace(/\s+level$/i, '')
+    .replace(
+      /(^|[\s-])(\p{L})/gu,
+      (_, boundary: string, letter: string) => boundary + letter.toUpperCase()
+    );
 }
 
 export function levelOf(job: JobRecord): string {
@@ -125,6 +138,7 @@ export function computeJobStats(jobs: JobRecord[]): JobStats {
     total: jobs.length,
     uniqueCompanies: byCompany.size,
     avgPerCompany: byCompany.size ? jobs.length / byCompany.size : 0,
+    earlyBirds: jobs.filter((j) => daysSincePosted(postedDate(j)) <= EARLY_BIRD_DAYS).length,
     latestDate: latest?.date ?? null,
     latestCount: latest?.count ?? 0,
     daily,

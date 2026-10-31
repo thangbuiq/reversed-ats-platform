@@ -117,7 +117,9 @@ const Alert: React.FC<AlertProps> = ({
         <div className={`-mt-0.5 ${variantClasses[variant].icon}`}>{icons[variant]}</div>
 
         <div>
-          <h4 className="mb-1 text-sm font-semibold text-gray-800 dark:text-white/90">{title}</h4>
+          <h4 className="font-display mb-1 text-sm font-semibold text-gray-800 dark:text-white/90">
+            {title}
+          </h4>
 
           <p className="text-sm text-gray-500 dark:text-gray-400">{message}</p>
 

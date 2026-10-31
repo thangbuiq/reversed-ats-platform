@@ -7,6 +7,7 @@ import { ExternalLink, X } from 'lucide-react';
 import Badge from '@/components/ui/badge/Badge';
 import { freshnessInfo } from '@/lib/freshness';
 import EarlyBirdMark from '@/components/jobs/EarlyBirdMark';
+import LinkedInSource from '@/components/jobs/LinkedInSource';
 import { LevelLabel } from '@/components/jobs/LevelLabel';
 
 const EASE_OUT = [0.22, 1, 0.36, 1] as const;
@@ -79,16 +80,16 @@ export default function JobDetailsModal({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.25 }}
-            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            transition={{ duration: 0.2 }}
+            className="absolute inset-0 bg-black/50"
             onClick={onClose}
             aria-hidden="true"
           />
           <motion.div
-            initial={{ opacity: 0, y: 48 }}
+            initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 48 }}
-            transition={{ duration: 0.4, ease: EASE_OUT }}
+            exit={{ opacity: 0, y: 24 }}
+            transition={{ duration: 0.25, ease: EASE_OUT }}
             className="relative flex max-h-[88dvh] w-full max-w-2xl flex-col border border-gray-200 bg-white shadow-2xl sm:max-h-[85vh]"
           >
             <div className="mx-auto mt-2.5 h-1 w-10 bg-gray-200 sm:hidden" />
@@ -113,7 +114,9 @@ export default function JobDetailsModal({
                   )}
                   {fresh && (
                     <Badge size="sm" color={fresh.isEarlyBird ? 'success' : 'light'}>
-                      {fresh.isEarlyBird && <EarlyBirdMark className="mr-1.5" />}
+                      {fresh.isEarlyBird && (
+                        <EarlyBirdMark className="mr-1.5" today={fresh.isToday} />
+                      )}
                       {fresh.label}
                     </Badge>
                   )}
@@ -132,13 +135,22 @@ export default function JobDetailsModal({
                   ))}
                 </div>
               ) : (
-                <div className="max-w-none text-sm leading-relaxed text-gray-700 [&_h1]:mt-5 [&_h1]:mb-2 [&_h1]:font-semibold [&_h1]:text-gray-900 [&_h2]:mt-4 [&_h2]:mb-2 [&_h2]:font-semibold [&_h2]:text-gray-900 [&_h3]:mt-3 [&_h3]:mb-1 [&_h3]:font-semibold [&_li]:mb-1 [&_ol]:mb-3 [&_ol]:list-decimal [&_ol]:pl-5 [&_p]:mb-3 [&_strong]:text-gray-900 [&_ul]:mb-3 [&_ul]:list-disc [&_ul]:pl-5">
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.2 }}
+                  className="max-w-none text-sm leading-relaxed text-gray-700 [&_h1]:mt-5 [&_h1]:mb-2 [&_h1]:font-semibold [&_h1]:text-gray-900 [&_h2]:mt-4 [&_h2]:mb-2 [&_h2]:font-semibold [&_h2]:text-gray-900 [&_h3]:mt-3 [&_h3]:mb-1 [&_h3]:font-semibold [&_li]:mb-1 [&_ol]:mb-3 [&_ol]:list-decimal [&_ol]:pl-5 [&_p]:mb-3 [&_strong]:text-gray-900 [&_ul]:mb-3 [&_ul]:list-disc [&_ul]:pl-5"
+                >
                   <Markdown>{description ?? '*No description available.*'}</Markdown>
-                </div>
+                </motion.div>
               )}
             </div>
 
-            <div className="flex gap-3 border-t border-gray-100 p-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:justify-end sm:px-6">
+            <div className="border-t border-gray-100 px-5 pt-3 sm:px-6">
+              <LinkedInSource compact />
+            </div>
+
+            <div className="flex gap-3 p-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:justify-end sm:px-6">
               <button onClick={onClose} className="btn btn-md h-11 flex-1 sm:h-auto sm:flex-none">
                 Close
               </button>
