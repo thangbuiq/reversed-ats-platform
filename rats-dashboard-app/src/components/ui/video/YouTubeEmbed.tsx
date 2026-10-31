@@ -23,7 +23,7 @@ const YouTubeEmbed: React.FC<YouTubeEmbedProps> = ({
   }[aspectRatio];
 
   return (
-    <div className={`overflow-hidden rounded-lg ${aspectRatioClass} ${className}`}>
+    <div className={`overflow-hidden ${aspectRatioClass} ${className}`}>
       <iframe
         src={`https://www.youtube.com/embed/${videoId}`}
         title={title}

@@ -1,83 +1,88 @@
 'use client';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { RotateCcw } from 'lucide-react';
+import { ArrowRight, RotateCcw, Sparkles } from 'lucide-react';
 import { predictBestMatchJob } from '@/lib/api';
 import { spreadScores } from '@/lib/freshness';
 import type { JobMatch } from '@/types/api';
 import CVUploadBar from '@/components/cv-match/CVUploadBar';
-import MatchResults from '@/components/cv-match/MatchResults';
+import MatchResultsModal from '@/components/cv-match/MatchResultsModal';
 
 const TOP_K = 10;
-const SKELETON_ROWS = 4;
+/** A level filter is applied after the search, so it starts from a wider pool. */
+const LEVEL_TOP_K = 25;
+
+/** Levels that say nothing about seniority, so they are not offered as a match target. */
+const UNSELECTABLE_LEVELS = new Set(['unknown', 'not applicable']);
 
 interface CVMatchSectionProps {
   totalListings: number;
   totalCompanies: number;
-}
-
-function ResultsSkeleton() {
-  return (
-    <div className="space-y-4 rounded-[9px] border border-gray-200 bg-white p-5 md:p-6">
-      <div className="skeleton h-5 w-40 rounded" />
-      {Array.from({ length: SKELETON_ROWS }, (_, i) => (
-        <div key={i} className="flex items-center gap-4 border-t border-gray-100 pt-4">
-          <div className="flex-1 space-y-2">
-            <div className="skeleton h-4 w-3/4 rounded" />
-            <div className="skeleton h-3 w-1/2 rounded" />
-          </div>
-          <div className="skeleton h-8 w-14 rounded" />
-        </div>
-      ))}
-    </div>
-  );
+  /** Every job level in the data; the user picks which ones to match against. */
+  levels: string[];
 }
 
 /** Hero for the CV matcher: upload a CV, then rank the closest live listings. */
-export default function CVMatchSection({ totalListings, totalCompanies }: CVMatchSectionProps) {
+export default function CVMatchSection({
+  totalListings,
+  totalCompanies,
+  levels,
+}: CVMatchSectionProps) {
   const [matches, setMatches] = useState<JobMatch[]>([]);
   const [totalMatches, setTotalMatches] = useState(0);
   const [isUploading, setIsUploading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [lastFile, setLastFile] = useState<File | null>(null);
-  const resultsRef = useRef<HTMLDivElement>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedLevel, setSelectedLevel] = useState<string | null>(null);
+  const selectableLevels = levels.filter((level) => !UNSELECTABLE_LEVELS.has(level.toLowerCase()));
 
-  const handleUpload = useCallback(async (file: File) => {
-    setLastFile(file);
-    setIsUploading(true);
-    setError(null);
-    try {
-      const result = await predictBestMatchJob(file, TOP_K);
-      setMatches(spreadScores(result.matches));
-      setTotalMatches(result.total_matches);
-      setHasSearched(true);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to match CV');
-    } finally {
-      setIsUploading(false);
-    }
-  }, []);
+  const handleUpload = useCallback(
+    async (file: File, levelToMatch: string | null = selectedLevel) => {
+      setLastFile(file);
+      setIsUploading(true);
+      setError(null);
+      try {
+        const result = await predictBestMatchJob(
+          file,
+          levelToMatch ? LEVEL_TOP_K : TOP_K,
+          undefined,
+          levelToMatch ? [levelToMatch] : []
+        );
+        setMatches(spreadScores(result.matches));
+        setTotalMatches(result.total_matches);
+        setHasSearched(true);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to match CV');
+      } finally {
+        setIsUploading(false);
+      }
+    },
+    [selectedLevel]
+  );
 
-  useEffect(() => {
-    if (isUploading || hasSearched) {
-      resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    }
-  }, [isUploading, hasSearched, matches]);
+  const chooseLevel = (level: string | null) => {
+    if (level === selectedLevel) return;
+    setSelectedLevel(level);
+    if (lastFile && !isUploading) handleUpload(lastFile, level);
+  };
+
+  const closeModal = useCallback(() => setIsModalOpen(false), []);
 
   return (
     <section aria-labelledby="cv-match-title" className="space-y-4">
-      <div className="relative overflow-hidden rounded-[9px] border border-gray-200 bg-white p-5 sm:p-6 lg:p-8">
+      <div className="relative overflow-hidden border border-gray-200 bg-white p-5 sm:p-6 lg:p-8">
         <div aria-hidden="true" className="ambient-dither pointer-events-none absolute inset-0" />
         <div
           aria-hidden="true"
-          className="ambient-glow bg-brand-500/10 pointer-events-none absolute -top-28 -right-20 h-72 w-72 rounded-full blur-3xl"
+          className="ambient-glow bg-brand-500/10 pointer-events-none absolute -top-28 -right-20 h-72 w-72 blur-3xl"
         />
 
-        <div className="relative grid gap-6 lg:grid-cols-[1.15fr_1fr] lg:items-end lg:gap-10">
+        <div className="relative grid gap-6 lg:grid-cols-[1.15fr_1fr] lg:items-start lg:gap-10">
           <div>
             <p className="label-md flex flex-wrap items-center gap-2 text-gray-500">
-              <span className="bg-success-500 h-2 w-2 animate-pulse rounded-full" />
+              <span className="bg-success-500 h-2 w-2 animate-pulse" />
               CV MATCH
               <span className="text-gray-300">/</span>
               {totalListings.toLocaleString()} LISTINGS
@@ -91,12 +96,82 @@ export default function CVMatchSection({ totalListings, totalCompanies }: CVMatc
               Find the jobs your CV <span className="text-brand-500">already fits</span>.
             </h2>
             <p className="mt-3 max-w-md text-sm leading-relaxed text-gray-500">
-              Upload your CV and we rank the closest live listings by meaning, not keywords.
+              We help you find the right jobs for you and apply as an early bird (within 7 days of
+              the job post).
             </p>
           </div>
 
           <div className="space-y-3">
+            <div
+              role="radiogroup"
+              aria-label="Job level to match"
+              className="flex flex-wrap items-center gap-1.5"
+            >
+              <span className="label-md mr-1 text-gray-500">MATCH LEVEL</span>
+              {[null, ...selectableLevels].map((level) => {
+                const active = level === selectedLevel;
+                return (
+                  <button
+                    key={level ?? 'all'}
+                    type="button"
+                    role="radio"
+                    aria-checked={active}
+                    disabled={isUploading}
+                    onClick={() => chooseLevel(level)}
+                    className={`label-md h-7 border px-2 transition-colors duration-200 disabled:opacity-50 ${
+                      active
+                        ? 'bg-brand-500 border-brand-500 text-white'
+                        : 'border-gray-200 bg-white text-gray-900 hover:border-gray-900'
+                    }`}
+                  >
+                    {level ?? 'All'}
+                  </button>
+                );
+              })}
+            </div>
             <CVUploadBar onUpload={handleUpload} isUploading={isUploading} />
+            <div className="flex h-12 gap-2">
+              {isUploading ? (
+                <div className="skeleton h-full flex-1" aria-hidden="true" />
+              ) : matches.length > 0 ? (
+                <>
+                  <motion.button
+                    type="button"
+                    onClick={() => setIsModalOpen(true)}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.4 }}
+                    className="btn-accent cta-pulse label-md group h-full min-w-0 flex-1 gap-2 px-4 motion-reduce:animate-none"
+                  >
+                    <Sparkles size={16} className="shrink-0" />
+                    <span className="truncate">
+                      View {totalMatches} matching {totalMatches === 1 ? 'job' : 'jobs'}
+                    </span>
+                    <ArrowRight
+                      size={16}
+                      className="shrink-0 transition-transform duration-200 group-hover:translate-x-1"
+                    />
+                  </motion.button>
+                  {lastFile && (
+                    <button
+                      type="button"
+                      onClick={() => handleUpload(lastFile)}
+                      className="btn h-full w-12 shrink-0 p-0"
+                      aria-label="Match again"
+                      title="Match again"
+                    >
+                      <RotateCcw size={16} />
+                    </button>
+                  )}
+                </>
+              ) : (
+                <p className="flex h-full flex-1 items-center justify-center border border-dashed border-gray-300 px-3 text-center text-xs text-gray-400">
+                  {hasSearched && !error
+                    ? 'No close matches. Try a more detailed CV.'
+                    : 'Your matching jobs will show up here'}
+                </p>
+              )}
+            </div>
             <AnimatePresence>
               {error && (
                 <motion.div
@@ -104,7 +179,7 @@ export default function CVMatchSection({ totalListings, totalCompanies }: CVMatc
                   initial={{ opacity: 0, y: -6 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -6 }}
-                  className="border-brand-200 bg-brand-50 text-brand-700 flex items-start justify-between gap-3 rounded-[10px] border p-3 text-sm"
+                  className="border-brand-200 bg-brand-50 text-brand-700 flex items-start justify-between gap-3 border p-3 text-sm"
                 >
                   <span>{error}</span>
                   {lastFile && (
@@ -124,31 +199,12 @@ export default function CVMatchSection({ totalListings, totalCompanies }: CVMatc
         </div>
       </div>
 
-      <div ref={resultsRef} className="scroll-mt-24">
-        <AnimatePresence mode="wait">
-          {isUploading ? (
-            <motion.div
-              key="loading"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-            >
-              <ResultsSkeleton />
-            </motion.div>
-          ) : hasSearched && matches.length > 0 ? (
-            <MatchResults key="results" matches={matches} totalMatches={totalMatches} />
-          ) : hasSearched && !error ? (
-            <motion.p
-              key="empty"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="rounded-[9px] border border-dashed border-gray-300 p-6 text-center text-sm text-gray-500"
-            >
-              No close matches yet. Try a more detailed CV or check back after the next crawl.
-            </motion.p>
-          ) : null}
-        </AnimatePresence>
-      </div>
+      <MatchResultsModal
+        isOpen={isModalOpen}
+        matches={matches}
+        totalMatches={totalMatches}
+        onClose={closeModal}
+      />
     </section>
   );
 }

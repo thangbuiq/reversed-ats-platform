@@ -1,5 +1,6 @@
 'use client';
 
+import { JobsProvider } from '@/context/JobsContext';
 import { useSidebar } from '@/context/SidebarContext';
 import AppHeader from '@/layout/AppHeader';
 import AppSidebar from '@/layout/AppSidebar';
@@ -17,17 +18,19 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       : 'lg:ml-[90px]';
 
   return (
-    <div className="min-h-screen xl:flex">
-      {/* Sidebar and Backdrop */}
-      <AppSidebar />
-      <Backdrop />
-      {/* Main Content Area */}
-      <div className={`flex-1 transition-all duration-300 ease-in-out ${mainContentMargin}`}>
-        {/* Header */}
-        <AppHeader />
-        {/* Page Content */}
-        <div className="mx-auto max-w-(--breakpoint-2xl) p-4 md:p-6">{children}</div>
+    <JobsProvider>
+      <div className="min-h-screen xl:flex">
+        {/* Sidebar and Backdrop */}
+        <AppSidebar />
+        <Backdrop />
+        {/* Main Content Area */}
+        <div className={`flex-1 transition-all duration-300 ease-in-out ${mainContentMargin}`}>
+          {/* Header */}
+          <AppHeader />
+          {/* Page Content */}
+          <div className="mx-auto max-w-(--breakpoint-2xl) p-4 md:p-6">{children}</div>
+        </div>
       </div>
-    </div>
+    </JobsProvider>
   );
 }

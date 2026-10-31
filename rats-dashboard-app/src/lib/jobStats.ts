@@ -33,14 +33,23 @@ export interface JobStats {
 const TOP_COMPANY_LIMIT = 8;
 const UNKNOWN_LEVEL = 'Unknown';
 
-/** Levels share a fixed palette: monochrome greys plus the red and green accents. */
-const LEVEL_COLORS = ['#111111', '#DC2626', '#71717A', '#12B76A', '#A1A1AA', '#3F3F46'];
-const UNKNOWN_LEVEL_COLOR = '#D4D4D8';
+/** Every known level keeps its own color on every chart and filter state. */
+const LEVEL_COLORS: Record<string, string> = {
+  'mid-senior level': '#111111',
+  'entry level': '#DC2626',
+  associate: '#12B76A',
+  internship: '#A1A1AA',
+  'not applicable': '#E4E4E7',
+  [UNKNOWN_LEVEL.toLowerCase()]: '#D4D4D8',
+};
+/** Levels LinkedIn adds later get a stable grey picked from their name. */
+const FALLBACK_LEVEL_COLORS = ['#3F3F46', '#52525B', '#71717A', '#8E8E96'];
 
-export function levelColor(level: string, levels: string[]): string {
-  if (level === UNKNOWN_LEVEL) return UNKNOWN_LEVEL_COLOR;
-  const index = levels.filter((l) => l !== UNKNOWN_LEVEL).indexOf(level);
-  return LEVEL_COLORS[Math.max(index, 0) % LEVEL_COLORS.length];
+export function levelColor(level: string): string {
+  const name = level.toLowerCase();
+  if (name in LEVEL_COLORS) return LEVEL_COLORS[name];
+  const hash = [...name].reduce((sum, char) => (sum * 31 + char.charCodeAt(0)) >>> 0, 0);
+  return FALLBACK_LEVEL_COLORS[hash % FALLBACK_LEVEL_COLORS.length];
 }
 
 export function levelOf(job: JobRecord): string {

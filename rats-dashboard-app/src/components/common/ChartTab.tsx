@@ -9,10 +9,10 @@ const ChartTab: React.FC = () => {
       : 'text-gray-500 dark:text-gray-400';
 
   return (
-    <div className="flex items-center gap-0.5 rounded-lg bg-gray-100 p-0.5 dark:bg-gray-900">
+    <div className="flex items-center gap-0.5 bg-gray-100 p-0.5 dark:bg-gray-900">
       <button
         onClick={() => setSelected('optionOne')}
-        className={`text-theme-sm w-full rounded-md px-3 py-2 font-medium hover:text-gray-900 dark:hover:text-white ${getButtonClass(
+        className={`text-theme-sm w-full px-3 py-2 font-medium hover:text-gray-900 dark:hover:text-white ${getButtonClass(
           'optionOne'
         )}`}
       >
@@ -21,7 +21,7 @@ const ChartTab: React.FC = () => {
 
       <button
         onClick={() => setSelected('optionTwo')}
-        className={`text-theme-sm w-full rounded-md px-3 py-2 font-medium hover:text-gray-900 dark:hover:text-white ${getButtonClass(
+        className={`text-theme-sm w-full px-3 py-2 font-medium hover:text-gray-900 dark:hover:text-white ${getButtonClass(
           'optionTwo'
         )}`}
       >
@@ -30,7 +30,7 @@ const ChartTab: React.FC = () => {
 
       <button
         onClick={() => setSelected('optionThree')}
-        className={`text-theme-sm w-full rounded-md px-3 py-2 font-medium hover:text-gray-900 dark:hover:text-white ${getButtonClass(
+        className={`text-theme-sm w-full px-3 py-2 font-medium hover:text-gray-900 dark:hover:text-white ${getButtonClass(
           'optionThree'
         )}`}
       >

@@ -18,19 +18,16 @@ function MetricCard({ label, value, icon, details, live }: MetricCardProps) {
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <div className="lift-hover flex min-w-0 cursor-default flex-col gap-3 rounded-[9px] border border-gray-200 bg-white p-3 text-left sm:flex-row sm:items-center sm:justify-between sm:p-4">
+        <div className="lift-hover flex min-w-0 cursor-default flex-col gap-3 border border-gray-200 bg-white p-3 text-left sm:flex-row sm:items-center sm:justify-between sm:p-4">
           <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-center">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] bg-black text-white sm:h-10 sm:w-10">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center bg-black text-white sm:h-10 sm:w-10">
               {icon}
             </div>
             <span className="label-md truncate text-gray-500">{label}</span>
           </div>
           <p className="font-display flex items-center gap-2 text-xl leading-none font-medium text-gray-900 sm:text-2xl">
             {live && (
-              <span
-                className="bg-success-500 h-2 w-2 shrink-0 animate-pulse rounded-full"
-                aria-hidden="true"
-              />
+              <span className="bg-success-500 h-2 w-2 shrink-0 animate-pulse" aria-hidden="true" />
             )}
             {value}
           </p>

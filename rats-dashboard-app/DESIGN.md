@@ -38,9 +38,9 @@ spacing:
   card-padding: '24px'
   section-padding: '80px'
 rounded:
-  card: '9px'
-  control: '10px'
-  pill: '9999px'
+  card: '0px'
+  control: '0px'
+  pill: '0px'
 components:
   card:
     backgroundColor: '{colors.surface}'
@@ -123,7 +123,7 @@ Keep spacing deliberate and stable. Favor the same grid direction, max-width beh
 
 Dashboard, chart, and data panels should preserve their compact operational hierarchy, nested surfaces, and metric emphasis.
 
-Buttons: every button is solid black (primary) with white text or icon, the control radius and no border. Red (accent) marks the single most important or currently selected button in a group, such as the active range chip, the current page, the main call to action and the active menu item. Icon-only buttons are 40px squares. Sidebar menu items are buttons too: black by default, red for the current page, with white icons.
+Buttons: every button is solid black (primary) with white text or icon, square corners and no border. Red (accent) marks the single most important or currently selected button in a group, such as the active range chip, the current page, the main call to action and the active menu item. Icon-only buttons are 40px squares. Sidebar menu items are buttons too: black by default, red for the current page, with white icons.
 
 ## Motion
 
@@ -138,4 +138,4 @@ If the source includes canvas, WebGL, Three.js, gradients, particles, or atmosph
 - Do not flatten the source into a generic card grid.
 - Stay in the light theme; use red sparingly, green only for positive states, and never introduce other hues.
 - Preserve the first viewport signal, focal object, and visual density.
-- Keep buttons, cards, and badges aligned to the same radius and border language.
+- No border radius anywhere: every card, button, chip, badge, input, modal and status dot has square corners.

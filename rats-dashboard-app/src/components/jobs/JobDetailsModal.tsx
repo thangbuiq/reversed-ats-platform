@@ -6,6 +6,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { ExternalLink, X } from 'lucide-react';
 import Badge from '@/components/ui/badge/Badge';
 import { freshnessInfo } from '@/lib/freshness';
+import EarlyBirdMark from '@/components/jobs/EarlyBirdMark';
 import { LevelLabel } from '@/components/jobs/LevelLabel';
 
 const EASE_OUT = [0.22, 1, 0.36, 1] as const;
@@ -20,8 +21,6 @@ export interface JobDetailsModalProps {
     payload: Record<string, unknown>;
   } | null;
   onClose: () => void;
-  /** Level order used by the charts, so the level dot keeps its color. */
-  levels?: string[];
   /** True while the full description is still being fetched. */
   isLoadingDescription?: boolean;
 }
@@ -38,7 +37,6 @@ function payloadField(payload: Record<string, unknown> | undefined, key: string)
 export default function JobDetailsModal({
   job,
   onClose,
-  levels = [],
   isLoadingDescription = false,
 }: JobDetailsModalProps) {
   const isClient = useSyncExternalStore(
@@ -91,9 +89,9 @@ export default function JobDetailsModal({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 48 }}
             transition={{ duration: 0.4, ease: EASE_OUT }}
-            className="relative flex max-h-[88dvh] w-full max-w-2xl flex-col rounded-t-[16px] border border-gray-200 bg-white shadow-2xl sm:max-h-[85vh] sm:rounded-[9px]"
+            className="relative flex max-h-[88dvh] w-full max-w-2xl flex-col border border-gray-200 bg-white shadow-2xl sm:max-h-[85vh]"
           >
-            <div className="mx-auto mt-2.5 h-1 w-10 rounded-full bg-gray-200 sm:hidden" />
+            <div className="mx-auto mt-2.5 h-1 w-10 bg-gray-200 sm:hidden" />
             <div className="flex items-start gap-4 p-5 pb-4 sm:p-6 sm:pb-4">
               <div className="min-w-0 flex-1">
                 <h2
@@ -107,7 +105,7 @@ export default function JobDetailsModal({
                   {job.location ? ` · ${job.location}` : ''}
                 </p>
                 <div className="mt-3 flex flex-wrap items-center gap-2">
-                  {level && <LevelLabel level={level} levels={levels} />}
+                  {level && <LevelLabel level={level} />}
                   {jobType && (
                     <Badge size="sm" color="light">
                       {jobType}
@@ -115,7 +113,8 @@ export default function JobDetailsModal({
                   )}
                   {fresh && (
                     <Badge size="sm" color={fresh.isEarlyBird ? 'success' : 'light'}>
-                      {fresh.isEarlyBird ? `🐣 ${fresh.label}` : fresh.label}
+                      {fresh.isEarlyBird && <EarlyBirdMark className="mr-1.5" />}
+                      {fresh.label}
                     </Badge>
                   )}
                 </div>
@@ -129,7 +128,7 @@ export default function JobDetailsModal({
               {isLoadingDescription ? (
                 <div className="space-y-3">
                   {['w-full', 'w-11/12', 'w-4/5', 'w-full', 'w-2/3'].map((width, i) => (
-                    <div key={i} className={`skeleton h-3.5 rounded ${width}`} />
+                    <div key={i} className={`skeleton h-3.5 ${width}`} />
                   ))}
                 </div>
               ) : (

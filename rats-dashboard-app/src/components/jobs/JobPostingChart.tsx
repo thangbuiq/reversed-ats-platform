@@ -12,8 +12,6 @@ const ReactApexChart = dynamic(() => import('react-apexcharts'), {
 interface JobPostingChartProps {
   /** Daily stats sorted by date ascending. */
   data: DailyStat[];
-  /** Every level present, used to keep level colors consistent across charts. */
-  levels: string[];
 }
 
 const TREND_WINDOW = 7;
@@ -39,7 +37,7 @@ function describeChange(
   return { text: `${diff > 0 ? '+' : ''}${diff} vs previous day`, trend };
 }
 
-export default function JobPostingChart({ data, levels }: JobPostingChartProps) {
+export default function JobPostingChart({ data }: JobPostingChartProps) {
   const total = data.reduce((sum, d) => sum + d.count, 0);
   const categories = data.map((d) => d.date);
 
@@ -86,7 +84,7 @@ export default function JobPostingChart({ data, levels }: JobPostingChartProps) 
             title: 'By level',
             items: Object.entries(day.levelCounts)
               .sort((a, b) => b[1] - a[1])
-              .map(([label, value]) => ({ label, value, color: levelColor(label, levels) })),
+              .map(([label, value]) => ({ label, value, color: levelColor(label) })),
           }
         );
       },
@@ -127,7 +125,7 @@ export default function JobPostingChart({ data, levels }: JobPostingChartProps) 
   };
 
   return (
-    <div className="h-full min-w-0 overflow-hidden rounded-2xl border border-gray-200 bg-white p-4 sm:p-5 md:p-6 dark:border-gray-400/20 dark:bg-gray-800">
+    <div className="h-full min-w-0 overflow-hidden border border-gray-200 bg-white p-4 sm:p-5 md:p-6 dark:border-gray-400/20 dark:bg-gray-800">
       <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
         <div>
           <h3 className="font-display text-xl font-medium text-gray-900">Jobs Posted by Day</h3>

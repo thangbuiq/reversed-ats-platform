@@ -1,192 +1,273 @@
 'use client';
-import React, { useState, useSyncExternalStore } from 'react';
-import { ChevronDown, SlidersHorizontal } from 'lucide-react';
-import type { JobRecord } from '@/types/api';
+import React, { useEffect, useRef, useState } from 'react';
+import { Check, ChevronDown, Minus, Search } from 'lucide-react';
+import { useJobs } from '@/context/JobsContext';
 import {
+  DEFAULT_FILTERS,
   RANGE_OPTIONS,
   facetOptions,
   sameFilters,
-  type JobFilters as JobFiltersState,
+  toggleValue,
 } from '@/lib/jobFilters';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select/Select';
 
-interface JobFiltersProps {
-  jobs: JobRecord[];
-  filters: JobFiltersState;
-  defaults: JobFiltersState;
-  visibleCount: number;
-  onChange: (filters: JobFiltersState) => void;
-}
+type BoxState = 'checked' | 'mixed' | 'unchecked';
 
-const ALL = 'all';
-const PHONE_QUERY = '(max-width: 767px)';
-
-function subscribeToPhoneQuery(onChange: () => void) {
-  const query = window.matchMedia(PHONE_QUERY);
-  query.addEventListener('change', onChange);
-  return () => query.removeEventListener('change', onChange);
-}
-
-/** Filters start collapsed on phones so the CV matcher and metrics stay above the fold. */
-function useIsPhone(): boolean {
-  return useSyncExternalStore(
-    subscribeToPhoneQuery,
-    () => window.matchMedia(PHONE_QUERY).matches,
-    () => false
+/** Square checkbox glyph: red when checked, red with a dash when only some are checked. */
+function Box({ state }: { state: BoxState }) {
+  return (
+    <span
+      className={`flex h-4 w-4 shrink-0 items-center justify-center border transition-colors ${
+        state === 'unchecked'
+          ? 'border-gray-300 bg-white'
+          : 'border-brand-500 bg-brand-500 text-white'
+      }`}
+    >
+      {state === 'checked' && <Check size={12} strokeWidth={3} />}
+      {state === 'mixed' && <Minus size={12} strokeWidth={3} />}
+    </span>
   );
 }
 
-interface FilterSelectProps {
-  value: string;
-  allLabel: string;
-  options: { value: string; label: string }[];
-  onChange: (value: string) => void;
+interface FacetListProps {
+  label: string;
+  options: string[];
+  selected: string[];
+  onToggle: (value: string) => void;
+  onClear: () => void;
 }
 
-function FilterSelect({ value, allLabel, options, onChange }: FilterSelectProps) {
+/** Multi-select checkbox list; selected values stay listed even if other filters hide them. */
+function FacetList({ label, options, selected, onToggle, onClear }: FacetListProps) {
+  const shown = [...new Set([...options, ...selected])].sort();
   return (
-    <Select value={value || ALL} onValueChange={(val) => onChange(val === ALL ? '' : val)}>
-      <SelectTrigger>
-        <SelectValue placeholder={allLabel} />
-      </SelectTrigger>
-      <SelectContent>
-        <SelectItem value={ALL}>{allLabel}</SelectItem>
-        {options.map((o) => (
-          <SelectItem key={o.value} value={o.value}>
-            {o.label}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
-  );
-}
-
-const truncate = (text: string) => (text.length > 30 ? `${text.substring(0, 30)}...` : text);
-
-/** Dashboard-wide filters: every metric, chart and the job table reads the filtered jobs. */
-export default function JobFilters({
-  jobs,
-  filters,
-  defaults,
-  visibleCount,
-  onChange,
-}: JobFiltersProps) {
-  const isPhone = useIsPhone();
-  const [openOverride, setOpenOverride] = useState<boolean | null>(null);
-  const isOpen = openOverride ?? !isPhone;
-  const isFiltered = !sameFilters(filters, defaults);
-  const set = (patch: Partial<JobFiltersState>) => onChange({ ...filters, ...patch });
-  const toOptions = (values: string[]) => values.map((v) => ({ value: v, label: truncate(v) }));
-
-  return (
-    <div className="rounded-[9px] border border-gray-200 bg-white p-3 sm:p-4 md:p-5">
-      <div className="flex items-center justify-between gap-3">
-        <button
-          type="button"
-          aria-expanded={isOpen}
-          aria-controls="job-filters-body"
-          onClick={() => setOpenOverride(!isOpen)}
-          className="btn label-md h-9 gap-2 px-3"
-        >
-          <SlidersHorizontal size={14} strokeWidth={2} />
-          {isOpen ? 'Hide filters' : 'Filters'}
-          <ChevronDown
-            size={14}
-            strokeWidth={2}
-            className={`transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}
-          />
-        </button>
-        <div className="flex min-w-0 items-center gap-2 sm:gap-3">
-          <p className="label-md truncate text-gray-500">
-            {visibleCount.toLocaleString()} of {jobs.length.toLocaleString()} jobs
-          </p>
-          {isFiltered && (
-            <button
-              type="button"
-              onClick={() => onChange(defaults)}
-              className="btn label-md h-9 shrink-0 px-3"
-            >
-              Reset
-            </button>
-          )}
-        </div>
+    <fieldset className="min-w-0">
+      <div className="mb-1 flex items-center justify-between gap-2">
+        <legend className="label-md float-left text-gray-500">
+          {label}
+          {selected.length > 0 && ` (${selected.length})`}
+        </legend>
+        {selected.length > 0 && (
+          <button
+            type="button"
+            onClick={onClear}
+            className="label-md text-gray-500 transition-colors hover:text-gray-900"
+          >
+            Clear
+          </button>
+        )}
       </div>
-      <div
-        id="job-filters-body"
-        aria-hidden={!isOpen}
-        inert={!isOpen}
-        className={`grid transition-[grid-template-rows,opacity,margin] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${
-          isOpen ? 'mt-3 grid-rows-[1fr] opacity-100' : 'mt-0 grid-rows-[0fr] opacity-0'
-        }`}
+      <ul className="clear-both max-h-48 overflow-y-auto">
+        {shown.map((option) => {
+          const checked = selected.includes(option);
+          return (
+            <li key={option}>
+              <button
+                type="button"
+                role="checkbox"
+                aria-checked={checked}
+                onClick={() => onToggle(option)}
+                className="flex w-full items-center gap-2 px-1 py-1.5 text-left text-sm text-gray-900 transition-colors hover:bg-gray-100"
+              >
+                <Box state={checked ? 'checked' : 'unchecked'} />
+                <span className="min-w-0 truncate" title={option}>
+                  {option}
+                </span>
+              </button>
+            </li>
+          );
+        })}
+      </ul>
+    </fieldset>
+  );
+}
+
+interface CompanySlicerProps {
+  options: string[];
+  selected: string[];
+  /** The user unticked "Select all": nothing is ticked, yet no company is filtered out. */
+  cleared: boolean;
+  onChange: (selected: string[], cleared: boolean) => void;
+}
+
+/** Power BI style slicer: a summary box that opens a panel with "Select all" above the company list. */
+function CompanySlicer({ options, selected, cleared, onChange }: CompanySlicerProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  const rootRef = useRef<HTMLDivElement>(null);
+  const shown = [...new Set([...options, ...selected])].sort();
+  const allChecked = selected.length === 0 && !cleared;
+  const allState: BoxState = allChecked ? 'checked' : selected.length === 0 ? 'unchecked' : 'mixed';
+  const summary =
+    selected.length === 0
+      ? 'All companies'
+      : selected.length === 1
+        ? selected[0]
+        : `${selected.length} companies`;
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const closeOnOutsideClick = (event: MouseEvent) => {
+      if (!rootRef.current?.contains(event.target as Node)) setIsOpen(false);
+    };
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setIsOpen(false);
+    };
+    document.addEventListener('mousedown', closeOnOutsideClick);
+    document.addEventListener('keydown', closeOnEscape);
+    return () => {
+      document.removeEventListener('mousedown', closeOnOutsideClick);
+      document.removeEventListener('keydown', closeOnEscape);
+    };
+  }, [isOpen]);
+
+  const toggleOne = (company: string) => {
+    const base = allChecked ? shown : selected;
+    const next = base.includes(company) ? base.filter((c) => c !== company) : [...base, company];
+    if (next.length === shown.length) onChange([], false);
+    else onChange(next, next.length === 0);
+  };
+
+  const rowClass =
+    'flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-gray-900 transition-colors hover:bg-gray-100';
+
+  return (
+    <div ref={rootRef} className="relative min-w-0">
+      <span className="label-md mb-1 block text-gray-500">Companies</span>
+      <button
+        type="button"
+        aria-haspopup="true"
+        aria-expanded={isOpen}
+        onClick={() => setIsOpen(!isOpen)}
+        className="flex h-10 w-full items-center justify-between gap-2 border border-gray-200 bg-white px-3 text-left text-sm text-gray-900 transition-colors hover:border-gray-900"
       >
-        <div className="-m-1 min-h-0 overflow-hidden p-1">
-          <div className="grid grid-cols-2 gap-2 sm:gap-3 lg:grid-cols-[auto_1fr_1fr_1fr]">
-            <div
-              role="group"
-              aria-label="Date range"
-              className="col-span-2 flex h-10 items-center gap-0.5 rounded-lg border border-gray-200 bg-white p-1 lg:col-span-1"
-            >
-              {RANGE_OPTIONS.map(({ value, label }) => (
-                <button
-                  key={value}
-                  type="button"
-                  aria-pressed={filters.range === value}
-                  onClick={() => set({ range: value })}
-                  className={`label-md h-full flex-1 rounded-md px-3 transition-colors duration-200 lg:flex-none ${
-                    filters.range === value
-                      ? 'bg-brand-500 text-white'
-                      : 'text-gray-900 hover:bg-gray-100'
-                  }`}
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
-            <FilterSelect
-              value={filters.company}
-              allLabel="All companies"
-              options={toOptions(facetOptions(jobs, filters, 'company'))}
-              onChange={(company) => set({ company })}
-            />
-            <FilterSelect
-              value={filters.level}
-              allLabel="All levels"
-              options={toOptions(facetOptions(jobs, filters, 'level'))}
-              onChange={(level) => set({ level })}
-            />
-            <div className="relative col-span-2 lg:col-span-1">
-              <span className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2">
-                <svg
-                  className="h-4 w-4 text-gray-400"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={2}
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"
-                  />
-                </svg>
-              </span>
-              <input
-                type="text"
-                value={filters.search}
-                onChange={(e) => set({ search: e.target.value })}
-                placeholder="Filter keywords…"
-                className="focus:border-brand-300 focus:ring-brand-500/10 h-10 w-full rounded-lg border border-gray-200 bg-transparent py-2 pr-3 pl-9 text-sm text-gray-800 placeholder:text-gray-400 focus:ring-3 focus:outline-hidden"
-              />
-            </div>
-          </div>
+        <span className="min-w-0 truncate">{summary}</span>
+        <ChevronDown
+          size={14}
+          strokeWidth={2}
+          className={`shrink-0 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}
+        />
+      </button>
+      {isOpen && (
+        <div className="absolute top-full right-0 left-0 z-20 mt-1 border border-gray-200 bg-white shadow-lg">
+          <button
+            type="button"
+            role="checkbox"
+            aria-checked={allState === 'mixed' ? 'mixed' : allChecked}
+            onClick={() => onChange([], allChecked)}
+            className={`${rowClass} border-b border-gray-200 font-medium`}
+          >
+            <Box state={allState} />
+            Select all
+          </button>
+          <ul className="max-h-56 overflow-y-auto">
+            {shown.map((company) => {
+              const checked = allChecked || selected.includes(company);
+              return (
+                <li key={company}>
+                  <button
+                    type="button"
+                    role="checkbox"
+                    aria-checked={checked}
+                    onClick={() => toggleOne(company)}
+                    className={rowClass}
+                  >
+                    <Box state={checked ? 'checked' : 'unchecked'} />
+                    <span className="min-w-0 truncate" title={company}>
+                      {company}
+                    </span>
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
         </div>
-      </div>
+      )}
     </div>
+  );
+}
+
+/** Dashboard-wide filters for the sidebar: every metric, chart and the job table read the result. */
+export default function JobFilters() {
+  const { jobs, filteredJobs, filters, setFilters } = useJobs();
+  const [companiesCleared, setCompaniesCleared] = useState(false);
+  const isFiltered = !sameFilters(filters, DEFAULT_FILTERS);
+
+  return (
+    <section aria-label="Filters" className="space-y-5 border-t border-gray-200 pt-5 pb-6">
+      <div className="flex items-center justify-between gap-2">
+        <div className="min-w-0">
+          <h2 className="text-xs leading-[20px] text-gray-400 uppercase">Filters</h2>
+          <p className="label-md truncate text-gray-500">
+            {filteredJobs.length.toLocaleString()} of {jobs.length.toLocaleString()} jobs
+          </p>
+        </div>
+        {isFiltered && (
+          <button
+            type="button"
+            onClick={() => {
+              setFilters(DEFAULT_FILTERS);
+              setCompaniesCleared(false);
+            }}
+            className="btn label-md h-9 shrink-0 px-3"
+          >
+            Reset
+          </button>
+        )}
+      </div>
+
+      <div
+        role="group"
+        aria-label="Date range"
+        className="flex h-10 items-center gap-0.5 border border-gray-200 bg-white p-1"
+      >
+        {RANGE_OPTIONS.map(({ value, label }) => (
+          <button
+            key={value}
+            type="button"
+            aria-pressed={filters.range === value}
+            onClick={() => setFilters({ ...filters, range: value })}
+            className={`label-md h-full flex-1 transition-colors duration-200 ${
+              filters.range === value
+                ? 'bg-brand-500 text-white'
+                : 'text-gray-900 hover:bg-gray-100'
+            }`}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+
+      <div className="relative">
+        <Search
+          size={16}
+          strokeWidth={2}
+          className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-gray-400"
+        />
+        <input
+          type="text"
+          value={filters.search}
+          onChange={(e) => setFilters({ ...filters, search: e.target.value })}
+          placeholder="Filter keywords…"
+          aria-label="Filter keywords"
+          className="focus:border-brand-300 focus:ring-brand-500/10 h-10 w-full border border-gray-200 bg-transparent py-2 pr-3 pl-9 text-sm text-gray-800 placeholder:text-gray-400 focus:ring-3 focus:outline-hidden"
+        />
+      </div>
+
+      <FacetList
+        label="Levels"
+        options={facetOptions(jobs, filters, 'level')}
+        selected={filters.level}
+        onToggle={(value) => setFilters({ ...filters, level: toggleValue(filters.level, value) })}
+        onClear={() => setFilters({ ...filters, level: [] })}
+      />
+      <CompanySlicer
+        options={facetOptions(jobs, filters, 'company')}
+        selected={filters.company}
+        cleared={companiesCleared}
+        onChange={(company, cleared) => {
+          setFilters({ ...filters, company });
+          setCompaniesCleared(cleared);
+        }}
+      />
+    </section>
   );
 }

@@ -27,9 +27,9 @@ export default function TopCompaniesChart({ companies, levels }: TopCompaniesCha
       stacked: true,
       toolbar: { show: false },
     },
-    colors: levels.map((level) => levelColor(level, levels)),
+    colors: levels.map(levelColor),
     plotOptions: {
-      bar: { horizontal: true, borderRadius: 3, borderRadiusWhenStacked: 'last', barHeight: '60%' },
+      bar: { horizontal: true, borderRadius: 0, barHeight: '60%' },
     },
     dataLabels: { enabled: false },
     stroke: { width: 1, colors: ['#fff'] },
@@ -38,7 +38,7 @@ export default function TopCompaniesChart({ companies, levels }: TopCompaniesCha
       position: 'top',
       horizontalAlign: 'left',
       fontSize: '12px',
-      markers: { size: 5, shape: 'circle', strokeWidth: 0 },
+      markers: { size: 5, shape: 'square', strokeWidth: 0 },
       itemMargin: { horizontal: 8, vertical: 2 },
     },
     grid: { xaxis: { lines: { show: true } }, yaxis: { lines: { show: false } } },
@@ -75,7 +75,7 @@ export default function TopCompaniesChart({ companies, levels }: TopCompaniesCha
             title: 'By level',
             items: Object.entries(company.levelCounts)
               .sort((a, b) => b[1] - a[1])
-              .map(([label, value]) => ({ label, value, color: levelColor(label, levels) })),
+              .map(([label, value]) => ({ label, value, color: levelColor(label) })),
           }
         );
       },
@@ -83,7 +83,7 @@ export default function TopCompaniesChart({ companies, levels }: TopCompaniesCha
   };
 
   return (
-    <div className="h-full min-w-0 overflow-hidden rounded-2xl border border-gray-200 bg-white p-4 sm:p-5 md:p-6 dark:border-gray-400/20 dark:bg-gray-800">
+    <div className="h-full min-w-0 overflow-hidden border border-gray-200 bg-white p-4 sm:p-5 md:p-6 dark:border-gray-400/20 dark:bg-gray-800">
       <h3 className="font-display mb-1 text-xl font-medium text-gray-900">Top Hiring Companies</h3>
       <p className="mb-4 text-sm text-gray-500 dark:text-gray-400">
         Open listings per company, split by level
