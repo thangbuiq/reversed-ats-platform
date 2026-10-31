@@ -3,7 +3,6 @@
 from unittest.mock import patch
 
 from fastapi.testclient import TestClient
-
 from src.main import app
 from src.routes.jobs import JOB_DETAIL_CACHE_CONTROL
 from src.schemas import JobRecord
