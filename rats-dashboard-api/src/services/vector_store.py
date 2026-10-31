@@ -3,12 +3,11 @@
 from __future__ import annotations
 
 import uuid
-from pathlib import Path
 
-from fastembed import TextEmbedding
+import httpx
 from qdrant_client import QdrantClient
 
-from ..config import COLLECTION_NAME, EMBEDDING_MODEL_NAME, QUERY_EMBED_PREFIX, require_env
+from ..config import COLLECTION_NAME, EMBEDDING_MODEL_NAME, EMBEDDING_TIMEOUT_SECONDS, QUERY_EMBED_PREFIX, require_env
 
 
 class VectorStoreService:
@@ -19,18 +18,21 @@ class VectorStoreService:
         qdrant_api_key = require_env("QDRANT_API_KEY")
         self._collection_name = COLLECTION_NAME
 
-        base_dir = Path(__file__).resolve().parent.parent.parent
-        cache_dir = base_dir / "api" / "model_cache"
-
-        self._embedder = TextEmbedding(model_name=EMBEDDING_MODEL_NAME, cache_dir=str(cache_dir))
+        account_id = require_env("CF_ACCOUNT_ID")
+        self._embedder = httpx.Client(
+            base_url=f"https://api.cloudflare.com/client/v4/accounts/{account_id}/ai/run/",
+            headers={"Authorization": f"Bearer {require_env('CF_API_TOKEN')}"},
+            timeout=EMBEDDING_TIMEOUT_SECONDS,
+        )
         self._qdrant = QdrantClient(url=qdrant_url, api_key=qdrant_api_key)
 
     def collection_exists(self) -> bool:
         return self._qdrant.collection_exists(self._collection_name)
 
     def embed_query(self, query: str) -> list[float]:
-        vector = next(self._embedder.embed([query]))
-        return vector.tolist()
+        response = self._embedder.post(EMBEDDING_MODEL_NAME, json={"text": [query]})
+        response.raise_for_status()
+        return response.json()["result"]["data"][0]
 
     def query_jobs(self, query_text: str, top_k: int, score_threshold: float | None) -> list[tuple[str, float]]:
         """Return ``(job_hash_id, score)`` pairs for the nearest jobs, best first."""
