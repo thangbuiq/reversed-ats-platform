@@ -27,7 +27,7 @@ export default function TopCompaniesChart({ companies, levels }: TopCompaniesCha
       stacked: true,
       toolbar: { show: false },
     },
-    colors: levels.map((level) => levelColor(level, levels)),
+    colors: levels.map(levelColor),
     plotOptions: {
       bar: { horizontal: true, borderRadius: 0, barHeight: '60%' },
     },
@@ -75,7 +75,7 @@ export default function TopCompaniesChart({ companies, levels }: TopCompaniesCha
             title: 'By level',
             items: Object.entries(company.levelCounts)
               .sort((a, b) => b[1] - a[1])
-              .map(([label, value]) => ({ label, value, color: levelColor(label, levels) })),
+              .map(([label, value]) => ({ label, value, color: levelColor(label) })),
           }
         );
       },

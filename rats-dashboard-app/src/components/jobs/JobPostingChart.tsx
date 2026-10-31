@@ -12,8 +12,6 @@ const ReactApexChart = dynamic(() => import('react-apexcharts'), {
 interface JobPostingChartProps {
   /** Daily stats sorted by date ascending. */
   data: DailyStat[];
-  /** Every level present, used to keep level colors consistent across charts. */
-  levels: string[];
 }
 
 const TREND_WINDOW = 7;
@@ -39,7 +37,7 @@ function describeChange(
   return { text: `${diff > 0 ? '+' : ''}${diff} vs previous day`, trend };
 }
 
-export default function JobPostingChart({ data, levels }: JobPostingChartProps) {
+export default function JobPostingChart({ data }: JobPostingChartProps) {
   const total = data.reduce((sum, d) => sum + d.count, 0);
   const categories = data.map((d) => d.date);
 
@@ -86,7 +84,7 @@ export default function JobPostingChart({ data, levels }: JobPostingChartProps) 
             title: 'By level',
             items: Object.entries(day.levelCounts)
               .sort((a, b) => b[1] - a[1])
-              .map(([label, value]) => ({ label, value, color: levelColor(label, levels) })),
+              .map(([label, value]) => ({ label, value, color: levelColor(label) })),
           }
         );
       },

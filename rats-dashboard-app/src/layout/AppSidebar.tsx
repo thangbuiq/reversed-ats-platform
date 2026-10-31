@@ -7,6 +7,7 @@ import { usePathname } from 'next/navigation';
 import { useSidebar } from '../context/SidebarContext';
 import { GridIcon, ChevronDownIcon, HorizontaLDots } from '../icons/index';
 import { motion, AnimatePresence } from 'framer-motion';
+import JobFilters from '@/components/jobs/JobFilters';
 
 type NavItem = {
   name: string;
@@ -232,7 +233,7 @@ const AppSidebar: React.FC = () => {
 
   return (
     <aside
-      className={`fixed top-0 left-0 z-[100000] mt-16 flex h-screen flex-col border-r border-gray-200 bg-white px-5 text-gray-900 transition-all duration-300 ease-in-out lg:mt-0 dark:border-gray-400/20 dark:bg-gray-900 ${
+      className={`fixed top-0 left-0 z-[100000] mt-16 flex h-[calc(100dvh-4rem)] flex-col border-r border-gray-200 bg-white px-5 text-gray-900 transition-all duration-300 ease-in-out lg:mt-0 lg:h-screen dark:border-gray-400/20 dark:bg-gray-900 ${
         isExpanded || isMobileOpen ? 'w-[290px]' : isHovered ? 'w-[290px]' : 'w-[90px]'
       } ${isMobileOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0`}
       onMouseEnter={() => !isExpanded && setIsHovered(true)}
@@ -287,7 +288,7 @@ const AppSidebar: React.FC = () => {
           )}
         </Link>
       </div>
-      <div className="no-scrollbar flex flex-col overflow-y-auto duration-300 ease-linear">
+      <div className="no-scrollbar flex min-h-0 flex-1 flex-col overflow-y-auto duration-300 ease-linear">
         <nav className="mb-6">
           <div className="flex flex-col gap-4">
             <div>
@@ -302,6 +303,7 @@ const AppSidebar: React.FC = () => {
             </div>
           </div>
         </nav>
+        {pathname === '/' && (isExpanded || isHovered || isMobileOpen) && <JobFilters />}
       </div>
 
       {typeof window !== 'undefined' &&

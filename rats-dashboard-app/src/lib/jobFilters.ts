@@ -2,8 +2,10 @@ import type { JobRecord } from '@/types/api';
 
 export interface JobFilters {
   search: string;
-  company: string;
-  level: string;
+  /** Selected companies; empty means all. */
+  company: string[];
+  /** Selected job levels; empty means all. */
+  level: string[];
   /** A RANGE_OPTIONS value: how far back from the newest posting to look. */
   range: string;
 }
@@ -17,7 +19,7 @@ export const RANGE_OPTIONS = [
 ] as const;
 
 /** Opens on the last 30 days so the dashboard never starts unbounded. */
-export const DEFAULT_FILTERS: JobFilters = { search: '', company: '', level: '', range: '30d' };
+export const DEFAULT_FILTERS: JobFilters = { search: '', company: [], level: [], range: '30d' };
 
 const DAY_MS = 86_400_000;
 
@@ -35,14 +37,31 @@ function rangeCutoff(jobs: JobRecord[], range: string): number {
   return newest ? newest - (days - 1) * DAY_MS : 0;
 }
 
+function sameValues(a: string[], b: string[]): boolean {
+  return a.length === b.length && a.every((value) => b.includes(value));
+}
+
 export function sameFilters(a: JobFilters, b: JobFilters): boolean {
-  return (Object.keys(a) as (keyof JobFilters)[]).every((key) => a[key].trim() === b[key].trim());
+  return (
+    a.search.trim() === b.search.trim() &&
+    a.range === b.range &&
+    sameValues(a.company, b.company) &&
+    sameValues(a.level, b.level)
+  );
+}
+
+export function toggleValue(values: string[], value: string): string[] {
+  return values.includes(value) ? values.filter((v) => v !== value) : [...values, value];
 }
 
 function matches(job: JobRecord, filters: JobFilters, cutoff: number, skip?: keyof JobFilters) {
   if (cutoff && postedAt(job) < cutoff) return false;
-  if (skip !== 'company' && filters.company && job.company_name !== filters.company) return false;
-  if (skip !== 'level' && filters.level && job.payload?.job_level !== filters.level) return false;
+  if (skip !== 'company' && filters.company.length > 0) {
+    if (!filters.company.includes(job.company_name ?? '')) return false;
+  }
+  if (skip !== 'level' && filters.level.length > 0) {
+    if (!filters.level.includes(String(job.payload?.job_level))) return false;
+  }
   if (filters.search.trim()) {
     const q = filters.search.trim().toLowerCase();
     return Boolean(

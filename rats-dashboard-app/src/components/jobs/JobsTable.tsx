@@ -154,7 +154,7 @@ export default function JobsTable({
                         {job.location ? ` · ${job.location}` : ''}
                       </p>
                       <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1">
-                        <LevelLabel level={levelOf(job)} levels={levels} />
+                        <LevelLabel level={levelOf(job)} />
                         <span
                           className={`label-md ${fresh.isEarlyBird ? 'text-success-700' : 'text-gray-400'}`}
                         >
@@ -257,7 +257,7 @@ export default function JobsTable({
                           )}
                         </TableCell>
                         <TableCell className="px-4 py-3 text-start">
-                          <LevelLabel level={levelOf(job)} levels={levels} />
+                          <LevelLabel level={levelOf(job)} />
                         </TableCell>
                         <TableCell
                           className="px-4 py-3 text-start"
@@ -313,7 +313,6 @@ export default function JobsTable({
       <JobDetailsModal
         job={jobDetail ?? selectedJob}
         onClose={closeModal}
-        levels={levels}
         isLoadingDescription={selectedJob !== null && jobDetail === null}
       />
     </div>

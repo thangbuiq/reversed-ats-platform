@@ -20,8 +20,6 @@ export interface JobDetailsModalProps {
     payload: Record<string, unknown>;
   } | null;
   onClose: () => void;
-  /** Level order used by the charts, so the level dot keeps its color. */
-  levels?: string[];
   /** True while the full description is still being fetched. */
   isLoadingDescription?: boolean;
 }
@@ -38,7 +36,6 @@ function payloadField(payload: Record<string, unknown> | undefined, key: string)
 export default function JobDetailsModal({
   job,
   onClose,
-  levels = [],
   isLoadingDescription = false,
 }: JobDetailsModalProps) {
   const isClient = useSyncExternalStore(
@@ -107,7 +104,7 @@ export default function JobDetailsModal({
                   {job.location ? ` · ${job.location}` : ''}
                 </p>
                 <div className="mt-3 flex flex-wrap items-center gap-2">
-                  {level && <LevelLabel level={level} levels={levels} />}
+                  {level && <LevelLabel level={level} />}
                   {jobType && (
                     <Badge size="sm" color="light">
                       {jobType}

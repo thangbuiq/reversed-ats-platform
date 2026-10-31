@@ -1,36 +1,18 @@
 'use client';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { RotateCcw } from 'lucide-react';
+import { ArrowRight, RotateCcw, Sparkles } from 'lucide-react';
 import { predictBestMatchJob } from '@/lib/api';
 import { spreadScores } from '@/lib/freshness';
 import type { JobMatch } from '@/types/api';
 import CVUploadBar from '@/components/cv-match/CVUploadBar';
-import MatchResults from '@/components/cv-match/MatchResults';
+import MatchResultsModal from '@/components/cv-match/MatchResultsModal';
 
 const TOP_K = 10;
-const SKELETON_ROWS = 4;
 
 interface CVMatchSectionProps {
   totalListings: number;
   totalCompanies: number;
-}
-
-function ResultsSkeleton() {
-  return (
-    <div className="space-y-4 border border-gray-200 bg-white p-5 md:p-6">
-      <div className="skeleton h-5 w-40" />
-      {Array.from({ length: SKELETON_ROWS }, (_, i) => (
-        <div key={i} className="flex items-center gap-4 border-t border-gray-100 pt-4">
-          <div className="flex-1 space-y-2">
-            <div className="skeleton h-4 w-3/4" />
-            <div className="skeleton h-3 w-1/2" />
-          </div>
-          <div className="skeleton h-8 w-14" />
-        </div>
-      ))}
-    </div>
-  );
 }
 
 /** Hero for the CV matcher: upload a CV, then rank the closest live listings. */
@@ -41,7 +23,7 @@ export default function CVMatchSection({ totalListings, totalCompanies }: CVMatc
   const [hasSearched, setHasSearched] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [lastFile, setLastFile] = useState<File | null>(null);
-  const resultsRef = useRef<HTMLDivElement>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleUpload = useCallback(async (file: File) => {
     setLastFile(file);
@@ -59,11 +41,7 @@ export default function CVMatchSection({ totalListings, totalCompanies }: CVMatc
     }
   }, []);
 
-  useEffect(() => {
-    if (isUploading || hasSearched) {
-      resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    }
-  }, [isUploading, hasSearched, matches]);
+  const closeModal = useCallback(() => setIsModalOpen(false), []);
 
   return (
     <section aria-labelledby="cv-match-title" className="space-y-4">
@@ -97,6 +75,48 @@ export default function CVMatchSection({ totalListings, totalCompanies }: CVMatc
 
           <div className="space-y-3">
             <CVUploadBar onUpload={handleUpload} isUploading={isUploading} />
+            <div className="flex h-12 gap-2">
+              {isUploading ? (
+                <div className="skeleton h-full flex-1" aria-hidden="true" />
+              ) : matches.length > 0 ? (
+                <>
+                  <motion.button
+                    type="button"
+                    onClick={() => setIsModalOpen(true)}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.4 }}
+                    className="btn-accent cta-pulse label-md group h-full min-w-0 flex-1 gap-2 px-4 motion-reduce:animate-none"
+                  >
+                    <Sparkles size={16} className="shrink-0" />
+                    <span className="truncate">
+                      View {totalMatches} matching {totalMatches === 1 ? 'job' : 'jobs'}
+                    </span>
+                    <ArrowRight
+                      size={16}
+                      className="shrink-0 transition-transform duration-200 group-hover:translate-x-1"
+                    />
+                  </motion.button>
+                  {lastFile && (
+                    <button
+                      type="button"
+                      onClick={() => handleUpload(lastFile)}
+                      className="btn h-full w-12 shrink-0 p-0"
+                      aria-label="Match again"
+                      title="Match again"
+                    >
+                      <RotateCcw size={16} />
+                    </button>
+                  )}
+                </>
+              ) : (
+                <p className="flex h-full flex-1 items-center justify-center border border-dashed border-gray-300 px-3 text-center text-xs text-gray-400">
+                  {hasSearched && !error
+                    ? 'No close matches. Try a more detailed CV.'
+                    : 'Your matching jobs will show up here'}
+                </p>
+              )}
+            </div>
             <AnimatePresence>
               {error && (
                 <motion.div
@@ -124,31 +144,12 @@ export default function CVMatchSection({ totalListings, totalCompanies }: CVMatc
         </div>
       </div>
 
-      <div ref={resultsRef} className="scroll-mt-24">
-        <AnimatePresence mode="wait">
-          {isUploading ? (
-            <motion.div
-              key="loading"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-            >
-              <ResultsSkeleton />
-            </motion.div>
-          ) : hasSearched && matches.length > 0 ? (
-            <MatchResults key="results" matches={matches} totalMatches={totalMatches} />
-          ) : hasSearched && !error ? (
-            <motion.p
-              key="empty"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="border border-dashed border-gray-300 p-6 text-center text-sm text-gray-500"
-            >
-              No close matches yet. Try a more detailed CV or check back after the next crawl.
-            </motion.p>
-          ) : null}
-        </AnimatePresence>
-      </div>
+      <MatchResultsModal
+        isOpen={isModalOpen}
+        matches={matches}
+        totalMatches={totalMatches}
+        onClose={closeModal}
+      />
     </section>
   );
 }

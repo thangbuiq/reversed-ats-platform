@@ -913,6 +913,16 @@ span.flatpickr-weekday,
   }
 }
 
+@keyframes cta-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgb(220 38 38 / 0.45);
+  }
+  70%,
+  100% {
+    box-shadow: 0 0 0 12px rgb(220 38 38 / 0);
+  }
+}
+
 @keyframes shimmer {
   to {
     background-position: -200% 0;
@@ -932,6 +942,10 @@ span.flatpickr-weekday,
 
 @utility ambient-glow {
   animation: glow-breathe 9s ease-in-out infinite;
+}
+
+@utility cta-pulse {
+  animation: cta-pulse 2s ease-out infinite;
 }
 
 @utility skeleton {

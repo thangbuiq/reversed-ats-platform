@@ -110,15 +110,6 @@ export default function CVUploadBar({ onUpload, isUploading }: CVUploadBarProps)
         </span>
       </div>
 
-      {selectedFile && !isUploading && (
-        <button
-          type="button"
-          onClick={() => onUpload(selectedFile)}
-          className="btn label-md h-12 w-full px-5 sm:h-10 sm:w-auto"
-        >
-          Match again
-        </button>
-      )}
       {rejection && (
         <p role="alert" className="text-brand-600 text-xs">
           {rejection}
