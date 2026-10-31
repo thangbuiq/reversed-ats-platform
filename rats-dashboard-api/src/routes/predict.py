@@ -1,5 +1,7 @@
 """CV-to-job matching (predict) endpoint."""
 
+import logging
+
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile
 
 from ..config import COLLECTION_NAME
@@ -7,6 +9,7 @@ from ..dependencies import get_job_store, get_vector_store
 from ..schemas import JobMatch, PredictResponse
 from ..utils import extract_cv_text
 
+logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
@@ -35,6 +38,7 @@ async def predict_best_match_job(
     except HTTPException:
         raise
     except Exception as error:
+        logger.exception("CV matching failed")
         raise HTTPException(status_code=502, detail="Matching service is unavailable. Please try again.") from error
 
     matches = [
